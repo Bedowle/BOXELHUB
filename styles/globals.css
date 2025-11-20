@@ -1,10 +1,20 @@
+/* Fondo general con degradado */
 body {
   margin: 0;
-  background: #ffffff;
   font-family: 'Segoe UI', Arial, sans-serif;
   color: #333;
+  background: linear-gradient(
+    135deg,
+    #E8FFE6,
+    #AEFFA3,
+    #97FF8A,
+    #6FFF5C,
+    #46FF2E
+  );
+  min-height: 100vh;
 }
 
+/* Header superior */
 header {
   display: flex;
   justify-content: space-between;
@@ -17,13 +27,16 @@ header {
   z-index: 1000;
 }
 
+/* Logo / Marca */
 .logo a {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #fdc500;
+  color: #B1BF30; /* color de marca */
   text-decoration: none;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.4); /* sombra para destacar */
 }
 
+/* Buscador */
 .search-bar input {
   padding: 8px;
   width: 300px;
@@ -31,22 +44,32 @@ header {
   border-radius: 6px;
 }
 
+/* Botones de acción */
 .actions button {
   margin-left: 12px;
-  background: #fdc500;
+  background: #B1BF30; /* color de marca */
   border: none;
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  color: #fff;
+  transition: background 0.3s ease;
 }
 
+.actions button:hover {
+  background: #97FF8A; /* tono más vivo al pasar el ratón */
+  color: #333;
+}
+
+/* Categorías */
 .categories {
   display: flex;
   justify-content: center;
   gap: 20px;
   padding: 12px;
   border-bottom: 1px solid #eee;
+  background: #fff;
 }
 
 .categories a {
@@ -55,6 +78,7 @@ header {
   font-weight: 500;
 }
 
+/* Contenedor principal */
 main {
   min-height: 100vh;
   padding: 40px 20px;
@@ -66,6 +90,7 @@ main {
   text-align: center;
 }
 
+/* Recomendaciones */
 .recommendations {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -74,7 +99,7 @@ main {
 }
 
 .card {
-  background: #fafafa;
+  background: #fff; /* contraste sobre el degradado */
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 12px;
@@ -86,6 +111,10 @@ main {
   border-radius: 6px;
 }
 
+.card h3 {
+  margin-top: 10px;
+  color: #333;
+}
 .card h3 {
   margin-top: 10px;
   color: #333;
