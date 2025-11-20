@@ -2,17 +2,19 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <>
-      <h1>VOXELHUB</h1>
-      <p>Marketplace de impresión 3D on-demand</p>
-      <div className="actions">
-        <Link href="/cliente">
-          <button>Entrar como Cliente</button>
-        </Link>
-        <Link href="/maker">
-          <button>Entrar como Maker</button>
-        </Link>
+    <section className="recommendations">
+      <div className="card">
+        <img src="/models/model1.png" alt="Modelo 1" />
+        <h3>Figura de Arte</h3>
       </div>
-    </>
+      <div className="card">
+        <img src="/models/model2.png" alt="Modelo 2" />
+        <h3>Accesorio para Hogar</h3>
+      </div>
+      <div className="card">
+        <img src="/models/model3.png" alt="Modelo 3" />
+        <h3>Objeto de Videojuego</h3>
+      </div>
+    </section>
   )
 }
