@@ -1,12 +1,12 @@
 export default function Home() {
   return (
-    <>
-      <h1>VOXELHUB</h1>
-      <p>Marketplace de impresión 3D on-demand</p>
+    <div className="container">
+      <h1>Test de estilos</h1>
+      <p>¿Se aplica el fondo y el diseño?</p>
       <div className="actions">
-        <button>Entrar como Cliente</button>
-        <button>Entrar como Maker</button>
+        <button>Botón 1</button>
+        <button>Botón 2</button>
       </div>
-    </>
+    </div>
   );
 }
