@@ -1,17 +1,16 @@
-generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql" // Usa Postgres en producción
+  url      = env("DATABASE_URL")
 }
 
-datasource db {
-  provider = "sqlite"
+generator client {
+  provider = "prisma-client-js"
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
+  id        String   @id @default(cuid())
   email     String   @unique
-  password  String
+  username  String   @unique
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
