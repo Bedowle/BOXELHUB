@@ -367,7 +367,7 @@ export default function MakerHome() {
         </div>
       </main>
 
-      <MakerProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
+      <MakerProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} profile={profile || null} />
       {selectedChatUser && (
         <ChatDialog
           open={chatDialogOpen}

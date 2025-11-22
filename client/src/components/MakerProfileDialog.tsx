@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertMakerProfileSchema, type InsertMakerProfile, type MakerProfile } from "@shared/schema";
@@ -129,6 +130,24 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       });
     },
   });
+
+  // Reset form when profile changes (for existing profiles)
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        userId: profile.userId,
+        printerType: profile.printerType,
+        materials: profile.materials || [],
+        maxPrintDimensionX: profile.maxPrintDimensionX || undefined,
+        maxPrintDimensionY: profile.maxPrintDimensionY || undefined,
+        maxPrintDimensionZ: profile.maxPrintDimensionZ || undefined,
+        hasMulticolor: profile.hasMulticolor || false,
+        maxColors: profile.maxColors || 1,
+        location: profile.location || "",
+        capabilities: profile.capabilities || "",
+      });
+    }
+  }, [profile, form]);
 
   const onSubmit = (data: InsertMakerProfile) => {
     mutation.mutate({ ...data, userId: user?.id || "" });
