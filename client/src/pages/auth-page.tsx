@@ -9,28 +9,32 @@ import { Button } from "@/components/ui/button";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
-  const [mode, setMode] = useState<"login" | "register" | "forgot-password">("login");
-  const [userType, setUserType] = useState<"client" | "maker" | null>(null);
+  const [view, setView] = useState<"login" | "register-client" | "register-maker" | "forgot-password">("login");
 
-  // Auto-set userType from URL query params
+  // Auto-set view from URL query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const typeParam = params.get("type");
+    
     if (typeParam === "maker") {
-      setMode("register");
-      setUserType("maker");
+      setView("register-maker");
     } else if (typeParam === "client") {
-      setMode("register");
-      setUserType("client");
+      setView("register-client");
+    } else {
+      setView("login");
     }
   }, []);
+
+  const handleBackToLanding = () => {
+    setLocation("/");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">
       <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
         <Card className="shadow-2xl border-0 p-8 min-h-full">
           {/* LOGIN MODE */}
-          {mode === "login" && !userType && (
+          {view === "login" && (
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="text-3xl font-bold mb-2">Bienvenido</h2>
@@ -41,13 +45,13 @@ export default function AuthPage() {
 
               <LoginForm 
                 onSuccess={() => setLocation("/")}
-                onForgotPassword={() => setMode("forgot-password")}
+                onForgotPassword={() => setView("forgot-password")}
               />
 
               <div className="text-center text-sm">
                 ¿No tienes cuenta?{" "}
                 <button
-                  onClick={() => setMode("register")}
+                  onClick={() => setLocation("/auth?type=client")}
                   className="text-primary font-semibold hover:underline"
                   data-testid="button-switch-register"
                 >
@@ -58,7 +62,7 @@ export default function AuthPage() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => setLocation("/")}
+                onClick={handleBackToLanding}
                 data-testid="button-back-to-landing-login"
               >
                 ← Atrás
@@ -66,70 +70,15 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* REGISTER - CHOOSE TYPE */}
-          {mode === "register" && !userType && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold mb-2">Crear Cuenta</h2>
-                <p className="text-muted-foreground text-sm">
-                  ¿Qué eres?
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setUserType("client")}
-                  size="lg"
-                  data-testid="button-client-register-choice"
-                >
-                  Soy Cliente - Necesito Impresión
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setUserType("maker")}
-                  size="lg"
-                  data-testid="button-maker-register-choice"
-                >
-                  Soy Maker - Ofrezco Impresión
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                <div className="text-center text-sm border-t pt-4">
-                  ¿Ya tienes cuenta?{" "}
-                  <button
-                    onClick={() => setMode("login")}
-                    className="text-primary font-semibold hover:underline"
-                    data-testid="button-switch-login"
-                  >
-                    Inicia Sesión
-                  </button>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setLocation("/")}
-                  data-testid="button-back-to-landing-register"
-                >
-                  ← Atrás
-                </Button>
-              </div>
-            </div>
-          )}
-
           {/* REGISTER - CLIENT FORM */}
-          {mode === "register" && userType === "client" && (
+          {view === "register-client" && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setUserType(null)}
+                  onClick={handleBackToLanding}
                   data-testid="button-back-client-form"
                 >
                   ←
@@ -138,20 +87,31 @@ export default function AuthPage() {
               </div>
               <ClientRegisterForm
                 onSuccess={() => setLocation("/")}
-                onBack={() => setUserType(null)}
+                onBack={handleBackToLanding}
               />
+              
+              <div className="text-center text-sm border-t pt-4">
+                ¿Ya tienes cuenta?{" "}
+                <button
+                  onClick={() => setLocation("/auth")}
+                  className="text-primary font-semibold hover:underline"
+                  data-testid="button-login-from-client-register"
+                >
+                  Inicia Sesión
+                </button>
+              </div>
             </div>
           )}
 
           {/* REGISTER - MAKER FORM */}
-          {mode === "register" && userType === "maker" && (
+          {view === "register-maker" && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setUserType(null)}
+                  onClick={handleBackToLanding}
                   data-testid="button-back-maker-form"
                 >
                   ←
@@ -160,13 +120,24 @@ export default function AuthPage() {
               </div>
               <MakerRegisterForm
                 onSuccess={() => setLocation("/")}
-                onBack={() => setUserType(null)}
+                onBack={handleBackToLanding}
               />
+              
+              <div className="text-center text-sm border-t pt-4">
+                ¿Ya tienes cuenta?{" "}
+                <button
+                  onClick={() => setLocation("/auth")}
+                  className="text-primary font-semibold hover:underline"
+                  data-testid="button-login-from-maker-register"
+                >
+                  Inicia Sesión
+                </button>
+              </div>
             </div>
           )}
 
           {/* FORGOT PASSWORD MODE */}
-          {mode === "forgot-password" && (
+          {view === "forgot-password" && (
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="text-3xl font-bold mb-2">Recuperar Contraseña</h2>
@@ -175,7 +146,7 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              <ForgotPasswordForm onBack={() => setMode("login")} />
+              <ForgotPasswordForm onBack={() => setView("login")} />
             </div>
           )}
         </Card>
