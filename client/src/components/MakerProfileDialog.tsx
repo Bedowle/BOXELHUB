@@ -322,9 +322,9 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
                 disabled={!profile}
-                data-testid="button-cancel-profile"
+                data-testid="button-back-profile"
               >
-                Cancelar
+                ← Atrás
               </Button>
               <Button
                 type="submit"

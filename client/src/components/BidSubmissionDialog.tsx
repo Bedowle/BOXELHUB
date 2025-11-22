@@ -179,9 +179,9 @@ export function BidSubmissionDialog({ open, onOpenChange, projectId }: BidSubmis
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
-                data-testid="button-cancel-bid"
+                data-testid="button-back-bid"
               >
-                Cancelar
+                ← Atrás
               </Button>
               <Button
                 type="submit"

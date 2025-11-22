@@ -54,6 +54,7 @@ export interface IStorage {
 
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
+  getConversationsForUser(userId: string): Promise<Array<{ userId: string; lastMessage?: Message }>>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(userId: string, senderId: string): Promise<void>;
 
@@ -316,6 +317,33 @@ export class DatabaseStorage implements IStorage {
           eq(messages.isRead, false)
         )
       );
+  }
+
+  async getConversationsForUser(userId: string): Promise<Array<{ userId: string; lastMessage?: Message }>> {
+    // Get all messages where user is sender or receiver
+    const allMessages = await db
+      .select()
+      .from(messages)
+      .where(
+        sql`${messages.senderId} = ${userId} OR ${messages.receiverId} = ${userId}`
+      )
+      .orderBy(desc(messages.createdAt));
+
+    // Group messages by conversation partner
+    const conversationMap = new Map<string, Message>();
+    
+    for (const msg of allMessages) {
+      const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      if (!conversationMap.has(partnerId)) {
+        conversationMap.set(partnerId, msg);
+      }
+    }
+
+    // Convert to array
+    return Array.from(conversationMap.entries()).map(([partnerId, lastMsg]) => ({
+      userId: partnerId,
+      lastMessage: lastMsg,
+    }));
   }
 
   // Stats operations

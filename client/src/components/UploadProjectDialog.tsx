@@ -303,9 +303,9 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                     variant="outline"
                     onClick={() => onOpenChange(false)}
                     className="flex-1"
-                    data-testid="button-cancel-upload"
+                    data-testid="button-back-upload"
                   >
-                    Cancelar
+                    ← Atrás
                   </Button>
                   <Button
                     type="submit"

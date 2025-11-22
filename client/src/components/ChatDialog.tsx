@@ -20,10 +20,22 @@ export function ChatDialog({ open, onOpenChange, otherUser, currentUserId }: Cha
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Conversación</DialogTitle>
-          <DialogDescription>
-            Comunícate directamente con {otherUser?.firstName ? `${otherUser.firstName}` : "el usuario"}
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle>Conversación</DialogTitle>
+              <DialogDescription>
+                Comunícate directamente con {otherUser?.firstName ? `${otherUser.firstName}` : "el usuario"}
+              </DialogDescription>
+            </div>
+            <button
+              onClick={() => onOpenChange(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Cerrar"
+              data-testid="button-close-chat"
+            >
+              ✕
+            </button>
+          </div>
         </DialogHeader>
         <ChatInterface
           otherUserId={otherUser.id}

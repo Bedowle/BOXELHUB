@@ -743,6 +743,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/my-conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const conversations = await storage.getConversationsForUser(userId);
+      
+      // Get user details for each conversation partner
+      const conversationsWithDetails = await Promise.all(
+        conversations.map(async (conv) => {
+          const partner = await storage.getUser(conv.userId);
+          return {
+            userId: conv.userId,
+            user: partner,
+            lastMessage: conv.lastMessage,
+          };
+        })
+      );
+      
+      res.json(conversationsWithDetails);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
   // Review routes
   app.get('/api/makers/:id/reviews', isAuthenticated, async (req: any, res) => {
     try {
