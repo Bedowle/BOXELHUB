@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import ClientRegisterForm from "@/components/ClientRegisterForm";
 import MakerRegisterForm from "@/components/MakerRegisterForm";
@@ -7,9 +7,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function AuthPage() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [userType, setUserType] = useState<"client" | "maker" | null>(null);
+
+  // Auto-set userType from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.split("?")[1] || "");
+    const typeParam = params.get("type");
+    if (typeParam === "maker") {
+      setMode("register");
+      setUserType("maker");
+    } else if (typeParam === "client") {
+      setMode("register");
+      setUserType("client");
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">

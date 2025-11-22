@@ -172,8 +172,13 @@ export default function Landing() {
             </Card>
           </div>
           <div className="text-center">
-            <Button asChild size="lg" className="px-8" data-testid="button-maker-register">
-              <a href="/api/login">Registrarme como Maker</a>
+            <Button 
+              size="lg" 
+              className="px-8" 
+              onClick={() => setLocation("/auth?type=maker")}
+              data-testid="button-maker-register"
+            >
+              Registrarme como Maker
             </Button>
           </div>
         </div>
