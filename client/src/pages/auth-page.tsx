@@ -23,8 +23,8 @@ export default function AuthPage() {
         <span className="ml-1">◼</span>
       </Button>
 
-      <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0 p-8">
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <Card className="shadow-2xl border-0 p-8 min-h-full">
           {/* LOGIN MODE */}
           {mode === "login" && !userType && (
             <div className="space-y-6">

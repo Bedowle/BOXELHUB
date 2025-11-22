@@ -241,10 +241,10 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onBack?.()}
+              onClick={() => setStep(1)}
               disabled={mutation.isPending}
             >
-              Atrás
+              ← Atrás
             </Button>
             <Button
               type="submit"
