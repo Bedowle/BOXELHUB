@@ -9,9 +9,10 @@ import { Mail, Lock, User, MapPin } from "lucide-react";
 
 interface ClientRegisterFormProps {
   onSuccess?: () => void;
+  onBack?: () => void;
 }
 
-export default function ClientRegisterForm({ onSuccess }: ClientRegisterFormProps) {
+export default function ClientRegisterForm({ onSuccess, onBack }: ClientRegisterFormProps) {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -223,7 +224,7 @@ export default function ClientRegisterForm({ onSuccess }: ClientRegisterFormProp
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => setStep(1)}
+              onClick={() => onBack?.()}
               disabled={mutation.isPending}
             >
               Atrás

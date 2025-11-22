@@ -17,9 +17,10 @@ import { Mail, Lock, User, MapPin, Printer } from "lucide-react";
 
 interface MakerRegisterFormProps {
   onSuccess?: () => void;
+  onBack?: () => void;
 }
 
-export default function MakerRegisterForm({ onSuccess }: MakerRegisterFormProps) {
+export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFormProps) {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -240,7 +241,7 @@ export default function MakerRegisterForm({ onSuccess }: MakerRegisterFormProps)
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => setStep(1)}
+              onClick={() => onBack?.()}
               disabled={mutation.isPending}
             >
               Atrás

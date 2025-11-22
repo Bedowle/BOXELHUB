@@ -36,44 +36,83 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              <Tabs defaultValue="login" onValueChange={(v) => setMode(v as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
-                  <TabsTrigger value="register">Registrarse</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="login" className="space-y-4">
+              {mode === "login" ? (
+                <>
+                  <h3 className="text-xl font-semibold text-center mb-4">Iniciar Sesión</h3>
                   <LoginForm onSuccess={() => setLocation("/")} />
-                </TabsContent>
-
-                <TabsContent value="register" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      variant={userType === "client" ? "default" : "outline"}
-                      onClick={() => setUserType("client")}
-                      size="lg"
-                      data-testid="button-client-register"
+                  <div className="text-center text-sm">
+                    ¿No tienes cuenta?{" "}
+                    <button
+                      onClick={() => setMode("register")}
+                      className="text-primary font-semibold hover:underline"
+                      data-testid="button-switch-register"
                     >
-                      Soy Cliente
-                    </Button>
-                    <Button
-                      variant={userType === "maker" ? "default" : "outline"}
-                      onClick={() => setUserType("maker")}
-                      size="lg"
-                      data-testid="button-maker-register"
-                    >
-                      Soy Maker
-                    </Button>
+                      Registrarse
+                    </button>
                   </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-center mb-6">Crear Cuenta</h3>
+                  
+                  {!userType ? (
+                    <div className="space-y-4">
+                      <div className="text-sm text-center text-muted-foreground mb-4">
+                        ¿Qué eres?
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setUserType("client")}
+                        size="lg"
+                        data-testid="button-client-register-choice"
+                      >
+                        Soy Cliente - Necesito Impresión
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setUserType("maker")}
+                        size="lg"
+                        data-testid="button-maker-register-choice"
+                      >
+                        Soy Maker - Ofrezco Impresión
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {userType === "client" && (
+                        <ClientRegisterForm 
+                          onSuccess={() => setLocation("/")}
+                          onBack={() => setUserType(null)}
+                        />
+                      )}
+                      {userType === "maker" && (
+                        <MakerRegisterForm 
+                          onSuccess={() => setLocation("/")}
+                          onBack={() => setUserType(null)}
+                        />
+                      )}
+                    </>
+                  )}
 
-                  {userType === "client" && (
-                    <ClientRegisterForm onSuccess={() => setLocation("/")} />
+                  {!userType && (
+                    <div className="text-center text-sm mt-6 border-t pt-4">
+                      ¿Ya tienes cuenta?{" "}
+                      <button
+                        onClick={() => {
+                          setMode("login");
+                          setUserType(null);
+                        }}
+                        className="text-primary font-semibold hover:underline"
+                        data-testid="button-switch-login"
+                      >
+                        Inicia Sesión
+                      </button>
+                    </div>
                   )}
-                  {userType === "maker" && (
-                    <MakerRegisterForm onSuccess={() => setLocation("/")} />
-                  )}
-                </TabsContent>
-              </Tabs>
+                </>
+              )}
 
               <Button
                 variant="ghost"

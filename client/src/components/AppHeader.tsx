@@ -7,29 +7,28 @@ export default function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b">
-      <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
-        <Button
-          variant="ghost"
-          size="lg"
-          onClick={() => setLocation("/")}
-          className="text-xl font-bold hover:bg-transparent"
-          data-testid="button-logo"
-        >
-          <span className="text-orange-500">VoxelHub</span>
-          <span className="ml-1 text-orange-500">◼</span>
-        </Button>
+      <div className="container mx-auto max-w-7xl px-4">
+        <div className="flex items-center justify-between py-3">
+          <button
+            onClick={() => setLocation("/")}
+            className="text-xl font-bold text-orange-500 hover:opacity-80 transition-opacity"
+            data-testid="button-logo"
+          >
+            VoxelHub ◼
+          </button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            window.location.href = "/api/logout";
-          }}
-          data-testid="button-logout"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Cerrar Sesión
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              window.location.href = "/api/logout";
+            }}
+            data-testid="button-logout"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Cerrar Sesión
+          </Button>
+        </div>
       </div>
     </header>
   );
