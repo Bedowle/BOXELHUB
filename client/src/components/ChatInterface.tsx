@@ -140,7 +140,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
                   msg.senderId === currentUserId
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-blue-200 dark:bg-blue-800 text-blue-950 dark:text-blue-100"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
@@ -151,7 +151,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
                   </p>
                   {msg.senderId === currentUserId && (
                     <CheckCheck 
-                      className={`h-4 w-4 ${msg.isRead ? "text-cyan-300" : "text-primary-foreground/40"}`}
+                      className={`h-4 w-4 ${msg.isRead ? "text-cyan-600 dark:text-cyan-400" : "text-blue-950/40 dark:text-blue-100/40"}`}
                       data-testid={msg.isRead ? `ticks-read-${msg.id}` : `ticks-received-${msg.id}`}
                     />
                   )}
