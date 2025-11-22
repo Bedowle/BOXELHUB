@@ -180,14 +180,11 @@ export default function ClientHome() {
             </div>
           ) : activeProjects.length === 0 ? (
             <EmptyState
-              icon={<Package className="h-12 w-12" />}
+              icon={Package}
               title="Sin proyectos aún"
               description="Sube tu primer archivo STL para recibir ofertas de makers profesionales"
-              action={
-                <Button onClick={() => setUploadDialogOpen(true)} size="lg" className="mt-4">
-                  Subir Proyecto
-                </Button>
-              }
+              actionLabel="Subir Proyecto"
+              onAction={() => setUploadDialogOpen(true)}
             />
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

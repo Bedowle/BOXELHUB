@@ -257,7 +257,7 @@ export default function MakerHome() {
             </div>
           ) : (filteredProjects?.length || 0) === 0 ? (
             <EmptyState
-              icon={<Search className="h-12 w-12" />}
+              icon={Search}
               title="Sin resultados"
               description={
                 searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all"
