@@ -17,7 +17,7 @@ import { z } from "zod";
 
 // Enums
 export const userTypeEnum = pgEnum("user_type", ["client", "maker"]);
-export const printerTypeEnum = pgEnum("printer_type", ["FDM", "SLA", "SLS"]);
+export const printerTypeEnum = pgEnum("printer_type", ["Ender3", "BambooLab", "FDM", "SLA", "SLS"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "reserved", "completed"]);
 export const bidStatusEnum = pgEnum("bid_status", ["pending", "accepted", "rejected"]);
 
@@ -36,7 +36,7 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
-  username: varchar("username").unique(),
+  username: varchar("username"),
   passwordHash: varchar("password_hash"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),

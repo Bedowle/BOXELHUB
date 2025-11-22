@@ -15,6 +15,7 @@ import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import ProjectDetails from "@/pages/project-details";
 import ChatPage from "@/pages/chat-page";
+import VerifyEmailPage from "@/pages/verify-email";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -24,6 +25,9 @@ function Router() {
 
   return (
     <Switch>
+      {/* Verify email route (accessible to all) */}
+      <Route path="/verify" component={VerifyEmailPage} />
+
       {/* Auth route (accessible to all) */}
       <Route path="/auth" component={AuthPage} />
 

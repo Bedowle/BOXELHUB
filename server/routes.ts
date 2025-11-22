@@ -104,14 +104,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create session
+      // Create email verification token
+      const verificationToken = await storage.createEmailToken(email, 'verification');
+      const verificationLink = `${process.env.PUBLIC_URL || 'http://localhost:5000'}/verify?token=${verificationToken}`;
+      
+      // Log the verification link (in production, send via email)
+      console.log(`\n=== EMAIL VERIFICATION ===`);
+      console.log(`To: ${email}`);
+      console.log(`Verification Link: ${verificationLink}`);
+      console.log(`Token: ${verificationToken}`);
+      console.log(`========================\n`);
+
+      // Create session (user can use app while waiting for email verification)
       req.session.userId = user.id;
       req.session.userType = userType;
 
-      res.json({ message: "Registration successful", user });
+      res.json({ 
+        message: "Registration successful. Check your email for verification link.", 
+        user,
+        verificationToken // Send token in response for testing
+      });
     } catch (error: any) {
       console.error("Error with registration:", error);
       res.status(400).json({ message: error.message || "Registration failed" });
+    }
+  });
+
+  // Email verification endpoint
+  app.post('/api/auth/verify-email', async (req: any, res) => {
+    try {
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+
+      const email = await storage.verifyEmailToken(token, 'verification');
+      if (!email) {
+        return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+
+      // Mark user as verified
+      const user = await storage.getUserByEmail(email);
+      if (user) {
+        await storage.upsertUser({
+          ...user,
+          isEmailVerified: true,
+        });
+      }
+
+      res.json({ message: "Email verified successfully", user });
+    } catch (error: any) {
+      console.error("Error verifying email:", error);
+      res.status(400).json({ message: error.message || "Verification failed" });
     }
   });
 

@@ -37,12 +37,18 @@ export default function ClientRegisterForm({ onSuccess, onBack }: ClientRegister
       });
       return res;
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       toast({
         title: "¡Registro exitoso!",
-        description: "Revisa tu email para verificar tu cuenta",
+        description: "Tu cuenta ha sido creada. Revisa los logs del servidor para el link de verificación.",
       });
-      setTimeout(() => onSuccess?.(), 2000);
+      if (response.verificationToken) {
+        console.log("=== VERIFICATION TOKEN ===");
+        console.log("Token:", response.verificationToken);
+        console.log("Link: /verify?token=" + response.verificationToken);
+        console.log("==========================");
+      }
+      setTimeout(() => onSuccess?.(), 3000);
     },
     onError: (error: any) => {
       toast({

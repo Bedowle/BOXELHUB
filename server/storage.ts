@@ -8,6 +8,7 @@ import {
   bids,
   messages,
   reviews,
+  emailTokens,
   type User,
   type UpsertUser,
   type MakerProfile,
@@ -72,6 +73,10 @@ export interface IStorage {
     wonProjects: number;
     earnings: number;
   }>;
+
+  // Email token operations
+  createEmailToken(email: string, type: string): Promise<string>;
+  verifyEmailToken(token: string, type: string): Promise<string | null>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -416,6 +421,47 @@ export class DatabaseStorage implements IStorage {
     const earnings = parseFloat(earningsResult[0]?.total || "0");
 
     return { activeBids, wonProjects, earnings };
+  }
+
+  // Email token operations
+  async createEmailToken(email: string, type: string): Promise<string> {
+    // Delete old tokens for this email
+    await db.delete(emailTokens).where(eq(emailTokens.email, email));
+    
+    // Generate random token
+    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    // Create expiring token (24 hours)
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    
+    const [result] = await db.insert(emailTokens).values({
+      email,
+      token,
+      type,
+      expiresAt,
+    }).returning();
+    
+    return token;
+  }
+
+  async verifyEmailToken(token: string, type: string): Promise<string | null> {
+    const [record] = await db
+      .select()
+      .from(emailTokens)
+      .where(and(eq(emailTokens.token, token), eq(emailTokens.type, type)));
+    
+    if (!record) {
+      return null;
+    }
+    
+    if (record.expiresAt < new Date()) {
+      return null;
+    }
+    
+    // Delete token after verification
+    await db.delete(emailTokens).where(eq(emailTokens.token, token));
+    
+    return record.email;
   }
 }
 
