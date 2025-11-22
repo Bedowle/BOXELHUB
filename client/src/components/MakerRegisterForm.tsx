@@ -229,47 +229,37 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
         </>
       ) : step === 2 ? (
         <>
-          <div>
-            <Label htmlFor="printerType" className="text-sm mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="printerType" className="text-sm">
               Tipo de Impresora
             </Label>
-            <div className="relative">
-              <Input
-                placeholder="Buscar o seleccionar impresora..."
-                value={printerSearch || form.printerType}
-                onChange={(e) => {
-                  setPrinterSearch(e.target.value);
-                  setPrinterDropdownOpen(true);
-                }}
-                onFocus={() => setPrinterDropdownOpen(true)}
-                className="w-full"
-                data-testid="input-printer-search"
-              />
-              {printerDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
-                  {printerOptions
-                    .filter(p => p.toLowerCase().includes((printerSearch || form.printerType).toLowerCase()))
-                    .map(printer => (
-                      <button
-                        key={printer}
-                        type="button"
-                        onClick={() => {
-                          setForm({ ...form, printerType: printer });
-                          setPrinterSearch("");
-                          setPrinterDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
-                        data-testid={`printer-option-${printer}`}
-                      >
-                        {printer}
-                      </button>
-                    ))}
-                </div>
-              )}
-            </div>
+            <Input
+              placeholder="Buscar: Ender3 o BambooLab..."
+              value={printerSearch}
+              onChange={(e) => setPrinterSearch(e.target.value)}
+              className="w-full mb-2"
+              data-testid="input-printer-search"
+            />
+            <select
+              value={form.printerType}
+              onChange={(e) => {
+                setForm({ ...form, printerType: e.target.value });
+                setPrinterSearch("");
+              }}
+              className="w-full px-3 py-2 border rounded-md bg-background text-foreground"
+              data-testid="select-printer-type"
+            >
+              {printerOptions
+                .filter(p => p.toLowerCase().includes(printerSearch.toLowerCase()))
+                .map(printer => (
+                  <option key={printer} value={printer}>
+                    {printer}
+                  </option>
+                ))}
+            </select>
             {form.printerType && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Seleccionado: <span className="font-semibold text-foreground">{form.printerType}</span>
+              <p className="text-xs text-muted-foreground">
+                ✓ Seleccionado: <span className="font-semibold text-foreground">{form.printerType}</span>
               </p>
             )}
           </div>
