@@ -49,12 +49,12 @@ export default function AuthPage() {
               </div>
 
               <Button
-                variant="ghost"
+                variant="outline"
                 className="w-full"
                 onClick={() => setLocation("/")}
-                data-testid="button-back-to-landing"
+                data-testid="button-back-to-landing-login"
               >
-                Volver a inicio
+                ← Atrás
               </Button>
             </div>
           )}
@@ -90,15 +90,26 @@ export default function AuthPage() {
                 </Button>
               </div>
 
-              <div className="text-center text-sm border-t pt-4">
-                ¿Ya tienes cuenta?{" "}
-                <button
-                  onClick={() => setMode("login")}
-                  className="text-primary font-semibold hover:underline"
-                  data-testid="button-switch-login"
+              <div className="space-y-3">
+                <div className="text-center text-sm border-t pt-4">
+                  ¿Ya tienes cuenta?{" "}
+                  <button
+                    onClick={() => setMode("login")}
+                    className="text-primary font-semibold hover:underline"
+                    data-testid="button-switch-login"
+                  >
+                    Inicia Sesión
+                  </button>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setLocation("/")}
+                  data-testid="button-back-to-landing-register"
                 >
-                  Inicia Sesión
-                </button>
+                  ← Atrás
+                </Button>
               </div>
             </div>
           )}
