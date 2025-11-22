@@ -1,11 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Circle } from "lucide-react";
 
 interface LocationData {
   latitude: string;
@@ -16,14 +12,14 @@ interface LocationData {
 interface LocationMapPickerProps {
   value: LocationData;
   onChange: (data: LocationData) => void;
+  isApproximate?: boolean; // true = show circle, false = show pin only
 }
 
-export default function LocationMapPicker({ value, onChange }: LocationMapPickerProps) {
+export default function LocationMapPicker({ value, onChange, isApproximate = false }: LocationMapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
-  const [isApproximate, setIsApproximate] = useState(value.radius > 0);
 
   // Initialize map
   useEffect(() => {
@@ -59,12 +55,12 @@ export default function LocationMapPicker({ value, onChange }: LocationMapPicker
     markerRef.current = marker;
 
     // Add circle if approximate
-    if (isApproximate && value.radius > 0) {
+    if (isApproximate) {
       const circle = L.circle([defaultLat, defaultLng], {
         color: "#8B5CF6",
         fillColor: "#A78BFA",
         fillOpacity: 0.2,
-        radius: value.radius * 1000, // Convert km to meters
+        radius: 1000, // 1 km
       }).addTo(map);
       circleRef.current = circle;
     }
@@ -101,18 +97,18 @@ export default function LocationMapPicker({ value, onChange }: LocationMapPicker
 
   // Update circle visibility when approximate mode changes
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current || !markerRef.current) return;
 
     if (isApproximate) {
-      const lat = value.latitude ? parseFloat(value.latitude) : 40.4168;
-      const lng = value.longitude ? parseFloat(value.longitude) : -3.7038;
-
       if (!circleRef.current) {
+        const lat = value.latitude ? parseFloat(value.latitude) : 40.4168;
+        const lng = value.longitude ? parseFloat(value.longitude) : -3.7038;
+
         const circle = L.circle([lat, lng], {
           color: "#8B5CF6",
           fillColor: "#A78BFA",
           fillOpacity: 0.2,
-          radius: 1000, // 1 km default
+          radius: 1000, // 1 km
         }).addTo(mapInstanceRef.current);
         circleRef.current = circle;
       }
@@ -151,26 +147,6 @@ export default function LocationMapPicker({ value, onChange }: LocationMapPicker
           data-testid="map-container"
         />
 
-        {/* Approximate mode toggle */}
-        <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md mb-4">
-          <Checkbox
-            id="approximate-mode"
-            checked={isApproximate}
-            onCheckedChange={(checked) => setIsApproximate(checked as boolean)}
-            data-testid="checkbox-approximate-mode"
-          />
-          <div className="flex-1">
-            <Label htmlFor="approximate-mode" className="text-sm cursor-pointer font-medium">
-              Modo Aproximado (Círculo 1km)
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {isApproximate
-                ? "Muestra un círculo de 1 km"
-                : "Muestra un pin exacto"}
-            </p>
-          </div>
-        </div>
-
         {/* Coordinates display */}
         <div className="grid grid-cols-2 gap-2 p-3 bg-muted/30 rounded-md">
           <div>
@@ -186,6 +162,14 @@ export default function LocationMapPicker({ value, onChange }: LocationMapPicker
             </p>
           </div>
         </div>
+
+        {isApproximate && (
+          <div className="mt-2 p-2 bg-secondary/10 rounded-md">
+            <p className="text-xs text-secondary font-medium">
+              📍 Modo aproximado: Círculo de 1 km
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

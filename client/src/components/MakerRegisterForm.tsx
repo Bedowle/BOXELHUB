@@ -418,6 +418,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
                   addressRadius: data.radius,
                 })
               }
+              isApproximate={form.addressSimplifiedMode}
             />
           </div>
 
