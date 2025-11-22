@@ -11,6 +11,19 @@ export default function Landing() {
       {/* Hero Section with Gradient */}
       <section className="relative bg-gradient-to-br from-primary via-secondary to-primary py-24 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
+        
+        {/* Login Button - Top Right */}
+        <div className="absolute top-6 right-6 z-20">
+          <Button 
+            variant="outline"
+            className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+            onClick={() => setLocation("/auth")}
+            data-testid="button-login-landing"
+          >
+            Iniciar Sesión
+          </Button>
+        </div>
+
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
@@ -24,7 +37,7 @@ export default function Landing() {
                 size="lg" 
                 variant="outline"
                 className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
-                onClick={() => setLocation("/auth")}
+                onClick={() => setLocation("/auth?type=client")}
                 data-testid="button-client-cta"
               >
                 Necesito Impresión
@@ -32,7 +45,7 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90"
-                onClick={() => setLocation("/auth")}
+                onClick={() => setLocation("/auth?type=maker")}
                 data-testid="button-maker-cta"
               >
                 Soy Maker
