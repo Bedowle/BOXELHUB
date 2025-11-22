@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BidCard } from "@/components/BidCard";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
+import { ChatDialog } from "@/components/ChatDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BidCardSkeleton } from "@/components/LoadingSkeleton";
 import { ArrowLeft, Calendar, FileText, Package } from "lucide-react";
@@ -24,6 +25,8 @@ export default function ProjectDetails() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [selectedMaker, setSelectedMaker] = useState<User | null>(null);
 
   const projectId = params?.id;
 
@@ -245,10 +248,11 @@ export default function ProjectDetails() {
                   onAccept={(bidId) => acceptBidMutation.mutate(bidId)}
                   onReject={(bidId) => rejectBidMutation.mutate(bidId)}
                   onContact={(makerId) => {
-                    toast({
-                      title: "Chat disponible próximamente",
-                      description: "La funcionalidad de chat estará disponible pronto",
-                    });
+                    const makerUser = bid.maker;
+                    if (makerUser) {
+                      setSelectedMaker(makerUser);
+                      setChatDialogOpen(true);
+                    }
                   }}
                   isPending={acceptBidMutation.isPending || rejectBidMutation.isPending}
                 />
@@ -275,6 +279,15 @@ export default function ProjectDetails() {
           open={bidDialogOpen}
           onOpenChange={setBidDialogOpen}
           projectId={projectId!}
+        />
+      )}
+
+      {selectedMaker && user && (
+        <ChatDialog
+          open={chatDialogOpen}
+          onOpenChange={setChatDialogOpen}
+          otherUser={selectedMaker}
+          currentUserId={user.id}
         />
       )}
     </div>
