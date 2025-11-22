@@ -117,7 +117,16 @@ export default function AuthPage() {
           {/* REGISTER - CLIENT FORM */}
           {mode === "register" && userType === "client" && (
             <div className="space-y-4">
-              <div className="text-center mb-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUserType(null)}
+                  data-testid="button-back-client-form"
+                >
+                  ←
+                </Button>
                 <h2 className="text-2xl font-bold">Registro - Cliente</h2>
               </div>
               <ClientRegisterForm
@@ -130,7 +139,16 @@ export default function AuthPage() {
           {/* REGISTER - MAKER FORM */}
           {mode === "register" && userType === "maker" && (
             <div className="space-y-4">
-              <div className="text-center mb-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUserType(null)}
+                  data-testid="button-back-maker-form"
+                >
+                  ←
+                </Button>
                 <h2 className="text-2xl font-bold">Registro - Maker</h2>
               </div>
               <MakerRegisterForm
