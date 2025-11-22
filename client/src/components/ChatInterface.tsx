@@ -26,9 +26,23 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", otherUserId],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/messages?otherUserId=${otherUserId}`, undefined);
-      return Array.isArray(response) ? response : [];
+      try {
+        // Manually construct URL with query parameter
+        const url = `/api/messages?otherUserId=${encodeURIComponent(otherUserId)}`;
+        const response = await fetch(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+        return [];
+      }
     },
+    enabled: !!otherUserId,
     refetchInterval: 3000, // Refresh every 3 seconds for simplicity
   });
 
