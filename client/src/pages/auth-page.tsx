@@ -14,13 +14,23 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">
+      <Button
+        variant="ghost"
+        className="absolute top-4 left-4 text-white hover:bg-white/10"
+        onClick={() => setLocation("/")}
+        data-testid="button-logo-auth"
+      >
+        <span className="text-lg font-bold">VoxelHub</span>
+        <span className="ml-1">◼</span>
+      </Button>
+
       <div className="w-full max-w-md">
         <Card className="shadow-2xl border-0">
           {!userType ? (
             // User type selection
             <div className="p-8 text-center space-y-6">
               <div>
-                <h1 className="text-3xl font-bold mb-2">VoxelHub</h1>
+                <h2 className="text-3xl font-bold mb-2">Bienvenido</h2>
                 <p className="text-muted-foreground">
                   Conecta con makers profesionales o comparte tus servicios
                 </p>

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { UserTypeSelector } from "@/components/UserTypeSelector";
+import AppHeader from "@/components/AppHeader";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
@@ -22,6 +23,9 @@ function Router() {
 
   return (
     <Switch>
+      {/* Auth route (accessible to all) */}
+      <Route path="/auth" component={AuthPage} />
+
       {isLoading ? (
         <Route path="/">
           {() => (
@@ -41,9 +45,6 @@ function Router() {
         </Route>
       ) : (
         <>
-          {/* Auth route (accessible to all) */}
-          <Route path="/auth" component={AuthPage} />
-
           {/* Client Routes */}
           {isClient && (
             <>
@@ -70,12 +71,23 @@ function Router() {
   );
 }
 
+function AppContent() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  return (
+    <>
+      {isAuthenticated && !isLoading && <AppHeader />}
+      <Router />
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AppContent />
       </TooltipProvider>
     </QueryClientProvider>
   );
