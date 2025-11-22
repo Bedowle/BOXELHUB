@@ -227,7 +227,7 @@ export default function ClientRegisterForm({ onSuccess, onBack }: ClientRegister
               onClick={() => onBack?.()}
               disabled={mutation.isPending}
             >
-              Atrás
+              ← Atrás
             </Button>
             <Button
               type="submit"
