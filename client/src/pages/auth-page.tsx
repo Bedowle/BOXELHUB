@@ -13,16 +13,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">
-      <Button
-        variant="ghost"
-        className="absolute top-4 left-4 text-white hover:bg-white/10"
-        onClick={() => setLocation("/")}
-        data-testid="button-logo-auth"
-      >
-        <span className="text-lg font-bold">VoxelHub</span>
-        <span className="ml-1">◼</span>
-      </Button>
-
       <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
         <Card className="shadow-2xl border-0 p-8 min-h-full">
           {/* LOGIN MODE */}
