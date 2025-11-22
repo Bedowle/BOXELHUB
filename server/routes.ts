@@ -109,7 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verificationToken = await storage.createEmailToken(email, 'verification');
       
       // Send verification email
-      await sendVerificationEmail(email, verificationToken);
+      await sendVerificationEmail(email, verificationToken, 'verification');
 
       // Create session (user can use app while waiting for email verification)
       req.session.userId = user.id;
@@ -178,6 +178,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error with login:", error);
       res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Forgot password endpoint
+  app.post('/api/auth/forgot-password', async (req: any, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal if email exists for security
+        return res.json({ message: "If email exists, reset link has been sent" });
+      }
+
+      // Create password reset token
+      const resetToken = await storage.createEmailToken(email, 'password_reset');
+      
+      // Send reset email
+      await sendVerificationEmail(email, resetToken, 'password_reset');
+
+      res.json({ message: "Password reset link sent to your email" });
+    } catch (error: any) {
+      console.error("Error with forgot password:", error);
+      res.status(500).json({ message: "Failed to process password reset" });
+    }
+  });
+
+  // Reset password endpoint
+  app.post('/api/auth/reset-password', async (req: any, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters" });
+      }
+
+      // Verify token
+      const email = await storage.verifyEmailToken(token, 'password_reset');
+      if (!email) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      // Get user and update password
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      await storage.updateUserPassword(user.id, newPassword);
+
+      res.json({ message: "Password reset successfully" });
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: error.message || "Failed to reset password" });
     }
   });
 

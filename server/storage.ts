@@ -77,6 +77,9 @@ export interface IStorage {
   // Email token operations
   createEmailToken(email: string, type: string): Promise<string>;
   verifyEmailToken(token: string, type: string): Promise<string | null>;
+
+  // Password reset operations
+  updateUserPassword(userId: string, newPassword: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -462,6 +465,11 @@ export class DatabaseStorage implements IStorage {
     await db.delete(emailTokens).where(eq(emailTokens.token, token));
     
     return record.email;
+  }
+
+  async updateUserPassword(userId: string, newPassword: string): Promise<void> {
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
   }
 }
 

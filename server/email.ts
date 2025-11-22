@@ -31,23 +31,42 @@ function getTransporter() {
   return transporter;
 }
 
-export async function sendVerificationEmail(to: string, token: string) {
+export async function sendVerificationEmail(to: string, token: string, type: string = "verification") {
   try {
     const transport = getTransporter();
-    const verificationLink = `${process.env.PUBLIC_URL || "http://localhost:5000"}/verify?token=${token}`;
+    const isResetPassword = type === 'password_reset';
+    const baseUrl = process.env.PUBLIC_URL || "http://localhost:5000";
+    const verificationLink = isResetPassword 
+      ? `${baseUrl}/reset-password?token=${token}`
+      : `${baseUrl}/verify?token=${token}`;
     const fromEmail = process.env.EMAIL_FROM || "noreply@voxelhub.com";
+
+    const subject = isResetPassword 
+      ? "VoxelHub - Recupera tu contraseña"
+      : "VoxelHub - Verifica tu email";
+
+    const heading = isResetPassword
+      ? "Recupera tu Contraseña"
+      : "¡Bienvenido a VoxelHub!";
+
+    const buttonText = isResetPassword
+      ? "Recuperar Contraseña"
+      : "Verificar Email";
 
     const mailOptions = {
       from: fromEmail,
       to,
-      subject: "VoxelHub - Verifica tu email",
+      subject,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>¡Bienvenido a VoxelHub!</h2>
-          <p>Por favor verifica tu email haciendo click en el siguiente link:</p>
+          <h2>${heading}</h2>
+          <p>${isResetPassword 
+            ? "Hemos recibido una solicitud para recuperar tu contraseña. Si no fuiste tú, ignora este email."
+            : "Por favor verifica tu email haciendo click en el siguiente link:"
+          }</p>
           <p>
             <a href="${verificationLink}" style="background-color: #3b82f6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
-              Verificar Email
+              ${buttonText}
             </a>
           </p>
           <p>O copia este link en tu navegador:</p>
@@ -57,15 +76,17 @@ export async function sendVerificationEmail(to: string, token: string) {
           </p>
         </div>
       `,
-      text: `Verifica tu email visitando este link: ${verificationLink}`,
+      text: `${isResetPassword ? "Recupera tu contraseña visitando este link:" : "Verifica tu email visitando este link:"} ${verificationLink}`,
     };
 
     await transport.sendMail(mailOptions);
-    console.log(`✓ Verification email sent to ${to}`);
+    console.log(`✓ ${isResetPassword ? "Password reset" : "Verification"} email sent to ${to}`);
+    console.log(`  Token: ${token}`);
+    console.log(`  Link: ${verificationLink}`);
     return true;
   } catch (error: any) {
-    console.error("✗ Error sending verification email:", error.message);
-    // Still return true since user can verify via the console token
+    console.error("✗ Error sending email:", error.message);
+    // Still return true since user can use the console token
     return true;
   }
 }

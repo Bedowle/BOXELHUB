@@ -3,12 +3,13 @@ import { useLocation } from "wouter";
 import ClientRegisterForm from "@/components/ClientRegisterForm";
 import MakerRegisterForm from "@/components/MakerRegisterForm";
 import LoginForm from "@/components/LoginForm";
+import ForgotPasswordForm from "@/components/ForgotPasswordForm";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot-password">("login");
   const [userType, setUserType] = useState<"client" | "maker" | null>(null);
 
   // Auto-set userType from URL query params
@@ -38,7 +39,10 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              <LoginForm onSuccess={() => setLocation("/")} />
+              <LoginForm 
+                onSuccess={() => setLocation("/")}
+                onForgotPassword={() => setMode("forgot-password")}
+              />
 
               <div className="text-center text-sm">
                 ¿No tienes cuenta?{" "}
@@ -158,6 +162,20 @@ export default function AuthPage() {
                 onSuccess={() => setLocation("/")}
                 onBack={() => setUserType(null)}
               />
+            </div>
+          )}
+
+          {/* FORGOT PASSWORD MODE */}
+          {mode === "forgot-password" && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold mb-2">Recuperar Contraseña</h2>
+                <p className="text-muted-foreground text-sm">
+                  Te enviaremos un link al email
+                </p>
+              </div>
+
+              <ForgotPasswordForm onBack={() => setMode("login")} />
             </div>
           )}
         </Card>

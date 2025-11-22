@@ -9,9 +9,10 @@ import { Mail, Lock } from "lucide-react";
 
 interface LoginFormProps {
   onSuccess?: () => void;
+  onForgotPassword?: () => void;
 }
 
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
@@ -105,6 +106,17 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       >
         {mutation.isPending ? "Iniciando..." : "Iniciar Sesión"}
       </Button>
+
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          className="text-primary text-sm hover:underline"
+          data-testid="button-forgot-password"
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
+      </div>
     </form>
   );
 }
