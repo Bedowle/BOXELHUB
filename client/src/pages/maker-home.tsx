@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Printer, Package, DollarSign, Zap, Search, Filter, TrendingUp, MessageCircle } from "lucide-react";
+import { Printer, Package, DollarSign, Zap, Search, Filter, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useLocation } from "wouter";
@@ -108,6 +108,22 @@ export default function MakerHome() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4 py-3 max-w-7xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2"
+            data-testid="button-back-to-home"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        </div>
+      </header>
+
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
         <div className="mb-12">

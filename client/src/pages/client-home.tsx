@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Upload, Package, Zap, TrendingUp, Plus, FileUp } from "lucide-react";
+import { Upload, Package, Zap, TrendingUp, Plus, FileUp, ArrowLeft } from "lucide-react";
 import { UploadProjectDialog } from "@/components/UploadProjectDialog";
 import { useLocation } from "wouter";
 import type { Project } from "@shared/schema";
@@ -64,6 +64,22 @@ export default function ClientHome() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4 py-3 max-w-7xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2"
+            data-testid="button-back-to-home"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        </div>
+      </header>
+
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
         <div className="mb-12">

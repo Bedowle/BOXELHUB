@@ -72,35 +72,37 @@ export default function ChatsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4 py-3 max-w-4xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation(user.userType === "client" ? "/client" : "/maker")}
+            className="flex items-center gap-2"
+            data-testid="button-back-to-dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        </div>
+      </header>
+
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header with Back Button */}
+        {/* Content Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation(user.userType === "client" ? "/client" : "/maker")}
-              className="flex items-center gap-2"
-              data-testid="button-back-to-dashboard"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver
-            </Button>
-          </div>
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 flex items-center gap-3">
-              <MessageCircle className="h-10 w-10 text-primary" />
-              Mis Chats
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              {conversations?.length || 0} conversación{(conversations?.length || 0) !== 1 ? "es" : ""}
-              {totalUnread > 0 && (
-                <span className="ml-3 font-semibold text-primary">
-                  ({totalUnread} mensaje{totalUnread !== 1 ? "s" : ""} sin leer)
-                </span>
-              )}
-            </p>
-          </div>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 flex items-center gap-3">
+          <MessageCircle className="h-10 w-10 text-primary" />
+          Mis Chats
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          {conversations?.length || 0} conversación{(conversations?.length || 0) !== 1 ? "es" : ""}
+          {totalUnread > 0 && (
+            <span className="ml-3 font-semibold text-primary">
+              ({totalUnread} mensaje{totalUnread !== 1 ? "s" : ""} sin leer)
+            </span>
+          )}
+        </p>
         </div>
 
         {/* Search Bar */}
