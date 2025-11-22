@@ -51,7 +51,11 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
       stlFileName: "",
       description: "",
       material: "",
-      specifications: {},
+      specifications: {
+        dimensionX: "",
+        dimensionY: "",
+        dimensionZ: "",
+      },
     },
   });
 
@@ -208,6 +212,59 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                 </FormItem>
               )}
             />
+
+            {/* Dimensions */}
+            <div className="space-y-3">
+              <FormLabel>Dimensiones (mm)</FormLabel>
+              <p className="text-sm text-muted-foreground">Especifica las medidas máximas del objeto</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Input
+                    type="number"
+                    placeholder="Largo (X)"
+                    value={(form.watch("specifications") as any)?.dimensionX || ""}
+                    onChange={(e) =>
+                      form.setValue("specifications", {
+                        ...((form.getValues("specifications") || {}) as any),
+                        dimensionX: e.target.value,
+                      })
+                    }
+                    data-testid="input-dimension-x"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Eje X</p>
+                </div>
+                <div>
+                  <Input
+                    type="number"
+                    placeholder="Ancho (Y)"
+                    value={(form.watch("specifications") as any)?.dimensionY || ""}
+                    onChange={(e) =>
+                      form.setValue("specifications", {
+                        ...((form.getValues("specifications") || {}) as any),
+                        dimensionY: e.target.value,
+                      })
+                    }
+                    data-testid="input-dimension-y"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Eje Y</p>
+                </div>
+                <div>
+                  <Input
+                    type="number"
+                    placeholder="Alto (Z)"
+                    value={(form.watch("specifications") as any)?.dimensionZ || ""}
+                    onChange={(e) =>
+                      form.setValue("specifications", {
+                        ...((form.getValues("specifications") || {}) as any),
+                        dimensionZ: e.target.value,
+                      })
+                    }
+                    data-testid="input-dimension-z"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Eje Z</p>
+                </div>
+              </div>
+            </div>
 
             <div className="flex gap-3 pt-4">
               <Button
