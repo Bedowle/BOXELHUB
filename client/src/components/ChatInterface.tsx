@@ -150,13 +150,10 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
                     {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
                   </p>
                   {msg.senderId === currentUserId && (
-                    <div className={`h-4 w-4 flex items-center justify-center ${msg.isRead ? "text-cyan-500" : "text-primary-foreground/70"}`}>
-                      {msg.isRead ? (
-                        <CheckCheck className="h-4 w-4" data-testid={`ticks-read-${msg.id}`} />
-                      ) : (
-                        <CheckCheck className="h-4 w-4 opacity-60" data-testid={`ticks-received-${msg.id}`} />
-                      )}
-                    </div>
+                    <CheckCheck 
+                      className={`h-4 w-4 ${msg.isRead ? "text-cyan-300" : "text-primary-foreground/40"}`}
+                      data-testid={msg.isRead ? `ticks-read-${msg.id}` : `ticks-received-${msg.id}`}
+                    />
                   )}
                 </div>
               </div>
