@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { UserTypeSelector } from "@/components/UserTypeSelector";
 import AppHeader from "@/components/AppHeader";
+import Logo from "@/components/Logo";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
@@ -76,6 +77,7 @@ function AppContent() {
 
   return (
     <>
+      <Logo />
       {isAuthenticated && !isLoading && <AppHeader />}
       <Router />
     </>
