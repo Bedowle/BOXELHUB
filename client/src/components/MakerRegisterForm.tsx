@@ -235,26 +235,21 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
       ) : step === 2 ? (
         <>
           <div>
-            <Label htmlFor="printerType" className="text-sm font-semibold block mb-3">
+            <Label htmlFor="printerType" className="text-sm font-semibold block mb-2">
               Tipo de Impresora
             </Label>
-            <div className="space-y-2">
-              {printerOptions.map((printer) => (
-                <button
-                  key={printer}
-                  type="button"
-                  onClick={() => setForm({ ...form, printerType: printer })}
-                  className={`w-full px-4 py-3 rounded-lg border-2 transition-all font-medium ${
-                    form.printerType === printer
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-muted hover:border-primary text-foreground"
-                  }`}
-                  data-testid={`printer-option-${printer}`}
-                >
-                  {printer} {form.printerType === printer && "✓"}
-                </button>
-              ))}
-            </div>
+            <Select value={form.printerType} onValueChange={(value) => setForm({ ...form, printerType: value })}>
+              <SelectTrigger id="printerType" data-testid="select-printer-type">
+                <SelectValue placeholder="Selecciona una impresora..." />
+              </SelectTrigger>
+              <SelectContent>
+                {printerOptions.map((printer) => (
+                  <SelectItem key={printer} value={printer} data-testid={`printer-option-${printer}`}>
+                    {printer}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-3">
