@@ -229,56 +229,27 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
         </>
       ) : step === 2 ? (
         <>
-          <div className="space-y-2">
-            <Label htmlFor="printerType" className="text-sm">
+          <div>
+            <Label htmlFor="printerType" className="text-sm font-semibold block mb-3">
               Tipo de Impresora
             </Label>
-            
             <div className="space-y-2">
-              <Input
-                placeholder="Buscar: Ender3 o BambooLab..."
-                value={printerSearch}
-                onChange={(e) => setPrinterSearch(e.target.value)}
-                className="w-full"
-                data-testid="input-printer-search"
-              />
-              
-              <div className="border rounded-md p-2 bg-background space-y-1" data-testid="printer-options">
-                {printerOptions.length > 0 ? (
-                  printerOptions
-                    .filter(p => !printerSearch || p.toLowerCase().includes(printerSearch.toLowerCase()))
-                    .map(printer => (
-                      <button
-                        key={printer}
-                        type="button"
-                        onClick={() => {
-                          setForm({ ...form, printerType: printer });
-                          setPrinterSearch("");
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                          form.printerType === printer
-                            ? "bg-primary text-primary-foreground font-semibold"
-                            : "hover:bg-muted"
-                        }`}
-                        data-testid={`printer-option-${printer}`}
-                      >
-                        {printer}
-                        {form.printerType === printer && " ✓"}
-                      </button>
-                    ))
-                ) : (
-                  <p className="text-sm text-muted-foreground px-3 py-2">
-                    No hay opciones disponibles
-                  </p>
-                )}
-              </div>
+              {printerOptions.map((printer) => (
+                <button
+                  key={printer}
+                  type="button"
+                  onClick={() => setForm({ ...form, printerType: printer })}
+                  className={`w-full px-4 py-3 rounded-lg border-2 transition-all font-medium ${
+                    form.printerType === printer
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted hover:border-primary text-foreground"
+                  }`}
+                  data-testid={`printer-option-${printer}`}
+                >
+                  {printer} {form.printerType === printer && "✓"}
+                </button>
+              ))}
             </div>
-            
-            {form.printerType && (
-              <p className="text-xs text-muted-foreground">
-                ✓ Seleccionado: <span className="font-semibold text-foreground">{form.printerType}</span>
-              </p>
-            )}
           </div>
 
           <div className="space-y-3">
