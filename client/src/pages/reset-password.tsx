@@ -3,6 +3,7 @@ import { useLocation, useRoute } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ResetPasswordForm from "@/components/ResetPasswordForm";
+import TokenInputForm from "@/components/TokenInputForm";
 import { AlertCircle } from "lucide-react";
 
 export default function ResetPasswordPage() {
