@@ -1,0 +1,143 @@
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Send } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import type { Message, User } from "@shared/schema";
+
+interface ChatInterfaceProps {
+  otherUserId: string;
+  otherUser: User | undefined;
+  currentUserId: string;
+}
+
+export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInterfaceProps) {
+  const [messageText, setMessageText] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: messages = [] } = useQuery<Message[]>({
+    queryKey: ["/api/messages", otherUserId],
+    refetchInterval: 3000, // Refresh every 3 seconds for simplicity
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: async (content: string) => {
+      await apiRequest("POST", "/api/messages", {
+        receiverId: otherUserId,
+        content,
+        projectId: undefined,
+      });
+    },
+    onSuccess: () => {
+      setMessageText("");
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", otherUserId] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo enviar el mensaje",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = () => {
+    if (messageText.trim()) {
+      sendMutation.mutate(messageText);
+    }
+  };
+
+  const otherUserInitials = otherUser?.firstName && otherUser?.lastName
+    ? `${otherUser.firstName[0]}${otherUser.lastName[0]}`
+    : otherUser?.email?.[0].toUpperCase() || "U";
+
+  return (
+    <Card className="flex flex-col h-[500px] border">
+      {/* Header */}
+      <div className="border-b p-4 flex items-center gap-3">
+        <Avatar>
+          <AvatarImage src={otherUser?.profileImageUrl || undefined} />
+          <AvatarFallback>{otherUserInitials}</AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="font-semibold">
+            {otherUser?.firstName && otherUser?.lastName
+              ? `${otherUser.firstName} ${otherUser.lastName}`
+              : otherUser?.email}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {otherUser?.userType === "maker" ? "Maker" : "Cliente"}
+          </p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            <p>No hay mensajes aún</p>
+            <p className="text-sm">¡Inicia la conversación!</p>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}
+              data-testid={`message-bubble-${msg.id}`}
+            >
+              <div
+                className={`max-w-xs px-4 py-2 rounded-lg ${
+                  msg.senderId === currentUserId
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <p className="text-sm">{msg.content}</p>
+                <p className="text-xs mt-1 opacity-70">
+                  {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t p-4 flex gap-2">
+        <Input
+          placeholder="Escribe un mensaje..."
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && handleSend()}
+          disabled={sendMutation.isPending}
+          data-testid="input-message"
+        />
+        <Button
+          size="icon"
+          onClick={handleSend}
+          disabled={sendMutation.isPending || !messageText.trim()}
+          data-testid="button-send-message"
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
+    </Card>
+  );
+}

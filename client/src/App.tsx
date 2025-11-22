@@ -11,6 +11,7 @@ import Landing from "@/pages/landing";
 import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import ProjectDetails from "@/pages/project-details";
+import ChatPage from "@/pages/chat-page";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -44,6 +45,7 @@ function Router() {
             <>
               <Route path="/" component={ClientHome} />
               <Route path="/project/:id" component={ProjectDetails} />
+              <Route path="/chat/:userId" component={ChatPage} />
             </>
           )}
           
@@ -52,6 +54,7 @@ function Router() {
             <>
               <Route path="/" component={MakerHome} />
               <Route path="/project/:id" component={ProjectDetails} />
+              <Route path="/chat/:userId" component={ChatPage} />
             </>
           )}
         </>

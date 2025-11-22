@@ -1,11 +1,12 @@
 import { db } from "./db";
-import { eq, and, desc, sql, count, ne } from "drizzle-orm";
+import { eq, and, desc, sql, count, ne, avg } from "drizzle-orm";
 import {
   users,
   makerProfiles,
   projects,
   bids,
   messages,
+  reviews,
   type User,
   type UpsertUser,
   type MakerProfile,
@@ -16,6 +17,8 @@ import {
   type InsertBid,
   type Message,
   type InsertMessage,
+  type Review,
+  type InsertReview,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -49,6 +52,11 @@ export interface IStorage {
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(userId: string, senderId: string): Promise<void>;
+
+  // Review operations
+  getReviewsForMaker(makerId: string): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  getReviewStats(makerId: string): Promise<{ averageRating: number; totalReviews: number }>;
 
   // Stats operations
   getClientStats(userId: string): Promise<{
@@ -298,6 +306,51 @@ export class DatabaseStorage implements IStorage {
     }
 
     return { activeProjects, pendingBids, acceptedOffers };
+  }
+
+  // Review operations
+  async getReviewsForMaker(makerId: string): Promise<Review[]> {
+    const results = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.toUserId, makerId))
+      .orderBy(desc(reviews.createdAt));
+    return results;
+  }
+
+  async createReview(reviewData: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values(reviewData).returning();
+    
+    // Update maker profile rating
+    const makerReviews = await this.getReviewsForMaker(reviewData.toUserId);
+    if (makerReviews.length > 0) {
+      const avgRating = makerReviews.reduce((sum, r) => sum + r.rating, 0) / makerReviews.length;
+      await db
+        .update(makerProfiles)
+        .set({ 
+          rating: avgRating.toString(),
+          totalReviews: makerReviews.length,
+          updatedAt: new Date()
+        })
+        .where(eq(makerProfiles.userId, reviewData.toUserId));
+    }
+
+    return review;
+  }
+
+  async getReviewStats(makerId: string): Promise<{ averageRating: number; totalReviews: number }> {
+    const [result] = await db
+      .select({ 
+        averageRating: avg(reviews.rating),
+        totalReviews: count()
+      })
+      .from(reviews)
+      .where(eq(reviews.toUserId, makerId));
+    
+    return {
+      averageRating: result?.averageRating ? parseFloat(result.averageRating) : 0,
+      totalReviews: result?.totalReviews || 0,
+    };
   }
 
   async getMakerStats(userId: string): Promise<{

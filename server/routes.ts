@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertBidSchema, insertMakerProfileSchema, insertMessageSchema } from "@shared/schema";
+import { insertProjectSchema, insertBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema } from "@shared/schema";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -17,6 +17,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.get('/api/user/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -470,7 +484,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { otherUserId } = req.query;
       
-      const messages = await storage.getMessages(userId, otherUserId as string | undefined);
+      if (!otherUserId) {
+        return res.status(400).json({ message: "otherUserId is required" });
+      }
+
+      const messages = await storage.getMessages(userId, otherUserId as string);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -499,6 +517,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating message:", error);
       res.status(400).json({ message: error.message || "Failed to create message" });
+    }
+  });
+
+  // Review routes
+  app.get('/api/makers/:id/reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const reviews = await storage.getReviewsForMaker(id);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validated = insertReviewSchema.parse(req.body);
+      
+      // Only client can review maker
+      const user = await storage.getUser(userId);
+      if (user?.userType !== 'client') {
+        return res.status(403).json({ message: "Only clients can leave reviews" });
+      }
+
+      // Verify the bid was accepted
+      const bid = await storage.getBid(validated.projectId);
+      if (!bid || bid.status !== 'accepted' || bid.makerId !== validated.toUserId) {
+        return res.status(400).json({ message: "Invalid project or bid" });
+      }
+
+      const review = await storage.createReview({ ...validated, fromUserId: userId });
+      res.json(review);
+    } catch (error: any) {
+      console.error("Error creating review:", error);
+      res.status(400).json({ message: error.message || "Failed to create review" });
     }
   });
 

@@ -111,6 +111,20 @@ export const messages = pgTable("messages", {
   index("idx_messages_project_id").on(table.projectId),
 ]);
 
+// Reviews table (NEW)
+export const reviews = pgTable("reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  fromUserId: varchar("from_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  toUserId: varchar("to_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // 1-5
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_reviews_project_id").on(table.projectId),
+  index("idx_reviews_to_user_id").on(table.toUserId),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   makerProfile: one(makerProfiles, {
@@ -121,6 +135,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   bidsAsMaker: many(bids, { relationName: "makerBids" }),
   sentMessages: many(messages, { relationName: "sentMessages" }),
   receivedMessages: many(messages, { relationName: "receivedMessages" }),
+  reviewsGiven: many(reviews, { relationName: "reviewsGiven" }),
+  reviewsReceived: many(reviews, { relationName: "reviewsReceived" }),
 }));
 
 export const makerProfilesRelations = relations(makerProfiles, ({ one }) => ({
@@ -137,6 +153,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   bids: many(bids),
   messages: many(messages),
+  reviews: many(reviews),
 }));
 
 export const bidsRelations = relations(bids, ({ one }) => ({
@@ -164,6 +181,23 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   project: one(projects, {
     fields: [messages.projectId],
     references: [projects.id],
+  }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  project: one(projects, {
+    fields: [reviews.projectId],
+    references: [projects.id],
+  }),
+  fromUser: one(users, {
+    fields: [reviews.fromUserId],
+    references: [users.id],
+    relationName: "reviewsGiven",
+  }),
+  toUser: one(users, {
+    fields: [reviews.toUserId],
+    references: [users.id],
+    relationName: "reviewsReceived",
   }),
 }));
 
@@ -210,6 +244,14 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   content: z.string().min(1, "Message cannot be empty"),
 });
 
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().optional(),
+});
+
 // TypeScript types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -225,3 +267,6 @@ export type Bid = typeof bids.$inferSelect;
 
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Review = typeof reviews.$inferSelect;
