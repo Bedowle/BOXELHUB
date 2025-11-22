@@ -1,9 +1,18 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Upload, Users, CheckCircle, Star, TrendingUp } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import ClientLoginPage from "./client-login";
 
 export default function Landing() {
+  const [showClientLogin, setShowClientLogin] = useState(false);
+  const [, setLocation] = useLocation();
+
+  if (showClientLogin) {
+    return <ClientLoginPage onSuccess={() => setLocation("/")} />;
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Gradient */}
@@ -19,13 +28,13 @@ export default function Landing() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                asChild 
                 size="lg" 
                 variant="outline"
                 className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+                onClick={() => setShowClientLogin(true)}
                 data-testid="button-client-cta"
               >
-                <a href="/api/login">Necesito Impresión</a>
+                Necesito Impresión
               </Button>
               <Button 
                 asChild 

@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertProjectSchema, insertBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema } from "@shared/schema";
+import { getAuthenticatedUserId } from "./replitAuth";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -15,7 +16,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -40,7 +44,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/user/type', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const { userType } = req.body;
       
       if (!userType || !['client', 'maker'].includes(userType)) {
@@ -69,10 +76,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client login (email only, no Replit Auth needed)
+  app.post('/api/auth/client-login', async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        return res.status(400).json({ message: "Invalid email" });
+      }
+
+      // Get or create user with type 'client'
+      let user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        user = await storage.upsertUser({
+          email,
+          userType: 'client',
+          firstName: undefined,
+          lastName: undefined,
+          profileImageUrl: undefined,
+        });
+      } else if (user.userType !== 'client') {
+        return res.status(400).json({ message: "This email is registered as a maker account" });
+      }
+
+      // Create session for client
+      req.session.userId = user.id;
+      req.session.userType = 'client';
+      req.session.email = email;
+
+      res.json({ message: "Login successful", user });
+    } catch (error) {
+      console.error("Error with client login:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
   // Project routes
   app.get('/api/projects/my-projects', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'client') {
@@ -98,7 +144,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/projects/available', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -124,7 +173,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/projects/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'client') {
@@ -157,7 +209,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/projects', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'client') {
@@ -183,7 +238,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id/bids', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       const project = await storage.getProject(id);
@@ -220,7 +278,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id/my-bid', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -238,7 +299,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects/:id/bids', isAuthenticated, async (req: any, res) => {
     try {
       const { id: projectId } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -299,7 +363,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/bids/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'client') {
@@ -360,7 +427,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/bids/:id/reject', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'client') {
@@ -398,7 +468,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/bids/my-bids', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -415,7 +488,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/bids/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -433,7 +509,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Maker profile routes
   app.get('/api/maker-profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const profile = await storage.getMakerProfile(userId);
       res.json(profile || null);
     } catch (error) {
@@ -444,7 +523,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/maker-profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -462,7 +544,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/maker-profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       
       if (user?.userType !== 'maker') {
@@ -481,7 +566,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Message routes
   app.get('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const { otherUserId } = req.query;
       
       if (!otherUserId) {
@@ -498,7 +586,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const validated = insertMessageSchema.parse(req.body);
       
       const message = await storage.createMessage({ ...validated, senderId: userId });
@@ -534,7 +625,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const validated = insertReviewSchema.parse(req.body);
       
       // Only client can review maker

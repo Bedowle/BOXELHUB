@@ -121,21 +121,40 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
-    });
+    // Handle both client session logout and Replit Auth logout
+    const session = req.session as any;
+    
+    if (session?.userId && session?.userType === 'client') {
+      // Client session logout
+      req.session.destroy(() => {
+        res.redirect("/");
+      });
+    } else {
+      // Replit Auth logout
+      req.logout(() => {
+        res.redirect(
+          client.buildEndSessionUrl(config, {
+            client_id: process.env.REPL_ID!,
+            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          }).href
+        );
+      });
+    }
   });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Support both Replit Auth (makers) and session-based auth (clients)
+  const session = req.session as any;
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  // Check for client session (email-based login)
+  if (session?.userId && session?.userType === 'client') {
+    return next();
+  }
+
+  // Check for Replit Auth (makers)
+  if (!req.isAuthenticated() || !user?.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -159,4 +178,17 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
+};
+
+// Helper to get authenticated user ID from either session or Replit Auth
+export function getAuthenticatedUserId(req: any): string | null {
+  // Check session-based auth first (clients)
+  if (req.session?.userId) {
+    return req.session.userId;
+  }
+  // Check Replit Auth (makers)
+  if (req.user?.claims?.sub) {
+    return req.user.claims.sub;
+  }
+  return null;
 };
