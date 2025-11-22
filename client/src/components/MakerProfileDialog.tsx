@@ -71,7 +71,7 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       capabilities: profile.capabilities || "",
     } : registrationData ? {
       userId: user?.id || "",
-      printerType: registrationData.printerType || "FDM",
+      printerType: registrationData.printerType || "Ender3",
       materials: [],
       maxPrintDimensionX: registrationData.maxPrintDimensionX,
       maxPrintDimensionY: registrationData.maxPrintDimensionY,
@@ -81,7 +81,7 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       capabilities: "",
     } : {
       userId: user?.id || "",
-      printerType: "FDM",
+      printerType: "Ender3",
       materials: [],
       hasMulticolor: false,
       location: "",
@@ -159,9 +159,8 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="FDM">FDM/FFF</SelectItem>
-                      <SelectItem value="SLA">SLA/DLP</SelectItem>
-                      <SelectItem value="SLS">SLS</SelectItem>
+                      <SelectItem value="Ender3">Ender 3</SelectItem>
+                      <SelectItem value="BambooLab">Bamboo Lab</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
