@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, desc, sql, count, ne, avg } from "drizzle-orm";
+import { eq, and, desc, asc, sql, count, ne, avg } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import {
   users,
@@ -296,7 +296,7 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
-    const results = await query.orderBy(desc(messages.createdAt));
+    const results = await query.orderBy(asc(messages.createdAt));
     return results;
   }
 
