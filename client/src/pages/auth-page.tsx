@@ -13,7 +13,7 @@ export default function AuthPage() {
 
   // Auto-set userType from URL query params
   useEffect(() => {
-    const params = new URLSearchParams(location.split("?")[1] || "");
+    const params = new URLSearchParams(window.location.search);
     const typeParam = params.get("type");
     if (typeParam === "maker") {
       setMode("register");
@@ -22,7 +22,7 @@ export default function AuthPage() {
       setMode("register");
       setUserType("client");
     }
-  }, [location]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">
