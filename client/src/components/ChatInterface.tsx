@@ -27,7 +27,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
     queryKey: ["/api/messages", otherUserId],
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/messages?otherUserId=${otherUserId}`, undefined);
-      return response;
+      return Array.isArray(response) ? response : [];
     },
     refetchInterval: 3000, // Refresh every 3 seconds for simplicity
   });
