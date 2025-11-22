@@ -260,6 +260,7 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   createdAt: true,
   updatedAt: true,
   status: true,
+  userId: true, // Added by server from authenticated user
 }).extend({
   material: z.string().min(1, "Material is required"),
   specifications: z.record(z.any()).optional(),

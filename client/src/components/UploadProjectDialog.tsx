@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Upload, CheckCircle } from "lucide-react";
 
 interface UploadProjectDialogProps {
   open: boolean;
@@ -43,6 +43,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [fileName, setFileName] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
@@ -61,19 +62,33 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
 
   const mutation = useMutation({
     mutationFn: async (data: InsertProject) => {
-      await apiRequest("POST", "/api/projects", data);
+      console.log("[UploadProjectDialog] Submitting project:", data);
+      const response = await apiRequest("POST", "/api/projects", data);
+      console.log("[UploadProjectDialog] Server response:", response);
+      return response;
     },
     onSuccess: () => {
+      console.log("[UploadProjectDialog] Upload successful");
+      setIsSuccess(true);
+      
       toast({
-        title: "Proyecto creado",
-        description: "Tu proyecto ha sido publicado. Los makers comenzarán a enviar ofertas pronto.",
+        title: "¡Proyecto Publicado!",
+        description: "Tu proyecto está disponible para que los makers hagan ofertas",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      form.reset();
-      setFileName("");
-      onOpenChange(false);
+      
+      // Reset form and close dialog after 2 seconds
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/projects/my-projects"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects/stats"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects/available"] });
+        form.reset();
+        setFileName("");
+        setIsSuccess(false);
+        onOpenChange(false);
+      }, 2000);
     },
     onError: (error: Error) => {
+      console.error("[UploadProjectDialog] Upload error:", error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "No autorizado",
@@ -86,7 +101,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
         return;
       }
       toast({
-        title: "Error",
+        title: "Error al publicar",
         description: error.message || "No se pudo crear el proyecto",
         variant: "destructive",
       });
@@ -94,6 +109,8 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
   });
 
   const onSubmit = (data: InsertProject) => {
+    console.log("[UploadProjectDialog] Form validation passed, submitting...");
+    console.log("[UploadProjectDialog] Form data:", data);
     mutation.mutate(data);
   };
 
@@ -105,188 +122,215 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
     }
   };
 
+  const isSubmitDisabled = mutation.isPending || !fileName || !form.formState.isValid;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Subir Nuevo Proyecto STL</DialogTitle>
-          <DialogDescription>
-            Completa los detalles de tu proyecto para que los makers puedan enviar ofertas precisas
-          </DialogDescription>
-        </DialogHeader>
+        {isSuccess ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
+            <h3 className="text-2xl font-bold mb-2">¡Publicado!</h3>
+            <p className="text-muted-foreground max-w-md">
+              Tu proyecto está disponible y los makers pueden empezar a hacer ofertas
+            </p>
+          </div>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Subir Nuevo Proyecto STL</DialogTitle>
+              <DialogDescription>
+                Completa los detalles de tu proyecto para que los makers puedan enviar ofertas precisas
+              </DialogDescription>
+            </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* File Upload */}
-            <FormItem>
-              <FormLabel>Archivo STL</FormLabel>
-              <FormControl>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
-                  <input
-                    type="file"
-                    accept=".stl"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="stl-file-input"
-                    data-testid="input-stl-file"
-                  />
-                  <label
-                    htmlFor="stl-file-input"
-                    className="cursor-pointer flex flex-col items-center gap-2"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* File Upload */}
+                <FormItem>
+                  <FormLabel>Archivo STL</FormLabel>
+                  <FormControl>
+                    <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                      <input
+                        type="file"
+                        accept=".stl"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="stl-file-input"
+                        data-testid="input-stl-file"
+                      />
+                      <label
+                        htmlFor="stl-file-input"
+                        className="cursor-pointer flex flex-col items-center gap-2"
+                      >
+                        <Upload className="h-10 w-10 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          {fileName || "Haz clic para seleccionar un archivo STL"}
+                        </span>
+                      </label>
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Formatos aceptados: .stl (máximo 50MB)
+                  </FormDescription>
+                </FormItem>
+
+                {/* Project Name */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nombre del Proyecto</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ej: Prototipo de engranaje mecánico" 
+                          {...field} 
+                          data-testid="input-project-name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Description */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe los detalles de tu proyecto, tolerancias, acabado requerido, etc."
+                          className="min-h-24"
+                          {...field}
+                          data-testid="input-project-description"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Material */}
+                <FormField
+                  control={form.control}
+                  name="material"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Material Preferido</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-material">
+                            <SelectValue placeholder="Selecciona el material" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="PLA">PLA</SelectItem>
+                          <SelectItem value="ABS">ABS</SelectItem>
+                          <SelectItem value="PETG">PETG</SelectItem>
+                          <SelectItem value="TPU">TPU</SelectItem>
+                          <SelectItem value="Nylon">Nylon</SelectItem>
+                          <SelectItem value="Resina">Resina</SelectItem>
+                          <SelectItem value="Otro">Otro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Dimensions */}
+                <div className="space-y-3">
+                  <FormLabel>Dimensiones (mm)</FormLabel>
+                  <p className="text-sm text-muted-foreground">Especifica las medidas máximas del objeto</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Input
+                        type="number"
+                        placeholder="Largo (X)"
+                        value={(form.watch("specifications") as any)?.dimensionX || ""}
+                        onChange={(e) =>
+                          form.setValue("specifications", {
+                            ...((form.getValues("specifications") || {}) as any),
+                            dimensionX: e.target.value,
+                          })
+                        }
+                        data-testid="input-dimension-x"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Eje X</p>
+                    </div>
+                    <div>
+                      <Input
+                        type="number"
+                        placeholder="Ancho (Y)"
+                        value={(form.watch("specifications") as any)?.dimensionY || ""}
+                        onChange={(e) =>
+                          form.setValue("specifications", {
+                            ...((form.getValues("specifications") || {}) as any),
+                            dimensionY: e.target.value,
+                          })
+                        }
+                        data-testid="input-dimension-y"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Eje Y</p>
+                    </div>
+                    <div>
+                      <Input
+                        type="number"
+                        placeholder="Alto (Z)"
+                        value={(form.watch("specifications") as any)?.dimensionZ || ""}
+                        onChange={(e) =>
+                          form.setValue("specifications", {
+                            ...((form.getValues("specifications") || {}) as any),
+                            dimensionZ: e.target.value,
+                          })
+                        }
+                        data-testid="input-dimension-z"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Eje Z</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    className="flex-1"
+                    data-testid="button-cancel-upload"
                   >
-                    <Upload className="h-10 w-10 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {fileName || "Haz clic para seleccionar un archivo STL"}
-                    </span>
-                  </label>
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitDisabled}
+                    className="flex-1"
+                    data-testid="button-submit-project"
+                  >
+                    {mutation.isPending ? "Publicando..." : "Publicar Proyecto"}
+                  </Button>
                 </div>
-              </FormControl>
-              <FormDescription>
-                Formatos aceptados: .stl (máximo 50MB)
-              </FormDescription>
-            </FormItem>
 
-            {/* Project Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Proyecto</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ej: Prototipo de engranaje mecánico" 
-                      {...field} 
-                      data-testid="input-project-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe los detalles de tu proyecto, tolerancias, acabado requerido, etc."
-                      className="min-h-24"
-                      {...field}
-                      data-testid="input-project-description"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Material */}
-            <FormField
-              control={form.control}
-              name="material"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Material Preferido</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-material">
-                        <SelectValue placeholder="Selecciona el material" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="PLA">PLA</SelectItem>
-                      <SelectItem value="ABS">ABS</SelectItem>
-                      <SelectItem value="PETG">PETG</SelectItem>
-                      <SelectItem value="TPU">TPU</SelectItem>
-                      <SelectItem value="Nylon">Nylon</SelectItem>
-                      <SelectItem value="Resina">Resina</SelectItem>
-                      <SelectItem value="Otro">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Dimensions */}
-            <div className="space-y-3">
-              <FormLabel>Dimensiones (mm)</FormLabel>
-              <p className="text-sm text-muted-foreground">Especifica las medidas máximas del objeto</p>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Input
-                    type="number"
-                    placeholder="Largo (X)"
-                    value={(form.watch("specifications") as any)?.dimensionX || ""}
-                    onChange={(e) =>
-                      form.setValue("specifications", {
-                        ...((form.getValues("specifications") || {}) as any),
-                        dimensionX: e.target.value,
-                      })
-                    }
-                    data-testid="input-dimension-x"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Eje X</p>
-                </div>
-                <div>
-                  <Input
-                    type="number"
-                    placeholder="Ancho (Y)"
-                    value={(form.watch("specifications") as any)?.dimensionY || ""}
-                    onChange={(e) =>
-                      form.setValue("specifications", {
-                        ...((form.getValues("specifications") || {}) as any),
-                        dimensionY: e.target.value,
-                      })
-                    }
-                    data-testid="input-dimension-y"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Eje Y</p>
-                </div>
-                <div>
-                  <Input
-                    type="number"
-                    placeholder="Alto (Z)"
-                    value={(form.watch("specifications") as any)?.dimensionZ || ""}
-                    onChange={(e) =>
-                      form.setValue("specifications", {
-                        ...((form.getValues("specifications") || {}) as any),
-                        dimensionZ: e.target.value,
-                      })
-                    }
-                    data-testid="input-dimension-z"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Eje Z</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="flex-1"
-                data-testid="button-cancel-upload"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={mutation.isPending || !fileName}
-                className="flex-1"
-                data-testid="button-submit-project"
-              >
-                {mutation.isPending ? "Subiendo..." : "Publicar Proyecto"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+                {form.formState.errors && Object.keys(form.formState.errors).length > 0 && (
+                  <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
+                    <p className="text-sm text-red-700 dark:text-red-400 font-semibold">Errores de validación:</p>
+                    <ul className="text-sm text-red-600 dark:text-red-300 mt-1 space-y-1">
+                      {Object.entries(form.formState.errors).map(([field, error]: any) => (
+                        <li key={field}>• {field}: {error?.message || "Error desconocido"}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </form>
+            </Form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
