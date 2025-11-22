@@ -60,7 +60,18 @@ export const makerProfiles = pgTable("maker_profiles", {
   maxPrintDimensionZ: integer("max_print_dimension_z"),
   hasMulticolor: boolean("has_multicolor").default(false).notNull(),
   maxColors: integer("max_colors"),
-  location: varchar("location"), // Maker's location for delivery
+  location: varchar("location"), // Maker's location for delivery (city, country)
+  // Address fields for maker's exact location
+  addressStreetType: varchar("address_street_type"), // vía, avenida, calle, etc.
+  addressStreetName: varchar("address_street_name"),
+  addressNumber: varchar("address_number"),
+  addressFloor: varchar("address_floor"),
+  addressDoor: varchar("address_door"),
+  addressPostalCode: varchar("address_postal_code"),
+  addressSimplifiedMode: boolean("address_simplified_mode").default(false), // true = only postal code
+  addressLatitude: varchar("address_latitude"),
+  addressLongitude: varchar("address_longitude"),
+  addressRadius: integer("address_radius"), // in km, 0 = exact point, 1+ = approximate area
   capabilities: text("capabilities"),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   totalReviews: integer("total_reviews").default(0).notNull(),
