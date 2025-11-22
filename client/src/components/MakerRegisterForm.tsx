@@ -38,6 +38,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
   });
   const [step, setStep] = useState(1);
   const [printerSearch, setPrinterSearch] = useState("");
+  const [printerDropdownOpen, setPrinterDropdownOpen] = useState(false);
   const { toast } = useToast();
 
   const printerOptions = ["Ender3", "BambooLab"];
@@ -229,35 +230,48 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
       ) : step === 2 ? (
         <>
           <div>
-            <Label htmlFor="printerType" className="text-sm">
+            <Label htmlFor="printerType" className="text-sm mb-2 block">
               Tipo de Impresora
             </Label>
             <div className="relative">
               <Input
-                placeholder="Buscar impresora..."
-                value={printerSearch}
-                onChange={(e) => setPrinterSearch(e.target.value)}
-                className="mb-2"
+                placeholder="Buscar o seleccionar impresora..."
+                value={printerSearch || form.printerType}
+                onChange={(e) => {
+                  setPrinterSearch(e.target.value);
+                  setPrinterDropdownOpen(true);
+                }}
+                onFocus={() => setPrinterDropdownOpen(true)}
+                className="w-full"
                 data-testid="input-printer-search"
               />
-              <Select value={form.printerType} onValueChange={(value) => {
-                setForm({ ...form, printerType: value });
-                setPrinterSearch("");
-              }}>
-                <SelectTrigger data-testid="select-printer-type">
-                  <SelectValue placeholder="Selecciona una impresora" />
-                </SelectTrigger>
-                <SelectContent>
+              {printerDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
                   {printerOptions
-                    .filter(p => p.toLowerCase().includes(printerSearch.toLowerCase()))
+                    .filter(p => p.toLowerCase().includes((printerSearch || form.printerType).toLowerCase()))
                     .map(printer => (
-                      <SelectItem key={printer} value={printer}>
+                      <button
+                        key={printer}
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, printerType: printer });
+                          setPrinterSearch("");
+                          setPrinterDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
+                        data-testid={`printer-option-${printer}`}
+                      >
                         {printer}
-                      </SelectItem>
+                      </button>
                     ))}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
             </div>
+            {form.printerType && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Seleccionado: <span className="font-semibold text-foreground">{form.printerType}</span>
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">
