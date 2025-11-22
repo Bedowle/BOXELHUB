@@ -121,11 +121,11 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
-    // Handle both client session logout and Replit Auth logout
+    // Handle both session-based logout and Replit Auth logout
     const session = req.session as any;
     
-    if (session?.userId && session?.userType === 'client') {
-      // Client session logout
+    if (session?.userId && session?.userType) {
+      // Session-based logout (for both clients and makers with email/password)
       req.session.destroy(() => {
         res.redirect("/");
       });
@@ -144,12 +144,12 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  // Support both Replit Auth (makers) and session-based auth (clients)
+  // Support both Replit Auth (makers) and session-based auth (clients and makers with email/password)
   const session = req.session as any;
   const user = req.user as any;
 
-  // Check for client session (email-based login)
-  if (session?.userId && session?.userType === 'client') {
+  // Check for session-based auth (email-based login for clients and makers)
+  if (session?.userId && session?.userType) {
     return next();
   }
 
