@@ -22,13 +22,14 @@ export default function MakerHome() {
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [hasShownProfileDialog, setHasShownProfileDialog] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
   const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
 
-  const { data: profile } = useQuery<MakerProfile>({
+  const { data: profile, isLoading: profileLoading } = useQuery<MakerProfile>({
     queryKey: ["/api/maker-profile"],
     enabled: !!user,
   });
@@ -71,10 +72,11 @@ export default function MakerHome() {
   }, [user, authLoading, toast]);
 
   useEffect(() => {
-    if (user && user.userType === "maker" && !profile) {
+    if (user && user.userType === "maker" && !profileLoading && !profile && !hasShownProfileDialog) {
       setProfileDialogOpen(true);
+      setHasShownProfileDialog(true);
     }
-  }, [user, profile]);
+  }, [user, profile, profileLoading, hasShownProfileDialog]);
 
   if (authLoading) {
     return (
