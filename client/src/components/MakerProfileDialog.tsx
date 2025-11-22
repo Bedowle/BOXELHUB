@@ -67,6 +67,7 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       maxPrintDimensionY: profile.maxPrintDimensionY || undefined,
       maxPrintDimensionZ: profile.maxPrintDimensionZ || undefined,
       hasMulticolor: profile.hasMulticolor || false,
+      maxColors: profile.maxColors || 1,
       location: profile.location || "",
       capabilities: profile.capabilities || "",
     } : registrationData ? {
@@ -77,6 +78,7 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       maxPrintDimensionY: registrationData.maxPrintDimensionY,
       maxPrintDimensionZ: registrationData.maxPrintDimensionZ,
       hasMulticolor: registrationData.hasMulticolor || false,
+      maxColors: registrationData.maxColors || 1,
       location: registrationData.addressPostalCode ? `${registrationData.addressPostalCode}` : "",
       capabilities: "",
     } : {
@@ -84,6 +86,7 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       printerType: "Ender3",
       materials: [],
       hasMulticolor: false,
+      maxColors: 1,
       location: "",
       capabilities: "",
     },
@@ -294,6 +297,31 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
                 </FormItem>
               )}
             />
+
+            {/* Max Colors - Only show if multicolor is enabled */}
+            {form.watch("hasMulticolor") && (
+              <FormField
+                control={form.control}
+                name="maxColors"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número Máximo de Colores</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number"
+                        min="2"
+                        placeholder="Ej: 4" 
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        data-testid="input-max-colors"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Location */}
             <FormField
