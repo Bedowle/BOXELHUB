@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/verify" component={VerifyEmailPage} />
 
       {/* Reset password route (accessible to all) */}
+      <Route path="/reset-password/:token" component={ResetPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
 
       {/* Auth route (accessible to all) */}
@@ -82,6 +84,19 @@ function Router() {
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Handle password reset token from URL (for email links) - do this early
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const resetToken = params.get("token");
+    const isResetPasswordPage = window.location.pathname === "/reset-password";
+    
+    if (resetToken && isResetPasswordPage) {
+      // Save token to sessionStorage for the reset-password page
+      sessionStorage.setItem("resetPasswordToken", resetToken);
+      console.log("[AppContent] Stored reset password token in sessionStorage");
+    }
+  }, []);
 
   return (
     <>

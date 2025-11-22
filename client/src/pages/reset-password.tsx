@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ResetPasswordForm from "@/components/ResetPasswordForm";
@@ -11,18 +11,39 @@ export default function ResetPasswordPage() {
   const [isExpired, setIsExpired] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tokenParam = params.get("token");
-    
-    console.log("Reset Password Page - location:", window.location.href);
-    console.log("Reset Password Page - search:", window.location.search);
-    console.log("Reset Password Page - token param:", tokenParam);
-    
+    // Get token from multiple sources
+    let tokenParam = null;
+
+    // 1. Try sessionStorage first (set by App.tsx when URL has ?token=)
+    tokenParam = sessionStorage.getItem("resetPasswordToken");
+    if (tokenParam) {
+      console.log("[ResetPassword] Token found in sessionStorage");
+      sessionStorage.removeItem("resetPasswordToken"); // Clean up after reading
+    }
+
+    // 2. Fallback to URL search params
     if (!tokenParam) {
-      console.log("No token found, marking as expired");
+      const params = new URLSearchParams(window.location.search);
+      tokenParam = params.get("token");
+      if (tokenParam) {
+        console.log("[ResetPassword] Token found in URL search");
+      }
+    }
+
+    // 3. Fallback to hash params
+    if (!tokenParam) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      tokenParam = hashParams.get("token");
+      if (tokenParam) {
+        console.log("[ResetPassword] Token found in URL hash");
+      }
+    }
+
+    console.log("[ResetPassword] Final token:", tokenParam ? "✓ Found" : "✗ Not found");
+
+    if (!tokenParam) {
       setIsExpired(true);
     } else {
-      console.log("Token found:", tokenParam);
       setToken(tokenParam);
       setIsExpired(false);
     }
@@ -43,27 +64,13 @@ export default function ResetPasswordPage() {
             <div className="space-y-4 text-center">
               <p className="text-muted-foreground">Cargando...</p>
             </div>
-          ) : isExpired || !token ? (
-            <div className="space-y-6 text-center">
-              <div className="flex justify-center">
-                <AlertCircle className="h-12 w-12 text-destructive" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Link expirado o inválido</h3>
-                <p className="text-muted-foreground text-sm mb-6">
-                  El link de recuperación ha expirado. Por favor, solicita uno nuevo.
-                </p>
-              </div>
-              <Button
-                className="w-full"
-                onClick={() => setLocation("/auth")}
-                data-testid="button-back-to-auth"
-              >
-                Volver a Login
-              </Button>
-            </div>
-          ) : (
+          ) : token ? (
             <ResetPasswordForm token={token} />
+          ) : (
+            <TokenInputForm onTokenSubmit={(inputToken) => {
+              setToken(inputToken);
+              setIsExpired(false);
+            }} onCancel={() => setLocation("/auth")} />
           )}
         </Card>
       </div>
