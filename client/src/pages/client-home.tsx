@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Upload, Package, MessageSquare, Clock, Plus } from "lucide-react";
+import { Upload, Package, Zap, TrendingUp, Plus, FileUp } from "lucide-react";
 import { UploadProjectDialog } from "@/components/UploadProjectDialog";
 import { useLocation } from "wouter";
 import type { Project } from "@shared/schema";
@@ -32,7 +32,6 @@ export default function ClientHome() {
     enabled: !!user,
   });
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -57,97 +56,96 @@ export default function ClientHome() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const activeProjects = projects?.filter(p => p.status === "active") || [];
   const canUploadMore = activeProjects.length < 10;
+  const totalBids = projects?.reduce((sum, p) => sum + p.bidCount, 0) || 0;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Package className="h-8 w-8 text-primary" />
-              <div>
-                <h1 className="text-2xl font-bold">VoxelHub</h1>
-                <p className="text-sm text-muted-foreground">Dashboard de Cliente</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                Hola, {user.firstName || user.email}
-              </span>
-              <Button variant="outline" asChild size="sm">
-                <a href="/api/logout" data-testid="button-logout">Cerrar Sesión</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
+        {/* Hero Section */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+            Bienvenido a tu Dashboard
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Gestiona tus proyectos STL y recibe ofertas de los mejores makers
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid md:grid-cols-3 gap-4 mb-10">
+          {/* Active Projects */}
+          <Card className="border-2 border-primary/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Proyectos Activos</p>
-                  <p className="text-3xl font-bold" data-testid="stat-active-projects">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Activos</span>
+                  <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+                    <Package className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {stats?.activeProjects || 0}
                   </p>
-                </div>
-                <div className="bg-primary/10 p-3 rounded-full">
-                  <Package className="h-6 w-6 text-primary" />
+                  <p className="text-xs text-muted-foreground">de 10 máximo</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+
+          {/* Pending Bids */}
+          <Card className="border-2 border-secondary/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Ofertas Pendientes</p>
-                  <p className="text-3xl font-bold" data-testid="stat-pending-bids">
-                    {stats?.pendingBids || 0}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Pendientes</span>
+                  <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
+                    <Zap className="h-5 w-5 text-secondary" />
+                  </div>
                 </div>
-                <div className="bg-secondary/10 p-3 rounded-full">
-                  <MessageSquare className="h-6 w-6 text-secondary" />
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold">{stats?.pendingBids || 0}</p>
+                  <p className="text-xs text-muted-foreground">{totalBids} total</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+
+          {/* Accepted Offers */}
+          <Card className="border-2 border-accent/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Ofertas Aceptadas</p>
-                  <p className="text-3xl font-bold" data-testid="stat-accepted-offers">
-                    {stats?.acceptedOffers || 0}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos en Ejecución</span>
+                  <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-accent" />
+                  </div>
                 </div>
-                <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-full">
-                  <Clock className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold">{stats?.acceptedOffers || 0}</p>
+                  <p className="text-xs text-muted-foreground">en progreso</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Upload Project CTA */}
-        <Card className="mb-8 border-2 border-dashed hover-elevate">
-          <CardContent className="pt-8 pb-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* CTA Card - Upload Project */}
+        <Card className="mb-12 border-2 border-dashed border-primary/30 hover-elevate bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
+          <CardContent className="pt-10 pb-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
-                <h3 className="text-xl font-semibold mb-2">Sube un nuevo proyecto</h3>
-                <p className="text-muted-foreground">
+                <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 justify-center md:justify-start">
+                  <FileUp className="h-6 w-6 text-primary" />
+                  Sube tu próximo proyecto
+                </h2>
+                <p className="text-muted-foreground max-w-sm">
                   {canUploadMore 
-                    ? `Tienes ${10 - activeProjects.length} espacios disponibles de 10 proyectos activos`
+                    ? `Tienes ${10 - activeProjects.length} espacio${10 - activeProjects.length !== 1 ? 's' : ''} disponible${10 - activeProjects.length !== 1 ? 's' : ''}`
                     : "Has alcanzado el límite de 10 proyectos activos"}
                 </p>
               </div>
@@ -155,51 +153,57 @@ export default function ClientHome() {
                 size="lg" 
                 onClick={() => setUploadDialogOpen(true)}
                 disabled={!canUploadMore}
+                className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg"
                 data-testid="button-upload-project"
               >
                 <Plus className="mr-2 h-5 w-5" />
-                Subir Proyecto STL
+                Subir Archivo STL
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Projects Grid */}
+        {/* Projects Section */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">Mis Proyectos</h2>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold">Tus Proyectos</h2>
+            <p className="text-muted-foreground mt-1">
+              {activeProjects.length} {activeProjects.length === 1 ? "proyecto" : "proyectos"} activo{activeProjects.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+
           {projectsLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ProjectCardSkeleton />
               <ProjectCardSkeleton />
               <ProjectCardSkeleton />
             </div>
-          ) : projects && projects.length > 0 ? (
+          ) : activeProjects.length === 0 ? (
+            <EmptyState
+              icon={<Package className="h-12 w-12" />}
+              title="Sin proyectos aún"
+              description="Sube tu primer archivo STL para recibir ofertas de makers profesionales"
+              action={
+                <Button onClick={() => setUploadDialogOpen(true)} size="lg" className="mt-4">
+                  Subir Proyecto
+                </Button>
+              }
+            />
+          ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
+              {activeProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
                   onClick={() => setLocation(`/project/${project.id}`)}
-                  showBidCount
                 />
               ))}
             </div>
-          ) : (
-            <EmptyState
-              icon={Upload}
-              title="No tienes proyectos aún"
-              description="Sube tu primer archivo STL y comienza a recibir ofertas de makers profesionales"
-              actionLabel="Subir Proyecto"
-              onAction={() => setUploadDialogOpen(true)}
-            />
           )}
         </div>
       </main>
 
-      <UploadProjectDialog 
-        open={uploadDialogOpen} 
-        onOpenChange={setUploadDialogOpen}
-      />
+      <UploadProjectDialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} />
     </div>
   );
 }

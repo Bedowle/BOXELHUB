@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Printer, Package, MessageSquare, DollarSign, Search, Filter } from "lucide-react";
+import { Printer, Package, DollarSign, Zap, Search, Filter, TrendingUp } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { useLocation } from "wouter";
 import type { Project, MakerProfile } from "@shared/schema";
@@ -47,7 +47,6 @@ export default function MakerHome() {
     enabled: !!user && !!profile,
   });
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -61,7 +60,6 @@ export default function MakerHome() {
     }
   }, [user, authLoading, toast]);
 
-  // Show profile setup if maker hasn't completed it
   useEffect(() => {
     if (user && user.userType === "maker" && !profile) {
       setProfileDialogOpen(true);
@@ -79,11 +77,8 @@ export default function MakerHome() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
-  // Filter projects
   const filteredProjects = projects?.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -103,175 +98,188 @@ export default function MakerHome() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Printer className="h-8 w-8 text-primary" />
-              <div>
-                <h1 className="text-2xl font-bold">VoxelHub</h1>
-                <p className="text-sm text-muted-foreground">Dashboard de Maker</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setProfileDialogOpen(true)}
-                data-testid="button-edit-profile"
-              >
-                Mi Perfil
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Hola, {user.firstName || user.email}
-              </span>
-              <Button variant="outline" asChild size="sm">
-                <a href="/api/logout" data-testid="button-logout">Cerrar Sesión</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
+        {/* Hero Section */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+            Explora Proyectos
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Encuentra proyectos que coincidan con tus capacidades y haz ofertas competitivas
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid md:grid-cols-3 gap-4 mb-10">
+          {/* Active Bids */}
+          <Card className="border-2 border-primary/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Ofertas Activas</p>
-                  <p className="text-3xl font-bold" data-testid="stat-active-bids">
-                    {stats?.activeBids || 0}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {canBidMore ? `Puedes hacer ${2 - activeBidsCount} más` : "Límite alcanzado"}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
+                  <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
                 </div>
-                <div className="bg-primary/10 p-3 rounded-full">
-                  <MessageSquare className="h-6 w-6 text-primary" />
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold">{stats?.activeBids || 0}</p>
+                  <p className="text-xs text-muted-foreground">de 2 máximo</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+
+          {/* Won Projects */}
+          <Card className="border-2 border-secondary/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Proyectos Ganados</p>
-                  <p className="text-3xl font-bold" data-testid="stat-won-projects">
-                    {stats?.wonProjects || 0}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
+                  <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
+                    <Package className="h-5 w-5 text-secondary" />
+                  </div>
                 </div>
-                <div className="bg-secondary/10 p-3 rounded-full">
-                  <Package className="h-6 w-6 text-secondary" />
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold">{stats?.wonProjects || 0}</p>
+                  <p className="text-xs text-muted-foreground">completados</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+
+          {/* Earnings */}
+          <Card className="border-2 border-accent/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Ganancias del Mes</p>
-                  <p className="text-3xl font-bold" data-testid="stat-earnings">
-                    €{stats?.earnings?.toFixed(2) || "0.00"}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-muted-foreground">Ganancias</span>
+                  <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-accent" />
+                  </div>
                 </div>
-                <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-full">
-                  <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold">${stats?.earnings || 0}</p>
+                  <p className="text-xs text-muted-foreground">en total</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="mb-8">
-          <CardContent className="pt-6 pb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="h-5 w-5 text-muted-foreground" />
-              <h3 className="font-semibold">Filtrar Proyectos</h3>
-            </div>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar proyectos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                  data-testid="input-search-projects"
-                />
+        {/* Profile Section */}
+        {profile && (
+          <Card className="mb-10 border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Printer className="h-5 w-5 text-primary" />
+                    {profile.printerType}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Materiales: {profile.materials.join(", ")} {profile.hasMulticolor && "• Multicolor"}
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setProfileDialogOpen(true)}
+                  data-testid="button-edit-profile"
+                >
+                  Editar Perfil
+                </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Search & Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder="Busca proyectos por nombre o descripción..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11"
+              data-testid="input-search-projects"
+            />
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex-1 min-w-[200px]">
               <Select value={printerTypeFilter} onValueChange={setPrinterTypeFilter}>
-                <SelectTrigger data-testid="select-printer-filter">
-                  <SelectValue placeholder="Tipo de impresora" />
+                <SelectTrigger data-testid="select-printer-type">
+                  <SelectValue placeholder="Tipo de Impresora" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las impresoras</SelectItem>
-                  <SelectItem value="FDM">FDM/FFF</SelectItem>
-                  <SelectItem value="SLA">SLA/DLP</SelectItem>
+                  <SelectItem value="Ender3">Ender 3</SelectItem>
+                  <SelectItem value="BambooLab">Bambu Lab</SelectItem>
+                  <SelectItem value="FDM">FDM</SelectItem>
+                  <SelectItem value="SLA">SLA</SelectItem>
                   <SelectItem value="SLS">SLS</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="flex-1 min-w-[200px]">
               <Select value={multicolorFilter} onValueChange={setMulticolorFilter}>
-                <SelectTrigger data-testid="select-multicolor-filter">
+                <SelectTrigger data-testid="select-multicolor">
                   <SelectValue placeholder="Multicolor" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="yes">Multicolor</SelectItem>
-                  <SelectItem value="no">Un solo color</SelectItem>
+                  <SelectItem value="all">Cualquiera</SelectItem>
+                  <SelectItem value="yes">Con multicolor</SelectItem>
+                  <SelectItem value="no">Sin multicolor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Projects Grid */}
+        {/* Projects Section */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Proyectos Disponibles</h2>
-            <p className="text-sm text-muted-foreground">
-              {filteredProjects?.length || 0} proyectos encontrados
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold flex items-center gap-2">
+              <TrendingUp className="h-8 w-8 text-primary" />
+              Proyectos Disponibles
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              {filteredProjects?.length || 0} proyecto{(filteredProjects?.length || 0) !== 1 ? "s" : ""} coincide{(filteredProjects?.length || 0) !== 1 ? "n" : ""}
             </p>
           </div>
+
           {projectsLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ProjectCardSkeleton />
               <ProjectCardSkeleton />
               <ProjectCardSkeleton />
             </div>
-          ) : filteredProjects && filteredProjects.length > 0 ? (
+          ) : (filteredProjects?.length || 0) === 0 ? (
+            <EmptyState
+              icon={<Search className="h-12 w-12" />}
+              title="Sin resultados"
+              description={
+                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all"
+                  ? "Intenta ajustar tus filtros de búsqueda"
+                  : "No hay proyectos disponibles en este momento"
+              }
+            />
+          ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => (
+              {filteredProjects?.map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
                   onClick={() => setLocation(`/project/${project.id}`)}
-                  showBidCount={false}
                 />
               ))}
             </div>
-          ) : (
-            <EmptyState
-              icon={Package}
-              title="No hay proyectos disponibles"
-              description={searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" 
-                ? "Intenta ajustar los filtros para ver más proyectos"
-                : "No hay proyectos activos en este momento. Vuelve más tarde para ver nuevas oportunidades"}
-            />
           )}
         </div>
       </main>
 
-      <MakerProfileDialog 
-        open={profileDialogOpen} 
-        onOpenChange={setProfileDialogOpen}
-        profile={profile}
-      />
+      <MakerProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
     </div>
   );
 }

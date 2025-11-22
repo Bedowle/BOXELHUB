@@ -2,134 +2,170 @@
 
 ## Design Approach
 
-**Reference-Based: Marketplace Pattern**
-Drawing inspiration from established P2P marketplaces like Fiverr, Upwork, and Airbnb, with emphasis on trust-building, clear user flows, and professional service presentation. The design prioritizes functional clarity for two distinct user journeys (Client vs Maker) while maintaining visual consistency.
+**Reference-Based: Premium Marketplace Pattern**
+Inspired by Linear's refined aesthetics, Stripe's professional restraint, and Airbnb's trust-building patterns. Emphasizes premium feel through generous whitespace, sophisticated typography hierarchy, and polished micro-interactions. Designed for dark mode with light mode compatibility.
 
 ## Core Design Principles
 
-1. **Dual Identity System**: Clear visual differentiation between Client and Maker experiences while maintaining brand coherence
-2. **Trust & Transparency**: Prominent display of ratings, reviews, maker credentials, and project details
-3. **Action-Oriented**: Every screen guides users toward the next logical step in the marketplace flow
-4. **Real-Time Feedback**: Visual indicators for live updates, new bids, and project status changes
+1. **Premium Positioning**: Elevated visual language distinguishing VoxelHub from commodity marketplaces
+2. **Dual User Flows**: Client interface emphasizes control and overview; Maker interface optimizes for discovery and competitive positioning
+3. **Real-Time Clarity**: Live bid updates with subtle animations, instant status changes
+4. **Dark-First Design**: Optimized for dark mode with carefully calibrated contrast and accent usage
 
 ## Typography
 
-**Font Family**: Inter (Google Fonts)
-- **Headings**: Inter Bold (700) - 32px to 48px for page titles, 24px for section headers
-- **Subheadings**: Inter Semibold (600) - 18px to 20px
-- **Body**: Inter Regular (400) - 16px for primary text, 14px for metadata
-- **Small Text**: Inter Medium (500) - 12px for labels, tags, timestamps
+**Font Family**: Inter (Google Fonts CDN)
 
-**Hierarchy**: Clear size differentiation between heading levels. Maintain 1.5 line-height for body text, 1.2 for headings.
+**Hierarchy**:
+- **Display Headlines**: Inter Bold (700) - 48px to 56px, tight leading (1.1), used sparingly for hero sections
+- **Page Titles**: Inter Semibold (600) - 32px to 40px, leading 1.2
+- **Section Headers**: Inter Semibold (600) - 24px, leading 1.3
+- **Card Titles**: Inter Medium (500) - 18px to 20px
+- **Body Text**: Inter Regular (400) - 16px, leading 1.6 for optimal readability
+- **Metadata**: Inter Medium (500) - 14px for timestamps, counts, labels
+- **Micro Copy**: Inter Medium (500) - 12px for badges, tooltips
+
+**Letter Spacing**: Slight negative tracking (-0.02em) on headlines for premium feel, normal spacing for body text.
+
+## Color System
+
+### Core Palette
+**Primary Gradient**: Blue (#3B82F6) to Purple (#8B5CF6) - used for hero backgrounds, primary CTAs, status highlights
+**VoxelHub Orange**: #FF6B35 - logo accent, notification badges, active states
+**Success Green**: #10B981 - accepted bids, completed states
+**Warning Yellow**: #F59E0B - pending actions
+**Error Red**: #EF4444 - rejected bids, destructive actions
+
+### Dark Mode (Primary)
+- **Background Base**: #0A0E1A (deep navy-black)
+- **Surface Level 1**: #141B2E (cards, elevated elements)
+- **Surface Level 2**: #1E2842 (hover states, nested cards)
+- **Border Subtle**: #2D3A5C
+- **Border Emphasis**: #3D4E73
+- **Text Primary**: #F8FAFC (high contrast)
+- **Text Secondary**: #94A3B8 (metadata, descriptions)
+- **Text Tertiary**: #64748B (disabled, placeholders)
+
+### Light Mode (Secondary)
+- **Background Base**: #FFFFFF
+- **Surface Level 1**: #F8FAFC
+- **Surface Level 2**: #F1F5F9
+- **Border Subtle**: #E2E8F0
+- **Border Emphasis**: #CBD5E1
+- **Text Primary**: #0F172A
+- **Text Secondary**: #475569
+- **Text Tertiary**: #94A3B8
 
 ## Layout System
 
-**Spacing Primitives**: Consistent use of Tailwind units: 2, 4, 6, 8, 12, 16, 20, 24 for padding/margins. Use px-4 to px-8 for container padding, py-6 to py-12 for section spacing, gap-4 to gap-6 for grid gaps.
+**Spacing Scale**: Tailwind units 2, 4, 6, 8, 12, 16, 20, 24, 32, 40
+
+**Application**:
+- Component padding: p-6 to p-8
+- Section spacing: py-12 to py-24
+- Card gaps: gap-6
+- Content max-width: max-w-7xl for dashboards, max-w-6xl for landing
+- Form containers: max-w-2xl for focused input flows
 
 **Grid Patterns**:
-- Project cards: 3-column grid on desktop (lg:grid-cols-3), 2-column on tablet (md:grid-cols-2), single column on mobile
-- Bid listings: Full-width cards with internal multi-column layout for bid details
-- Dashboard sections: 12-column flexible grid for complex layouts
-
-**Container Max-Widths**: max-w-7xl for main content areas, max-w-4xl for forms and focused content, max-w-2xl for chat interfaces
+- Project cards: lg:grid-cols-3 md:grid-cols-2 grid-cols-1 with gap-6
+- Dashboard metrics: grid-cols-3 for stat cards with gap-4
+- Bid listings: Full-width with internal flex layout
 
 ## Component Library
 
 ### Navigation
-- **Navbar**: Fixed top navigation with logo left, user menu right. Different CTAs for logged-in vs logged-out states. Client sees "Upload Project", Maker sees "Browse Projects"
-- **Sidebar Navigation** (Dashboards): Vertical navigation for Client/Maker dashboards with icons and labels. Active state with accent background and bold text
+**Main Navbar**: Fixed top, backdrop-blur-lg with 80% background opacity. Logo left (with orange accent), centered navigation links (Browse/Dashboard/Messages), user menu right with profile avatar. Client navbar shows "Upload Project" in gradient button; Maker shows "Browse Projects".
 
-### Cards & Lists
-- **Project Card**: Image placeholder/preview area, title, material badge, bid count, timestamp. Hover elevates with shadow transition
-- **Bid Card**: Horizontal layout with maker avatar left, details center (price, delivery time, rating), action buttons right. Border on hover, subtle background change
-- **Maker Profile Card**: Avatar, name, rating stars, printer capabilities as icon badges, "View Profile" CTA
+**Dashboard Sidebar**: Persistent left sidebar (w-64) with icon+label navigation. Active route gets gradient background with orange left border indicator.
+
+### Cards & Containers
+**Project Card**: Rounded-xl with border, hover elevates (translate-y-1) with enhanced border glow. Internal layout: thumbnail area (16:9 aspect ratio), title (truncate after 2 lines), material badge, bid count with pulsing indicator for new bids, timestamp.
+
+**Bid Card**: Horizontal flex layout with maker avatar (48px rounded-full), name/rating stack, price in large semibold type, delivery time with clock icon, message preview (max 2 lines), action buttons aligned right.
+
+**Stat Cards**: Dashboard metrics in cards with gradient borders. Large number display (32px bold), label below (14px text-secondary), subtle icon top-right.
 
 ### Forms & Inputs
-- **Project Upload Form**: Multi-step wizard with progress indicator. File upload with drag-drop zone, text inputs for specifications, material selector dropdown
-- **Bid Submission Form**: Price input (with currency symbol), delivery time selector, message textarea
-- **Maker Registration**: Extended form with sections for business info, equipment details, material inventory checkboxes
+**Styling**: All inputs with rounded-lg, border-emphasis in default state, focus ring-2 ring-blue-500 with ring-offset-2. Labels use text-secondary, positioned above input with mb-2.
 
-### Status Indicators
-- **Project Status Badges**: Pill-shaped badges with rounded-full class. "Active" in blue, "Reserved" in green, "Completed" in gray
-- **Real-time Indicators**: Pulsing dot animation for new bids, notification badges with count
-- **Filter Chips**: Removable filter tags with x icon for active filters
+**Project Upload**: Multi-step with progress dots indicator at top. Drag-drop zone with dashed border, file icon, "Drop STL file or click to upload" centered text.
 
-### Actions & CTAs
-- **Primary Actions**: Full-width or prominent buttons in blue-600 with white text, rounded-lg
-- **Secondary Actions**: Border buttons in blue-600 with transparent background
-- **Destructive Actions**: Red-600 for reject/delete actions
+**Bid Form**: Price input with large text (24px), currency symbol prefix. Delivery time slider with day markers. Message textarea with character count.
+
+### Status & Feedback
+**Badges**: Pill-shaped with px-3 py-1, rounded-full. Use gradient backgrounds for active states, solid for completed/inactive.
+
+**Real-time Updates**: Notification dot (w-2 h-2) with animate-pulse on new bids. Toast notifications slide in from top-right with auto-dismiss.
+
+**Loading States**: Skeleton screens with animated gradient shimmer for cards during data fetch. Button loading shows spinner with disabled state.
 
 ### Chat Interface
-- **Message Bubbles**: Client messages aligned right with blue background, Maker messages left with gray background
-- **Input Area**: Fixed bottom textarea with send button, file attachment option
-- **Conversation List**: Sidebar showing active chats with last message preview and unread count
-
-### Data Display
-- **Rating Display**: Yellow star icons (filled/half-filled/empty) with numerical rating and review count
-- **Statistics Dashboard**: Grid of metric cards showing active projects, total bids, earnings (for makers)
-- **History Timeline**: Chronological list with date separators, project thumbnails, status indicators
-
-## Color Palette (Blue-Purple Gradient Theme)
-
-While specific color values will be defined later, the design uses a blue-to-purple gradient as the primary brand expression in hero sections and key CTAs. Additional accent colors distinguish project states and user roles.
+**Layout**: Split view with conversation list (w-80) on left, message area on right. Client messages use blue-purple gradient bubble aligned right, Maker messages use surface-level-2 aligned left. Fixed bottom input with rounded-full styling, attachment icon, send button.
 
 ## Images
 
-**Hero Section**: Large, full-width hero image showcasing 3D printed objects in use or a maker working with a 3D printer. Overlay with gradient (blue-to-purple) at 60% opacity for text legibility. Hero CTAs have blurred backgrounds for visibility.
+### Hero Section
+**Large Hero Image**: Full-width background image (min-h-[600px]) showing high-quality 3D printed object or maker workspace in action. Apply gradient overlay (blue-purple diagonal gradient at 70% opacity). Centered content with headline, subheadline, dual CTAs with blurred glass-morphism backgrounds.
 
-**Project Cards**: Each project displays a placeholder thumbnail (320x240) representing the STL file or final print preview.
+### Project Thumbnails
+Consistent 16:9 aspect ratio for all project preview images. Placeholder shows wireframe 3D object icon in center with gradient background. Display in project cards at 320px width.
 
-**Maker Profiles**: Avatar images for makers, optional background image for profile headers.
+### Maker Avatars
+Circular profile images (48px in cards, 96px in profiles). Default avatar uses gradient background with initials in white.
 
-**Empty States**: Friendly illustrations for "No projects yet", "No bids received" screens.
+### Empty States
+Custom illustrations for "No projects yet" and "No bids" screens using blue-purple gradient elements. Center-aligned with supporting text and CTA below.
 
-## Landing Page Structure
+## Client vs Maker Interface Distinctions
 
-1. **Hero Section**: Full-width with background image, gradient overlay, centered headline ("Connect with expert 3D printing makers"), dual CTAs ("I need printing" / "I'm a maker")
-2. **How It Works**: 3-column section with icons explaining the process for clients
-3. **Active Projects Preview**: Grid showcasing 6 recent projects to demonstrate activity
-4. **For Makers Section**: Benefits of joining as a maker, registration CTA
-5. **Trust Indicators**: Stats (makers registered, projects completed, average rating)
-6. **Footer**: Multi-column with links, contact info, social media
+### Client Dashboard
+- **Metric Priority**: Active Projects (gradient card), Total Spent, Average Rating Received
+- **Primary CTA**: "Upload New Project" in hero card with gradient background
+- **Project Grid**: Shows client's projects with bid count badges, latest bid preview
+- **Quick Actions**: View bids, accept offer, message maker
+- **Accent Color**: Leans toward blue in gradients
 
-## Dashboard Layouts
+### Maker Dashboard  
+- **Metric Priority**: Active Bids (gradient card), Won Projects, Total Earnings
+- **Primary CTA**: "Browse Projects" with filters visible
+- **Project Feed**: Recommended based on capabilities, distance filters
+- **Bid Management**: Active bids section with countdown timers, edit/withdraw options
+- **Accent Color**: Leans toward purple in gradients
 
-**Client Dashboard**:
-- Top metrics bar: Active Projects, Pending Bids, Accepted Offers
-- "Upload New Project" prominent CTA card
-- Grid of active projects with real-time bid count updates
-- Quick access to history and settings in sidebar
+## Animations
 
-**Maker Dashboard**:
-- Top metrics: Active Bids, Won Projects, Earnings This Month
-- "Browse Projects" CTA
-- Active bids section (max 2 shown prominently)
-- Recommended projects feed based on maker capabilities
-- Sidebar with profile completion status and quick actions
+**Minimal & Purposeful**:
+- Card hover: translate-y-1 with border glow (duration-200)
+- New bid: Scale pulse on notification badge (duration-500)
+- Page transitions: Fade opacity only (duration-150)
+- Skeleton loading: Shimmer gradient animation
+- Button states: Scale-95 on active press
 
-## Interactions & Animations
+## Responsive Behavior
 
-**Minimal, Purposeful Animations**:
-- Card hover: Subtle translate-y and shadow increase (transition-all duration-300)
-- New bid notification: Brief scale animation on notification badge
-- Project state change: Fade transition when moving between Active/Reserved
-- Form submission: Loading spinner replaces button text
-- Chat messages: Slide-in animation for new messages
+**Mobile (< 768px)**: 
+- Collapse sidebar to bottom tab bar
+- Single column grids
+- Stack bid card elements vertically
+- Simplified navbar with hamburger menu
 
-**No Complex Animations**: Avoid page transitions, scroll-triggered effects, or decorative animations that distract from core functionality.
+**Tablet (768px - 1024px)**:
+- Two-column project grids
+- Condensed sidebar (icons only with tooltips)
+- Horizontal bid cards maintained
+
+**Desktop (≥ 1024px)**:
+- Full multi-column layouts
+- Persistent sidebars
+- Expanded chat interface
 
 ## Accessibility
 
-- Consistent focus states with ring-2 ring-blue-500 for all interactive elements
-- Form labels always visible, not placeholder-dependent
-- ARIA labels for icon-only buttons
-- Sufficient color contrast ratios throughout
-- Keyboard navigation support for all critical flows
+- All interactive elements have visible focus states with ring-2 ring-orange-500
+- Form labels always visible above inputs
+- ARIA labels for icon-only actions
+- Color contrast meets WCAG AAA in dark mode, AA in light mode
+- Keyboard shortcuts for primary actions (Upload: Cmd+U, Browse: Cmd+B)
 
-## Responsive Breakpoints
-
-- **Mobile (default)**: Single column layouts, stacked navigation, full-width cards
-- **Tablet (md: 768px)**: 2-column grids, expanded navigation, side-by-side forms
-- **Desktop (lg: 1024px)**: Full multi-column layouts, persistent sidebars, 3-column grids
-
-This marketplace prioritizes clarity, trust, and efficiency—enabling clients to quickly find makers and makers to efficiently submit competitive bids. Every design decision supports the core flow: upload project → receive bids → accept offer.
+This premium marketplace establishes VoxelHub as the sophisticated choice for serious 3D printing collaboration, with dark mode excellence and real-time marketplace dynamics.
