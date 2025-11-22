@@ -6,6 +6,7 @@ import LoginForm from "@/components/LoginForm";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
@@ -30,9 +31,26 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">
-      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <Card className="shadow-2xl border-0 p-8 min-h-full">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-primary/50 backdrop-blur-md border-b border-primary/20 p-4">
+        <div className="max-w-md mx-auto">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToLanding}
+            className="flex items-center gap-2"
+            data-testid="button-back-to-landing"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Atrás
+          </Button>
+        </div>
+      </header>
+
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <Card className="shadow-2xl border-0 p-8 min-h-full">
           {/* LOGIN MODE */}
           {view === "login" && (
             <div className="space-y-6">
@@ -59,14 +77,6 @@ export default function AuthPage() {
                 </button>
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleBackToLanding}
-                data-testid="button-back-to-landing-login"
-              >
-                ← Atrás
-              </Button>
             </div>
           )}
 
@@ -149,7 +159,8 @@ export default function AuthPage() {
               <ForgotPasswordForm onBack={() => setView("login")} />
             </div>
           )}
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );

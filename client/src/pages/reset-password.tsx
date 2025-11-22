@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ResetPasswordForm from "@/components/ResetPasswordForm";
 import TokenInputForm from "@/components/TokenInputForm";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function ResetPasswordPage() {
   const [location, setLocation] = useLocation();
@@ -51,10 +51,27 @@ export default function ResetPasswordPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0 p-8">
-          <div className="text-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-50 bg-primary/50 backdrop-blur-md border-b border-primary/20 p-4">
+        <div className="max-w-md mx-auto">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/auth")}
+            className="flex items-center gap-2"
+            data-testid="button-back-reset-password"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Atrás
+          </Button>
+        </div>
+      </header>
+
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Card className="shadow-2xl border-0 p-8">
+            <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-2">Recuperar Contraseña</h2>
             <p className="text-muted-foreground text-sm">
               Ingresa tu nueva contraseña
@@ -73,7 +90,8 @@ export default function ResetPasswordPage() {
               setIsExpired(false);
             }} onCancel={() => setLocation("/auth")} />
           )}
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
