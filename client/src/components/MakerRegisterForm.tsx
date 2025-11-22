@@ -96,6 +96,8 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submit - Current step:", step);
+    
     if (step === 1) {
       if (!form.firstName || !form.lastName || !form.username || !form.email || !form.password || !form.confirmPassword) {
         toast({
@@ -113,6 +115,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
         });
         return;
       }
+      console.log("Moving to step 2");
       setStep(2);
     } else if (step === 2) {
       if (!form.maxDimensionX || !form.maxDimensionY || !form.maxDimensionZ) {
@@ -123,8 +126,10 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
         });
         return;
       }
+      console.log("Moving to step 3");
       setStep(3);
     } else {
+      console.log("Submitting registration");
       mutation.mutate();
     }
   };
