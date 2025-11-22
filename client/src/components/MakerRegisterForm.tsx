@@ -29,7 +29,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
     password: "",
     confirmPassword: "",
     location: "",
-    printerType: "FDM",
+    printerType: "Ender3",
     hasMulticolor: false,
     maxColors: "1",
     maxDimensionX: "",
@@ -37,12 +37,21 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
     maxDimensionZ: "",
   });
   const [step, setStep] = useState(1);
+  const [printerSearch, setPrinterSearch] = useState("");
   const { toast } = useToast();
+
+  const printerOptions = ["Ender3", "BambooLab"];
 
   const mutation = useMutation({
     mutationFn: async () => {
       if (form.password !== form.confirmPassword) {
         throw new Error("Las contraseñas no coinciden");
+      }
+      if (!form.email) {
+        throw new Error("El email es requerido");
+      }
+      if (!form.password) {
+        throw new Error("La contraseña es requerida");
       }
 
       const res = await apiRequest("POST", "/api/auth/register", {
@@ -84,10 +93,6 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
     });
   };
 
-  const handleSelectChange = (value: string) => {
-    setForm({ ...form, printerType: value });
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
@@ -114,6 +119,9 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
       mutation.mutate();
     }
   };
+
+  const passwordsMatch = form.password === form.confirmPassword;
+  const passwordError = form.password && form.confirmPassword && !passwordsMatch;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -160,20 +168,36 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
             <Label htmlFor="printerType" className="text-sm">
               Tipo de Impresora
             </Label>
-            <Select value={form.printerType} onValueChange={handleSelectChange}>
-              <SelectTrigger data-testid="select-printer-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="FDM">FDM (Filamento)</SelectItem>
-                <SelectItem value="SLA">SLA (Resina)</SelectItem>
-                <SelectItem value="SLS">SLS (Polvos)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <Input
+                placeholder="Buscar impresora..."
+                value={printerSearch}
+                onChange={(e) => setPrinterSearch(e.target.value)}
+                className="mb-2"
+                data-testid="input-printer-search"
+              />
+              <Select value={form.printerType} onValueChange={(value) => {
+                setForm({ ...form, printerType: value });
+                setPrinterSearch("");
+              }}>
+                <SelectTrigger data-testid="select-printer-type">
+                  <SelectValue placeholder="Selecciona una impresora" />
+                </SelectTrigger>
+                <SelectContent>
+                  {printerOptions
+                    .filter(p => p.toLowerCase().includes(printerSearch.toLowerCase()))
+                    .map(printer => (
+                      <SelectItem key={printer} value={printer}>
+                        {printer}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-3">
-            <Label>Dimensión Máxima de Impresión (mm)</Label>
+            <Label className="text-sm">Dimensión Máxima de Impresión (mm)</Label>
             <div className="grid grid-cols-3 gap-2">
               <Input
                 name="maxDimensionX"
@@ -261,66 +285,87 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
             <Label htmlFor="email" className="text-sm">
               Email
             </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="tu@email.com"
-              value={form.email}
-              onChange={handleChange}
-              disabled={mutation.isPending}
-              required
-              data-testid="input-maker-email"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="location" className="text-sm">
-              Ubicación (Opcional)
-            </Label>
-            <Input
-              id="location"
-              name="location"
-              placeholder="Ciudad, País"
-              value={form.location}
-              onChange={handleChange}
-              disabled={mutation.isPending}
-              data-testid="input-maker-location"
-            />
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="tu@email.com"
+                value={form.email}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                required
+                className="pl-10"
+                data-testid="input-maker-email"
+              />
+            </div>
           </div>
 
           <div>
             <Label htmlFor="password" className="text-sm">
               Contraseña
             </Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              disabled={mutation.isPending}
-              required
-              data-testid="input-maker-password"
-            />
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                required
+                className="pl-10"
+                data-testid="input-maker-password"
+              />
+            </div>
           </div>
 
           <div>
             <Label htmlFor="confirmPassword" className="text-sm">
               Confirmar Contraseña
             </Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              disabled={mutation.isPending}
-              required
-              data-testid="input-maker-confirm-password"
-            />
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                required
+                className={`pl-10 ${passwordError ? 'border-red-500' : ''}`}
+                data-testid="input-maker-confirm-password"
+              />
+            </div>
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1" data-testid="error-password-mismatch">
+                Las contraseñas no coinciden
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="location" className="text-sm">
+              Ubicación (Opcional)
+            </Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="location"
+                name="location"
+                placeholder="Ciudad, País"
+                value={form.location}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                className="pl-10"
+                data-testid="input-maker-location"
+              />
+            </div>
           </div>
 
           <div className="flex gap-2">
@@ -328,7 +373,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onBack?.()}
+              onClick={() => setStep(2)}
               disabled={mutation.isPending}
             >
               ← Atrás
@@ -336,7 +381,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
             <Button
               type="submit"
               className="flex-1"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || passwordError}
               data-testid="button-maker-register-submit"
             >
               {mutation.isPending ? "Registrando..." : "Registrarse"}
