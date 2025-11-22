@@ -120,6 +120,26 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
         console.log("Link: /verify?token=" + response.verificationToken);
         console.log("==========================");
       }
+      
+      // Save registration data to sessionStorage for MakerProfileDialog to use
+      sessionStorage.setItem("makerRegistrationData", JSON.stringify({
+        printerType: form.printerType,
+        hasMulticolor: form.hasMulticolor,
+        maxColors: form.hasMulticolor ? parseInt(form.maxColors) : 1,
+        maxPrintDimensionX: form.maxDimensionX ? parseInt(form.maxDimensionX) : undefined,
+        maxPrintDimensionY: form.maxDimensionY ? parseInt(form.maxDimensionY) : undefined,
+        maxPrintDimensionZ: form.maxDimensionZ ? parseInt(form.maxDimensionZ) : undefined,
+        addressPostalCode: form.addressPostalCode,
+        addressStreetType: form.addressStreetType,
+        addressStreetName: form.addressStreetName,
+        addressNumber: form.addressNumber,
+        addressFloor: form.addressFloor,
+        addressDoor: form.addressDoor,
+        addressLatitude: form.addressLatitude,
+        addressLongitude: form.addressLongitude,
+        addressRadius: form.addressRadius,
+      }));
+      
       setTimeout(() => onSuccess?.(), 3000);
     },
     onError: (error: any) => {

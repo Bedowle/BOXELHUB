@@ -45,6 +45,18 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Get registration data from sessionStorage if available
+  const getRegistrationData = () => {
+    try {
+      const data = sessionStorage.getItem("makerRegistrationData");
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const registrationData = getRegistrationData();
+
   const form = useForm<InsertMakerProfile>({
     resolver: zodResolver(insertMakerProfileSchema),
     defaultValues: profile ? {
@@ -57,6 +69,16 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
       hasMulticolor: profile.hasMulticolor || false,
       location: profile.location || "",
       capabilities: profile.capabilities || "",
+    } : registrationData ? {
+      userId: user?.id || "",
+      printerType: registrationData.printerType || "FDM",
+      materials: [],
+      maxPrintDimensionX: registrationData.maxPrintDimensionX,
+      maxPrintDimensionY: registrationData.maxPrintDimensionY,
+      maxPrintDimensionZ: registrationData.maxPrintDimensionZ,
+      hasMulticolor: registrationData.hasMulticolor || false,
+      location: registrationData.addressPostalCode ? `${registrationData.addressPostalCode}` : "",
+      capabilities: "",
     } : {
       userId: user?.id || "",
       printerType: "FDM",
