@@ -42,6 +42,15 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   location: varchar("location"), // Approximate location (both client & maker)
+  // For clients: optional address fields similar to makers
+  hasLocation: boolean("has_location").default(false),
+  addressPostalCode: varchar("address_postal_code"),
+  addressLatitude: varchar("address_latitude"),
+  addressLongitude: varchar("address_longitude"),
+  addressRadius: integer("address_radius"), // in km
+  // Policy acceptance
+  acceptedTermsAt: timestamp("accepted_terms_at"),
+  acceptedPrivacyAt: timestamp("accepted_privacy_at"),
   isEmailVerified: boolean("is_email_verified").default(false).notNull(),
   userType: userTypeEnum("user_type"),
   authProvider: varchar("auth_provider"), // 'email', 'google', 'facebook', 'apple', 'replit'
