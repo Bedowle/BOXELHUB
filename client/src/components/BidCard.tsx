@@ -85,7 +85,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, isClient, isPendin
             </div>
 
             {/* Actions */}
-            {isClient && bid.status === "pending" && (
+            {isClient && (bid.status === "pending" || bid.status === undefined || bid.status === null) && (
               <div className="flex gap-2">
                 <Button
                   variant="outline"

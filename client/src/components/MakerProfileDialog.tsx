@@ -81,6 +81,8 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
         description: "Tu perfil de maker ha sido guardado exitosamente",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/maker-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/available"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       onOpenChange(false);
     },
     onError: (error: Error) => {

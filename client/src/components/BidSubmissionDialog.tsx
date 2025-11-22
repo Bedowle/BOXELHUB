@@ -138,13 +138,14 @@ export function BidSubmissionDialog({ open, onOpenChange, projectId }: BidSubmis
                     <Input
                       type="number"
                       min="1"
+                      max="30"
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                       data-testid="input-delivery-days"
                     />
                   </FormControl>
                   <FormDescription>
-                    ¿Cuántos días necesitas para completar el proyecto?
+                    ¿Cuántos días necesitas para completar el proyecto? (máximo 30 días)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
