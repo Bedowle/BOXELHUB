@@ -43,7 +43,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       }
     },
     enabled: !!otherUserId,
-    refetchInterval: 3000, // Refresh every 3 seconds for simplicity
+    refetchInterval: 1000, // Refresh every 1 second for real-time updates
   });
 
   const sendMutation = useMutation({
