@@ -32,19 +32,24 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table (mandatory for Replit Auth, extended with userType)
+// User storage table (extended for full registration)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
+  username: varchar("username").unique(),
+  passwordHash: varchar("password_hash"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  location: varchar("location"), // Approximate location (both client & maker)
+  isEmailVerified: boolean("is_email_verified").default(false).notNull(),
   userType: userTypeEnum("user_type"),
+  authProvider: varchar("auth_provider"), // 'email', 'google', 'facebook', 'apple', 'replit'
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Maker profiles table
+// Maker profiles table (extended with printer details)
 export const makerProfiles = pgTable("maker_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
@@ -54,7 +59,8 @@ export const makerProfiles = pgTable("maker_profiles", {
   maxPrintDimensionY: integer("max_print_dimension_y"),
   maxPrintDimensionZ: integer("max_print_dimension_z"),
   hasMulticolor: boolean("has_multicolor").default(false).notNull(),
-  location: varchar("location"),
+  maxColors: integer("max_colors"),
+  location: varchar("location"), // Maker's location for delivery
   capabilities: text("capabilities"),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   totalReviews: integer("total_reviews").default(0).notNull(),
@@ -111,7 +117,20 @@ export const messages = pgTable("messages", {
   index("idx_messages_project_id").on(table.projectId),
 ]);
 
-// Reviews table (NEW)
+// Email verification tokens table
+export const emailTokens = pgTable("email_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").notNull(),
+  token: varchar("token").unique().notNull(),
+  type: varchar("type").notNull(), // 'verification', 'magic_link', 'password_reset'
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_email_tokens_email").on(table.email),
+  index("idx_email_tokens_token").on(table.token),
+]);
+
+// Reviews table
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),

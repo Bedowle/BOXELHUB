@@ -76,38 +76,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Client login (email only, no Replit Auth needed)
-  app.post('/api/auth/client-login', async (req: any, res) => {
+  // Registration endpoint
+  app.post('/api/auth/register', async (req: any, res) => {
     try {
-      const { email } = req.body;
-      
-      if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        return res.status(400).json({ message: "Invalid email" });
+      const { email, password, username, firstName, lastName, userType, location, makerProfile } = req.body;
+
+      if (!email || !password || !username) {
+        return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // Get or create user with type 'client'
-      let user = await storage.getUserByEmail(email);
-      
-      if (!user) {
-        user = await storage.upsertUser({
-          email,
-          userType: 'client',
-          firstName: undefined,
-          lastName: undefined,
-          profileImageUrl: undefined,
+      // Register user
+      const user = await storage.registerUser({
+        email,
+        password,
+        username,
+        firstName,
+        lastName,
+        userType,
+        location,
+      });
+
+      // If maker, create profile
+      if (userType === 'maker' && makerProfile) {
+        await storage.upsertMakerProfile({
+          userId: user.id,
+          ...makerProfile,
         });
-      } else if (user.userType !== 'client') {
-        return res.status(400).json({ message: "This email is registered as a maker account" });
       }
 
-      // Create session for client
+      // Create session
       req.session.userId = user.id;
-      req.session.userType = 'client';
-      req.session.email = email;
+      req.session.userType = userType;
+
+      res.json({ message: "Registration successful", user });
+    } catch (error: any) {
+      console.error("Error with registration:", error);
+      res.status(400).json({ message: error.message || "Registration failed" });
+    }
+  });
+
+  // Login endpoint
+  app.post('/api/auth/login', async (req: any, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password required" });
+      }
+
+      const user = await storage.loginUser(email, password);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Create session
+      req.session.userId = user.id;
+      req.session.userType = user.userType;
 
       res.json({ message: "Login successful", user });
     } catch (error) {
-      console.error("Error with client login:", error);
+      console.error("Error with login:", error);
       res.status(500).json({ message: "Login failed" });
     }
   });

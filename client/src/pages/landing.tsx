@@ -1,17 +1,10 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Upload, Users, CheckCircle, Star, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import ClientLoginPage from "./client-login";
 
 export default function Landing() {
-  const [showClientLogin, setShowClientLogin] = useState(false);
   const [, setLocation] = useLocation();
-
-  if (showClientLogin) {
-    return <ClientLoginPage onSuccess={() => setLocation("/")} />;
-  }
 
   return (
     <div className="min-h-screen">
@@ -31,18 +24,18 @@ export default function Landing() {
                 size="lg" 
                 variant="outline"
                 className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
-                onClick={() => setShowClientLogin(true)}
+                onClick={() => setLocation("/auth")}
                 data-testid="button-client-cta"
               >
                 Necesito Impresión
               </Button>
               <Button 
-                asChild 
                 size="lg" 
                 className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90"
+                onClick={() => setLocation("/auth")}
                 data-testid="button-maker-cta"
               >
-                <a href="/api/login">Soy Maker</a>
+                Soy Maker
               </Button>
             </div>
           </div>

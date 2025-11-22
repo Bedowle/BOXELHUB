@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { eq, and, desc, sql, count, ne, avg } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import {
   users,
   makerProfiles,
@@ -26,6 +27,8 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  registerUser(data: { email: string; password: string; username: string; firstName?: string; lastName?: string; userType: string; location?: string }): Promise<User>;
+  loginUser(email: string, password: string): Promise<User | null>;
 
   // Maker profile operations
   getMakerProfile(userId: string): Promise<MakerProfile | undefined>;
@@ -80,6 +83,46 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async registerUser(data: { email: string; password: string; username: string; firstName?: string; lastName?: string; userType: string; location?: string }): Promise<User> {
+    // Check if user exists
+    const existing = await this.getUserByEmail(data.email);
+    if (existing) {
+      throw new Error("Email already registered");
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    // Create user
+    const [user] = await db.insert(users).values({
+      email: data.email,
+      username: data.username,
+      passwordHash,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      location: data.location,
+      userType: data.userType as any,
+      authProvider: 'email',
+      isEmailVerified: true, // Auto-verify for now (remove this when adding email verification)
+    }).returning();
+
+    return user;
+  }
+
+  async loginUser(email: string, password: string): Promise<User | null> {
+    const user = await this.getUserByEmail(email);
+    if (!user || !user.passwordHash) {
+      return null;
+    }
+
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      return null;
+    }
+
     return user;
   }
 

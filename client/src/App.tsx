@@ -8,6 +8,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { UserTypeSelector } from "@/components/UserTypeSelector";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
+import AuthPage from "@/pages/auth-page";
 import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import ProjectDetails from "@/pages/project-details";
@@ -40,6 +41,9 @@ function Router() {
         </Route>
       ) : (
         <>
+          {/* Auth route (accessible to all) */}
+          <Route path="/auth" component={AuthPage} />
+
           {/* Client Routes */}
           {isClient && (
             <>
