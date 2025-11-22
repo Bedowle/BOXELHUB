@@ -31,6 +31,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
   const sendMutation = useMutation({
     mutationFn: async (content: string) => {
       await apiRequest("POST", "/api/messages", {
+        senderId: currentUserId,
         receiverId: otherUserId,
         content,
         projectId: undefined,
