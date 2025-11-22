@@ -5,7 +5,6 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertProjectSchema, insertBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema } from "@shared/schema";
 import { getAuthenticatedUserId } from "./replitAuth";
-import { sendVerificationEmail } from "./email";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -107,9 +106,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create email verification token
       const verificationToken = await storage.createEmailToken(email, 'verification');
+      const verificationLink = `${process.env.PUBLIC_URL || 'http://localhost:5000'}/verify?token=${verificationToken}`;
       
-      // Send verification email
-      await sendVerificationEmail(email, verificationToken);
+      // Log the verification link (in production, send via email)
+      console.log(`\n=== EMAIL VERIFICATION ===`);
+      console.log(`To: ${email}`);
+      console.log(`Verification Link: ${verificationLink}`);
+      console.log(`Token: ${verificationToken}`);
+      console.log(`========================\n`);
 
       // Create session (user can use app while waiting for email verification)
       req.session.userId = user.id;
