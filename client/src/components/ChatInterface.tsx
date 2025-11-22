@@ -68,6 +68,23 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
     },
   });
 
+  // Mark messages as read when chat is opened/mounted
+  useEffect(() => {
+    const markAsRead = async () => {
+      try {
+        await apiRequest("PUT", `/api/messages/mark-read/${otherUserId}`, {});
+        // Invalidate conversations to update unread counts
+        queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
+      } catch (error) {
+        console.error("Failed to mark messages as read:", error);
+      }
+    };
+
+    if (otherUserId) {
+      markAsRead();
+    }
+  }, [otherUserId, queryClient]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };

@@ -800,6 +800,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/messages/mark-read/:senderId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { senderId } = req.params;
+      await storage.markMessagesAsRead(userId, senderId);
+      res.json({ message: "Messages marked as read" });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
   // Review routes
   app.get('/api/makers/:id/reviews', isAuthenticated, async (req: any, res) => {
     try {
