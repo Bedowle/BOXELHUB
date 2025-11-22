@@ -96,10 +96,18 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
-      if (!form.firstName || !form.lastName || !form.username) {
+      if (!form.firstName || !form.lastName || !form.username || !form.email || !form.password || !form.confirmPassword) {
         toast({
           title: "Error",
           description: "Por favor completa todos los campos",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (form.password !== form.confirmPassword) {
+        toast({
+          title: "Error",
+          description: "Las contraseñas no coinciden",
           variant: "destructive",
         });
         return;
@@ -158,7 +166,63 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
             data-testid="input-maker-username"
           />
 
-          <Button type="submit" className="w-full" disabled={mutation.isPending}>
+          <div>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                name="email"
+                type="email"
+                placeholder="tu@email.com"
+                value={form.email}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                required
+                className="pl-10"
+                data-testid="input-maker-email"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                name="password"
+                type="password"
+                placeholder="Contraseña"
+                value={form.password}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                required
+                className="pl-10"
+                data-testid="input-maker-password"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirmar contraseña"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                disabled={mutation.isPending}
+                required
+                className={`pl-10 ${passwordError ? 'border-red-500' : ''}`}
+                data-testid="input-maker-confirm-password"
+              />
+            </div>
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1" data-testid="error-password-mismatch">
+                Las contraseñas no coinciden
+              </p>
+            )}
+          </div>
+
+          <Button type="submit" className="w-full" disabled={mutation.isPending || passwordError}>
             Continuar
           </Button>
         </>
@@ -282,74 +346,6 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
       ) : (
         <>
           <div>
-            <Label htmlFor="email" className="text-sm">
-              Email
-            </Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="tu@email.com"
-                value={form.email}
-                onChange={handleChange}
-                disabled={mutation.isPending}
-                required
-                className="pl-10"
-                data-testid="input-maker-email"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="password" className="text-sm">
-              Contraseña
-            </Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                disabled={mutation.isPending}
-                required
-                className="pl-10"
-                data-testid="input-maker-password"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="confirmPassword" className="text-sm">
-              Confirmar Contraseña
-            </Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                disabled={mutation.isPending}
-                required
-                className={`pl-10 ${passwordError ? 'border-red-500' : ''}`}
-                data-testid="input-maker-confirm-password"
-              />
-            </div>
-            {passwordError && (
-              <p className="text-red-500 text-sm mt-1" data-testid="error-password-mismatch">
-                Las contraseñas no coinciden
-              </p>
-            )}
-          </div>
-
-          <div>
             <Label htmlFor="location" className="text-sm">
               Ubicación (Opcional)
             </Label>
@@ -381,7 +377,7 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
             <Button
               type="submit"
               className="flex-1"
-              disabled={mutation.isPending || passwordError}
+              disabled={mutation.isPending}
               data-testid="button-maker-register-submit"
             >
               {mutation.isPending ? "Registrando..." : "Registrarse"}
