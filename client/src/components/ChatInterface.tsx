@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send } from "lucide-react";
+import { Send, Check, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Message, User } from "@shared/schema";
@@ -145,9 +145,20 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
                 }`}
               >
                 <p className="text-sm">{msg.content}</p>
-                <p className="text-xs mt-1 opacity-70">
-                  {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <p className="text-xs opacity-70">
+                    {format(new Date(msg.createdAt), "HH:mm", { locale: es })}
+                  </p>
+                  {msg.senderId === currentUserId && (
+                    <div className={`h-4 w-4 flex items-center justify-center ${msg.isRead ? "text-primary-foreground" : "text-primary-foreground/70"}`}>
+                      {msg.isRead ? (
+                        <CheckCheck className="h-4 w-4" data-testid={`ticks-read-${msg.id}`} />
+                      ) : (
+                        <CheckCheck className="h-4 w-4 opacity-60" data-testid={`ticks-received-${msg.id}`} />
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))
