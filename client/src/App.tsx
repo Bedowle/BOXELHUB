@@ -16,6 +16,7 @@ import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import ProjectDetails from "@/pages/project-details";
 import ChatPage from "@/pages/chat-page";
+import ChatsPage from "@/pages/chats";
 import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
 
@@ -56,10 +57,14 @@ function Router() {
         </Route>
       ) : (
         <>
+          {/* Shared Routes */}
+          <Route path="/chats" component={ChatsPage} />
+
           {/* Client Routes */}
           {isClient && (
             <>
               <Route path="/" component={ClientHome} />
+              <Route path="/client" component={ClientHome} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
             </>
@@ -69,6 +74,7 @@ function Router() {
           {isMaker && (
             <>
               <Route path="/" component={MakerHome} />
+              <Route path="/maker" component={MakerHome} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
             </>

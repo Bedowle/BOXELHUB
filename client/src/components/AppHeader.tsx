@@ -1,11 +1,19 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, MessageCircle } from "lucide-react";
 
 export default function AppHeader() {
   const [, setLocation] = useLocation();
   const { user, isClient, isMaker } = useAuth();
+
+  const { data: conversations } = useQuery<Array<{ userId: string; unreadCount: number }>>({
+    queryKey: ["/api/my-conversations-full"],
+    enabled: !!user,
+  });
+
+  const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -26,7 +34,22 @@ export default function AppHeader() {
             </div>
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLocation("/chats")}
+              className="relative"
+              data-testid="button-chats"
+            >
+              <MessageCircle className="h-5 w-5" />
+              {totalUnread > 0 && (
+                <div className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold">
+                  {totalUnread > 9 ? "9+" : totalUnread}
+                </div>
+              )}
+            </Button>
+
             <span className="text-sm text-muted-foreground hidden sm:block">
               {isClient ? "Cliente" : isMaker ? "Maker" : ""}
             </span>

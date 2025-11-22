@@ -55,6 +55,7 @@ export interface IStorage {
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
   getConversationsForUser(userId: string): Promise<Array<{ userId: string; lastMessage?: Message }>>;
+  getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; lastMessage?: Message; unreadCount: number }>>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(userId: string, senderId: string): Promise<void>;
 
@@ -343,6 +344,43 @@ export class DatabaseStorage implements IStorage {
     return Array.from(conversationMap.entries()).map(([partnerId, lastMsg]) => ({
       userId: partnerId,
       lastMessage: lastMsg,
+    }));
+  }
+
+  async getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; lastMessage?: Message; unreadCount: number }>> {
+    // Get all messages where user is sender or receiver
+    const allMessages = await db
+      .select()
+      .from(messages)
+      .where(
+        sql`${messages.senderId} = ${userId} OR ${messages.receiverId} = ${userId}`
+      )
+      .orderBy(desc(messages.createdAt));
+
+    // Group messages by conversation partner and count unread
+    const conversationMap = new Map<string, { lastMsg: Message; unreadCount: number }>();
+    
+    for (const msg of allMessages) {
+      const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      if (!conversationMap.has(partnerId)) {
+        conversationMap.set(partnerId, { 
+          lastMsg: msg, 
+          unreadCount: msg.receiverId === userId && !msg.isRead ? 1 : 0 
+        });
+      } else {
+        // Increment unread count for messages from this partner that are unread
+        const existing = conversationMap.get(partnerId)!;
+        if (msg.receiverId === userId && !msg.isRead) {
+          existing.unreadCount++;
+        }
+      }
+    }
+
+    // Convert to array
+    return Array.from(conversationMap.entries()).map(([partnerId, data]) => ({
+      userId: partnerId,
+      lastMessage: data.lastMsg,
+      unreadCount: data.unreadCount,
     }));
   }
 
