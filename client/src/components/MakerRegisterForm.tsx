@@ -234,20 +234,35 @@ export default function MakerRegisterForm({ onSuccess, onBack }: MakerRegisterFo
         </>
       ) : step === 2 ? (
         <>
-          <div>
-            <Label htmlFor="printerType" className="text-sm font-semibold block mb-2">
+          <div className="space-y-2">
+            <Label htmlFor="printerType" className="text-sm font-semibold block">
               Tipo de Impresora
             </Label>
-            <Select value={form.printerType} onValueChange={(value) => setForm({ ...form, printerType: value })}>
+            <Input
+              placeholder="Busca tu impresora (Ender3, BambooLab)..."
+              value={printerSearch}
+              onChange={(e) => setPrinterSearch(e.target.value)}
+              className="w-full mb-2"
+              data-testid="input-printer-search"
+            />
+            <Select 
+              value={form.printerType} 
+              onValueChange={(value) => {
+                setForm({ ...form, printerType: value });
+                setPrinterSearch("");
+              }}
+            >
               <SelectTrigger id="printerType" data-testid="select-printer-type">
                 <SelectValue placeholder="Selecciona una impresora..." />
               </SelectTrigger>
               <SelectContent>
-                {printerOptions.map((printer) => (
-                  <SelectItem key={printer} value={printer} data-testid={`printer-option-${printer}`}>
-                    {printer}
-                  </SelectItem>
-                ))}
+                {printerOptions
+                  .filter((p) => p.toLowerCase().includes(printerSearch.toLowerCase()))
+                  .map((printer) => (
+                    <SelectItem key={printer} value={printer} data-testid={`printer-option-${printer}`}>
+                      {printer}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
