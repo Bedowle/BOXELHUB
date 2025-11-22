@@ -8,6 +8,19 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b">
+        <div className="container mx-auto px-4 py-4 max-w-7xl bg-[#5d46b6]">
+          <button 
+            onClick={() => setLocation("/")}
+            className="text-orange-500 font-bold text-2xl"
+            data-testid="button-logo-landing"
+          >
+            VoxelHub ◼
+          </button>
+        </div>
+      </header>
+
       {/* Hero Section with Gradient */}
       <section className="relative bg-gradient-to-br from-primary via-secondary to-primary py-24 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
