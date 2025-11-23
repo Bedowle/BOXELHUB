@@ -761,11 +761,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const { projectId, otherUserId } = req.query;
       
-      if (!otherUserId || !projectId) {
-        return res.status(400).json({ message: "otherUserId and projectId are required" });
+      if (!otherUserId) {
+        return res.status(400).json({ message: "otherUserId is required" });
       }
 
-      const messages = await storage.getMessagesByProject(userId, projectId as string, otherUserId as string);
+      // If projectId is provided, use project-based messages; otherwise use general messages
+      const messages = projectId 
+        ? await storage.getMessagesByProject(userId, projectId as string, otherUserId as string)
+        : await storage.getMessages(userId, otherUserId as string);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -800,19 +803,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/messages/mark-read/:projectId/:otherUserId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/messages/mark-read/:otherUserId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      const { projectId, otherUserId } = req.params;
+      const { otherUserId } = req.params;
+      const { projectId } = req.query;
       
-      if (!projectId || !otherUserId) {
-        return res.status(400).json({ message: "projectId and otherUserId are required" });
+      if (!otherUserId) {
+        return res.status(400).json({ message: "otherUserId is required" });
       }
 
-      await storage.markMessagesAsReadByProject(userId, projectId, otherUserId);
+      // If projectId is provided, mark messages as read by project; otherwise use general mark as read
+      if (projectId) {
+        await storage.markMessagesAsReadByProject(userId, projectId as string, otherUserId);
+      } else {
+        await storage.markMessagesAsRead(userId, otherUserId);
+      }
       res.json({ success: true });
     } catch (error: any) {
       console.error("Error marking messages as read:", error);

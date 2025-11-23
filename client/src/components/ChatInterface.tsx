@@ -82,7 +82,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
       markReadTimeoutRef.current = setTimeout(async () => {
         try {
           const url = projectId 
-            ? `/api/messages/mark-read/${projectId}/${otherUserId}`
+            ? `/api/messages/mark-read/${otherUserId}?projectId=${encodeURIComponent(projectId)}`
             : `/api/messages/mark-read/${otherUserId}`;
           await apiRequest("PUT", url, {});
           // Invalidate conversations to remove unread badges
