@@ -323,6 +323,8 @@ export default function MakerHome() {
                       <ProjectCard
                         project={project}
                         onClick={() => {
+                          // Save the current page before navigating
+                          localStorage.setItem('previousProjectPath', '/maker');
                           if (hasMyBid) {
                             setLocation(`/maker/project/${project.id}`);
                           } else {

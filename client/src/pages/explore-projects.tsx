@@ -272,6 +272,8 @@ export default function ExploreProjects() {
                     key={project.id}
                     project={project}
                     onClick={() => {
+                      // Save the current page before navigating
+                      localStorage.setItem('previousProjectPath', '/maker/explore');
                       if (hasMyBid) {
                         setLocation(`/maker/project/${project.id}`);
                       } else {
