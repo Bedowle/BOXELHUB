@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Check, CheckCheck } from "lucide-react";
+import { Send, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Message, User } from "@shared/schema";
@@ -19,17 +19,15 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInterfaceProps) {
   const [messageText, setMessageText] = useState("");
-  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const markedAsReadRef = useRef<Set<string>>(new Set());
+  const markReadCalledRef = useRef(false);
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", otherUserId],
     queryFn: async () => {
       try {
-        // Manually construct URL with query parameter
         const url = `/api/messages?otherUserId=${encodeURIComponent(otherUserId)}`;
         const response = await fetch(url, {
           headers: {
@@ -45,13 +43,8 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       }
     },
     enabled: !!otherUserId,
-    refetchInterval: 500, // Refresh every 500ms for near real-time updates while chat is visible
+    refetchInterval: 500, // Poll every 500ms for read status updates
   });
-
-  // Update local messages when fetched messages change
-  useEffect(() => {
-    setLocalMessages(messages);
-  }, [messages]);
 
   const sendMutation = useMutation({
     mutationFn: async (content: string) => {
@@ -75,52 +68,28 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
     },
   });
 
-  // Mark messages as read when chat is opened/mounted
+  // Mark messages as read ONLY when chat is opened, not on every update
   useEffect(() => {
-    const markAsRead = async () => {
-      try {
-        await apiRequest("PUT", `/api/messages/mark-read/${otherUserId}`, {});
-        // Invalidate conversations to update unread counts
-        queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
-      } catch (error) {
-        console.error("Failed to mark messages as read:", error);
-      }
-    };
+    if (otherUserId && !markReadCalledRef.current) {
+      markReadCalledRef.current = true;
+      
+      const markAsRead = async () => {
+        try {
+          await apiRequest("PUT", `/api/messages/mark-read/${otherUserId}`, {});
+          queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
+        } catch (error) {
+          console.error("Failed to mark messages as read:", error);
+        }
+      };
 
-    if (otherUserId) {
       markAsRead();
     }
   }, [otherUserId, queryClient]);
 
-  // Use Intersection Observer to mark messages as read when visible
+  // Reset markReadCalledRef when chat changes
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const messageId = entry.target.getAttribute("data-message-id");
-          const senderId = entry.target.getAttribute("data-sender-id");
-          
-          // Mark as read if it's a message from currentUser and not already marked
-          if (messageId && senderId === currentUserId && !markedAsReadRef.current.has(messageId)) {
-            markedAsReadRef.current.add(messageId);
-            
-            // Update local state optimistically
-            setLocalMessages(prev =>
-              prev.map(msg =>
-                msg.id === messageId ? { ...msg, isRead: true } : msg
-              )
-            );
-          }
-        }
-      });
-    }, { threshold: 0.5 });
-
-    // Observe all message elements
-    const messageElements = document.querySelectorAll("[data-message-id]");
-    messageElements.forEach(el => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [currentUserId, localMessages]);
+    markReadCalledRef.current = false;
+  }, [otherUserId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -128,7 +97,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
 
   useEffect(() => {
     scrollToBottom();
-  }, [localMessages]);
+  }, [messages]);
 
   const handleSend = () => {
     if (messageText.trim()) {
@@ -162,19 +131,17 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {localMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <p>No hay mensajes aún</p>
             <p className="text-sm">¡Inicia la conversación!</p>
           </div>
         ) : (
-          localMessages.map((msg) => (
+          messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}
               data-testid={`message-bubble-${msg.id}`}
-              data-message-id={msg.id}
-              data-sender-id={msg.senderId}
             >
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
