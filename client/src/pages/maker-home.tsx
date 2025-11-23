@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,9 +20,9 @@ import type { Project, MakerProfile, User } from "@shared/schema";
 export default function MakerHome() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
-  const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
 
+  // Save the current home page URL when this component mounts
   useEffect(() => {
     localStorage.setItem('previousProjectPath', '/maker');
   }, []);
@@ -75,15 +74,16 @@ export default function MakerHome() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "Unauthorized",
-        description: "Signing in...",
+        title: "No autorizado",
+        description: "Iniciando sesión...",
         variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
     }
-  }, [user, authLoading, toast, t]);
+  }, [user, authLoading, toast]);
+
 
   useEffect(() => {
     const handleDeliveryConfirmed = (event: Event) => {
@@ -105,7 +105,7 @@ export default function MakerHome() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Cargando...</p>
         </div>
       </div>
     );
@@ -116,12 +116,14 @@ export default function MakerHome() {
   const projectsLoading = availableLoading || myBidsLoading;
   const allProjects = [...(availableProjects || []), ...(myBidProjects?.filter(p => p.status !== "active") || [])];
   
+  // Get project IDs that have been delivered
   const deliveredProjectIds = new Set(
     myBids
       ?.filter(bid => bid.deliveryConfirmedAt)
       .map(bid => bid.projectId) || []
   );
   
+  // Filter out completed/delivered projects and get random ones
   const availableFilteredProjects = allProjects.filter(project => {
     if (project.status === "completed" || deliveredProjectIds.has(project.id)) {
       return false;
@@ -129,6 +131,7 @@ export default function MakerHome() {
     return true;
   });
 
+  // Get 3 random projects for recommendations
   const getRandomProjects = (projects: typeof allProjects, count: number) => {
     const shuffled = [...projects].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
@@ -146,8 +149,8 @@ export default function MakerHome() {
     },
     onSuccess: () => {
       toast({
-        title: "Rating sent",
-        description: "Your rating has been recorded.",
+        title: "Calificación enviada",
+        description: "Tu calificación ha sido registrada.",
       });
       setRatingDialogOpen(false);
       setDeliveryToRate(null);
@@ -156,7 +159,7 @@ export default function MakerHome() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Could not send rating",
+        description: error.message || "No se pudo enviar la calificación",
         variant: "destructive",
       });
     },
@@ -164,8 +167,10 @@ export default function MakerHome() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
+          {/* Profile Section - Clickable */}
           {profile && (
             <Card 
               className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10 hover-elevate cursor-pointer"
@@ -180,7 +185,7 @@ export default function MakerHome() {
                       {profile.printerType}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Materials: {profile.materials.join(", ")} {profile.hasMulticolor && "• Multicolor"}
+                      Materiales: {profile.materials.join(", ")} {profile.hasMulticolor && "• Multicolor"}
                     </p>
                   </div>
                   <Button 
@@ -191,7 +196,7 @@ export default function MakerHome() {
                     }}
                     data-testid="button-view-profile"
                   >
-                    View Profile
+                    Ver Perfil
                   </Button>
                 </div>
               </CardContent>
@@ -201,16 +206,19 @@ export default function MakerHome() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            Your Maker Dashboard
+            Tu Panel de Maker
           </h1>
           <p className="text-lg text-muted-foreground">
-            Manage your bids, ongoing projects and completed deliveries
+            Gestiona tus ofertas, proyectos en progreso y entregas completadas
           </p>
         </div>
 
+        {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
+          {/* Active Bids */}
           <Card 
             className="border-2 border-primary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/maker/bids")}
@@ -219,23 +227,20 @@ export default function MakerHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Active Bids
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Zap className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.activeBids || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    in progress
-                  </p>
+                  <p className="text-xs text-muted-foreground">en progreso</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Won Projects */}
           <Card 
             className="border-2 border-secondary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/maker/won-projects")}
@@ -244,23 +249,20 @@ export default function MakerHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Won Projects
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.wonProjects || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    completed
-                  </p>
+                  <p className="text-xs text-muted-foreground">completados</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Completed Projects */}
           <Card 
             className="border-2 border-accent/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/maker/completed-projects")}
@@ -269,32 +271,29 @@ export default function MakerHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Completed Projects
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
                   <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.completedProjects || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    delivered
-                  </p>
+                  <p className="text-xs text-muted-foreground">entregados</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Recommended Projects Section */}
         <div className="mb-12">
           <div className="mb-8">
             <h2 className="text-3xl font-bold flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-primary" />
-              Recommended Projects
+              Proyectos Recomendados
             </h2>
             <p className="text-muted-foreground mt-2">
-              Projects selected for you
+              Proyectos seleccionados para ti
             </p>
           </div>
 
@@ -307,8 +306,8 @@ export default function MakerHome() {
           ) : (filteredProjects?.length || 0) === 0 ? (
             <EmptyState
               icon={Search}
-              title="No projects available"
-              description="No projects available at this time"
+              title="Sin proyectos disponibles"
+              description="No hay proyectos disponibles en este momento"
             />
           ) : (
             <div className="relative">
@@ -324,6 +323,7 @@ export default function MakerHome() {
                       <ProjectCard
                         project={project}
                         onClick={() => {
+                          // Save the current page before navigating
                           localStorage.setItem('previousProjectPath', '/maker');
                           if (hasMyBid) {
                             setLocation(`/maker/project/${project.id}`);
@@ -342,6 +342,7 @@ export default function MakerHome() {
             </div>
           )}
 
+          {/* Fade & Button Section - Always visible */}
           <div className="relative -mt-48 pt-0">
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
             <div className="flex justify-center">
@@ -351,7 +352,7 @@ export default function MakerHome() {
                 className="px-8"
                 data-testid="button-explore-more-projects"
               >
-                Explore More Projects
+                Explora Más Proyectos
               </Button>
             </div>
           </div>

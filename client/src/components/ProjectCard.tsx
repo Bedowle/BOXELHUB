@@ -1,4 +1,3 @@
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadge";

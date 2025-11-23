@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ export default function ClientProjectsActive() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { language } = useLanguage();
 
   const { data: projects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-projects"],
@@ -23,8 +21,8 @@ export default function ClientProjectsActive() {
 
   if (!authLoading && !user) {
     toast({
-      title: "Unauthorized",
-      description: "Signing in...",
+      title: "No autorizado",
+      description: "Iniciando sesión...",
       variant: "destructive",
     });
     setTimeout(() => {
@@ -38,7 +36,7 @@ export default function ClientProjectsActive() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Cargando...</p>
         </div>
       </div>
     );
@@ -55,21 +53,21 @@ export default function ClientProjectsActive() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/auth")}
+            onClick={() => setLocation("/")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            Volver
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-12">
-          <h1 className="text-3xl font-bold mb-2">Active & In Progress Projects</h1>
+          <h1 className="text-3xl font-bold mb-2">Proyectos Activos y en Ejecución</h1>
           <p className="text-muted-foreground">
-            {allProjects.length} project{allProjects.length !== 1 ? "s" : ""}
+            {allProjects.length} proyecto{allProjects.length !== 1 ? "s" : ""}
           </p>
         </div>
 
@@ -84,7 +82,7 @@ export default function ClientProjectsActive() {
             {/* Active Projects Section */}
             {activeProjects.length > 0 && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-6 text-primary">Active Projects</h2>
+                <h2 className="text-2xl font-bold mb-6 text-primary">Proyectos Activos</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {activeProjects.map((project) => (
                     <ProjectCard
@@ -100,7 +98,7 @@ export default function ClientProjectsActive() {
             {/* In Progress Projects Section */}
             {inProgressProjects.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold mb-6 text-secondary">In Progress Projects</h2>
+                <h2 className="text-2xl font-bold mb-6 text-secondary">Proyectos en Ejecución</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {inProgressProjects.map((project) => (
                     <ProjectCard
@@ -116,8 +114,8 @@ export default function ClientProjectsActive() {
         ) : (
           <EmptyState
             icon={Package}
-            title="No active projects"
-            description="All your projects have been completed"
+            title="Sin proyectos activos"
+            description="Todos tus proyectos han sido completados"
           />
         )}
       </main>

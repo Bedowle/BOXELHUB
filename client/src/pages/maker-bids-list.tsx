@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,8 @@ export default function MakerBidsList() {
 
   if (!authLoading && !user) {
     toast({
+      title: "No autorizado",
+      description: "Iniciando sesión...",
       variant: "destructive",
     });
     setTimeout(() => {
@@ -56,11 +57,12 @@ export default function MakerBidsList() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/auth")}
+            onClick={() => setLocation("/maker")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
+            Volver
           </Button>
         </div>
       </header>

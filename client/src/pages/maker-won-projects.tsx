@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -125,7 +124,7 @@ export default function MakerWonProjects() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/auth")}
+            onClick={() => setLocation("/maker")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >

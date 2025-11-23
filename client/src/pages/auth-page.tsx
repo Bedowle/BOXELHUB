@@ -1,4 +1,3 @@
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import ClientRegisterForm from "@/components/ClientRegisterForm";
@@ -28,7 +27,7 @@ export default function AuthPage() {
   }, []);
 
   const handleBackToLanding = () => {
-    setLocation("/auth");
+    setLocation("/");
   };
 
   return (
@@ -63,14 +62,14 @@ export default function AuthPage() {
               </div>
 
               <LoginForm 
-                onSuccess={() => setLocation("/auth")}
+                onSuccess={() => setLocation("/")}
                 onForgotPassword={() => setView("forgot-password")}
               />
 
               <div className="text-center text-sm">
                 ¿No tienes cuenta?{" "}
                 <button
-                  onClick={() => setLocation("/auth")}
+                  onClick={() => setLocation("/auth?type=client")}
                   className="text-primary font-semibold hover:underline"
                   data-testid="button-switch-register"
                 >
@@ -97,7 +96,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold">Registro - Cliente</h2>
               </div>
               <ClientRegisterForm
-                onSuccess={() => setLocation("/auth")}
+                onSuccess={() => setLocation("/")}
                 onBack={handleBackToLanding}
               />
               
@@ -130,7 +129,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold">Registro - Maker</h2>
               </div>
               <MakerRegisterForm
-                onSuccess={() => setLocation("/auth")}
+                onSuccess={() => setLocation("/")}
                 onBack={handleBackToLanding}
               />
               

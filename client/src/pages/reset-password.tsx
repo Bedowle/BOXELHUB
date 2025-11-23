@@ -1,4 +1,3 @@
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useEffect, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { Card } from "@/components/ui/card";

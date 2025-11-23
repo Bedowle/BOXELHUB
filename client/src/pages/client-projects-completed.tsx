@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ export default function ClientProjectsCompleted() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { language } = useLanguage();
 
   const { data: projects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-projects"],
@@ -23,8 +21,8 @@ export default function ClientProjectsCompleted() {
 
   if (!authLoading && !user) {
     toast({
-      title: "Unauthorized",
-      description: "Signing in...",
+      title: "No autorizado",
+      description: "Iniciando sesión...",
       variant: "destructive",
     });
     setTimeout(() => {
@@ -38,7 +36,7 @@ export default function ClientProjectsCompleted() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Cargando...</p>
         </div>
       </div>
     );
@@ -53,12 +51,12 @@ export default function ClientProjectsCompleted() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/auth")}
+            onClick={() => setLocation("/")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            Volver
           </Button>
         </div>
       </header>
@@ -67,10 +65,10 @@ export default function ClientProjectsCompleted() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="h-8 w-8 text-green-500" />
-            <h1 className="text-3xl font-bold">Completed Projects</h1>
+            <h1 className="text-3xl font-bold">Proyectos Terminados</h1>
           </div>
           <p className="text-muted-foreground">
-            {completedProjects.length} project{completedProjects.length !== 1 ? "s" : ""} completed
+            {completedProjects.length} proyecto{completedProjects.length !== 1 ? "s" : ""} completado{completedProjects.length !== 1 ? "s" : ""}
           </p>
         </div>
 
@@ -93,8 +91,8 @@ export default function ClientProjectsCompleted() {
         ) : (
           <EmptyState
             icon={CheckCircle}
-            title="No completed projects yet"
-            description="Your projects will appear here once deliveries are completed"
+            title="Sin proyectos completados aún"
+            description="Tus proyectos aparecerán aquí una vez que se completen las entregas"
           />
         )}
       </main>

@@ -1,4 +1,3 @@
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { ChatInterface } from "@/components/ChatInterface";
 import {
   Dialog,

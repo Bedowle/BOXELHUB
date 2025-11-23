@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +41,7 @@ export default function MakerProfile() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => setLocation("/auth")}
+          onClick={() => setLocation("/maker")}
           className="mb-6"
           data-testid="button-back"
         >
@@ -94,7 +93,7 @@ export default function MakerProfile() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setLocation("/auth")}
+                      onClick={() => setLocation("/maker/reviews")}
                       data-testid="button-view-reviews"
                     >
                       {profile.totalReviews || 0} reseña{(profile.totalReviews || 0) !== 1 ? "s" : ""}

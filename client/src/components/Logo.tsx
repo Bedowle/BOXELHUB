@@ -1,4 +1,3 @@
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useLocation } from "wouter";
 
 export default function Logo() {

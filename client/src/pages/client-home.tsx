@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,9 +15,9 @@ import type { Project } from "@shared/schema";
 export default function ClientHome() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
-  const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
 
+  // Save the current home page URL when this component mounts
   useEffect(() => {
     localStorage.setItem('previousProjectPath', '/');
   }, []);
@@ -42,22 +41,22 @@ export default function ClientHome() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "Unauthorized",
-        description: "Redirecting to login...",
+        title: "No autorizado",
+        description: "Iniciando sesión...",
         variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
     }
-  }, [user, authLoading, toast, t]);
+  }, [user, authLoading, toast]);
 
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Cargando...</p>
         </div>
       </div>
     );
@@ -73,6 +72,7 @@ export default function ClientHome() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-3 max-w-7xl">
           <Button
@@ -83,22 +83,25 @@ export default function ClientHome() {
             data-testid="button-back-to-home"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            Volver
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            Welcome to Your Dashboard
+            Bienvenido a tu Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">
-            Manage your STL projects and receive offers from the best makers
+            Gestiona tus proyectos STL y recibe ofertas de los mejores makers
           </p>
         </div>
 
+        {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
+          {/* Projects in Progress */}
           <Card 
             className="border-2 border-primary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/projects-active")}
@@ -107,9 +110,7 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Projects in Progress
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos en Progreso</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
@@ -118,14 +119,13 @@ export default function ClientHome() {
                   <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {activeProjects.length + inProgressProjects.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    active and accepted
-                  </p>
+                  <p className="text-xs text-muted-foreground">activos y aceptados</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Pending Bids */}
           <Card 
             className="border-2 border-secondary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/bids")}
@@ -134,9 +134,7 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Pending Bids
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Pendientes</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
                     <Zap className="h-5 w-5 text-secondary" />
                   </div>
@@ -149,6 +147,7 @@ export default function ClientHome() {
             </CardContent>
           </Card>
 
+          {/* Completed Projects */}
           <Card 
             className="border-2 border-green-500/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/projects-completed")}
@@ -157,36 +156,33 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Completed Projects
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Terminados</span>
                   <div className="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{completedProjects.length}</p>
-                  <p className="text-xs text-muted-foreground">
-                    completed
-                  </p>
+                  <p className="text-xs text-muted-foreground">completados</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* CTA Card - Upload Project */}
         <Card className="mb-12 border-2 border-dashed border-primary/30 hover-elevate bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
           <CardContent className="pt-10 pb-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 justify-center md:justify-start">
                   <FileUp className="h-6 w-6 text-primary" />
-                  Upload your next project
+                  Sube tu próximo proyecto
                 </h2>
                 <p className="text-muted-foreground max-w-sm">
                   {canUploadMore 
-                    ? `You have ${10 - activeProjects.length} space${10 - activeProjects.length !== 1 ? 's' : ''} available`
-                    : "You have reached the limit of 10 active projects"}
+                    ? `Tienes ${10 - activeProjects.length} espacio${10 - activeProjects.length !== 1 ? 's' : ''} disponible${10 - activeProjects.length !== 1 ? 's' : ''}`
+                    : "Has alcanzado el límite de 10 proyectos activos"}
                 </p>
               </div>
               <Button 
@@ -197,19 +193,18 @@ export default function ClientHome() {
                 data-testid="button-upload-project"
               >
                 <Plus className="mr-2 h-5 w-5" />
-                Upload STL File
+                Subir Archivo STL
               </Button>
             </div>
           </CardContent>
         </Card>
 
+        {/* Projects Section */}
         <div>
           <div className="mb-8">
-            <h2 className="text-3xl font-bold">
-              Your Projects
-            </h2>
+            <h2 className="text-3xl font-bold">Tus Proyectos</h2>
             <p className="text-muted-foreground mt-1">
-              {activeProjects.length} active project{activeProjects.length !== 1 ? "s" : ""}
+              {activeProjects.length} {activeProjects.length === 1 ? "proyecto" : "proyectos"} activo{activeProjects.length !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -222,9 +217,9 @@ export default function ClientHome() {
           ) : activeProjects.length === 0 ? (
             <EmptyState
               icon={Package}
-              title="No projects yet"
-              description="Upload your first STL file to receive offers from professional makers"
-              actionLabel="Upload Project"
+              title="Sin proyectos aún"
+              description="Sube tu primer archivo STL para recibir ofertas de makers profesionales"
+              actionLabel="Subir Proyecto"
               onAction={() => setUploadDialogOpen(true)}
             />
           ) : (

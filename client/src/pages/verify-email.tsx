@@ -1,4 +1,3 @@
-import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -37,7 +36,7 @@ export default function VerifyEmailPage() {
         });
 
         // Redirect to home after 2 seconds
-        setTimeout(() => setLocation("/auth"), 2000);
+        setTimeout(() => setLocation("/"), 2000);
       } catch (error: any) {
         setStatus("error");
         setMessage(error.message || "Error al verificar el email");
