@@ -63,7 +63,7 @@ export default function ChatsPage() {
   if (!user) return null;
 
   const filteredConversations = conversations?.filter(conv =>
-    (conv.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase())
+    ((conv.user?.username || conv.user?.email) || "").toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
@@ -150,11 +150,11 @@ export default function ChatsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <h3 className="font-semibold text-lg">
-                          {conv.project?.name && conv.user?.email 
-                            ? `${conv.project.name} con ${conv.user.email}`
+                          {conv.project?.name && (conv.user?.username || conv.user?.email)
+                            ? `${conv.project.name} con ${conv.user.username || conv.user.email}`
                             : conv.project?.name
                             ? conv.project.name
-                            : conv.user?.email || "Usuario"}
+                            : (conv.user?.username || conv.user?.email) || "Usuario"}
                         </h3>
                         {conv.unreadCount > 0 && (
                           <div className="flex items-center justify-center h-6 w-6 rounded-full bg-red-500 text-white text-xs font-bold">

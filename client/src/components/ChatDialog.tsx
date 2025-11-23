@@ -25,7 +25,7 @@ export function ChatDialog({ open, onOpenChange, otherUser, currentUserId, proje
             <div>
               <DialogTitle>Conversación</DialogTitle>
               <DialogDescription>
-                Comunícate directamente con {otherUser?.email || "el usuario"}
+                Comunícate directamente con {otherUser?.username || otherUser?.email || "el usuario"}
               </DialogDescription>
             </div>
             <button
