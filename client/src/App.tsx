@@ -15,6 +15,7 @@ import AuthPage from "@/pages/auth-page";
 import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import ProjectDetails from "@/pages/project-details";
+import MakerProjectDetails from "@/pages/maker-project-details";
 import ChatPage from "@/pages/chat-page";
 import ChatsPage from "@/pages/chats";
 import VerifyEmailPage from "@/pages/verify-email";
@@ -75,6 +76,7 @@ function Router() {
             <>
               <Route path="/" component={MakerHome} />
               <Route path="/maker" component={MakerHome} />
+              <Route path="/maker/project/:id" component={MakerProjectDetails} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
             </>

@@ -38,6 +38,7 @@ export interface IStorage {
   // Project operations
   getProject(id: string): Promise<Project | undefined>;
   getProjects(filters?: { userId?: string; status?: string }): Promise<Project[]>;
+  getProjectsWithMakerBids(makerId: string): Promise<Project[]>;
   createProject(project: InsertProject): Promise<Project>;
   updateProjectStatus(id: string, status: Project["status"]): Promise<void>;
   getProjectCount(userId: string): Promise<number>;
@@ -230,6 +231,26 @@ export class DatabaseStorage implements IStorage {
       .from(projects)
       .where(and(eq(projects.userId, userId), eq(projects.status, "active")));
     return result.count;
+  }
+
+  async getProjectsWithMakerBids(makerId: string): Promise<Project[]> {
+    // Get all projects where this maker has bids
+    const projectIds = await db
+      .select({ projectId: bids.projectId })
+      .from(bids)
+      .where(eq(bids.makerId, makerId));
+
+    if (projectIds.length === 0) return [];
+
+    const projectIdList = projectIds.map(p => p.projectId);
+    
+    const results = await db
+      .select()
+      .from(projects)
+      .where(sql`${projects.id} IN (${sql.join(projectIdList)})`)
+      .orderBy(desc(projects.createdAt));
+    
+    return results;
   }
 
   // Bid operations

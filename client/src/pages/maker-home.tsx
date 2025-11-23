@@ -34,8 +34,13 @@ export default function MakerHome() {
     enabled: !!user,
   });
 
-  const { data: projects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
+  const { data: availableProjects, isLoading: availableLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/available"],
+    enabled: !!user && !!profile,
+  });
+
+  const { data: myBidProjects, isLoading: myBidsLoading } = useQuery<(Project & { bidCount: number })[]>({
+    queryKey: ["/api/projects/my-bids"],
     enabled: !!user && !!profile,
   });
 
@@ -91,7 +96,10 @@ export default function MakerHome() {
 
   if (!user) return null;
 
-  const filteredProjects = projects?.filter(project => {
+  const projectsLoading = availableLoading || myBidsLoading;
+  const allProjects = [...(availableProjects || []), ...(myBidProjects?.filter(p => p.status !== "active") || [])];
+  
+  const filteredProjects = allProjects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -102,7 +110,7 @@ export default function MakerHome() {
       (multicolorFilter === "yes" && profile?.hasMulticolor) ||
       (multicolorFilter === "no" && !profile?.hasMulticolor);
 
-    return matchesSearch && matchesPrinter && matchesMulticolor && project.status === "active";
+    return matchesSearch && matchesPrinter && matchesMulticolor;
   });
 
   const activeBidsCount = myBids?.filter(bid => bid.status === "pending").length || 0;
@@ -357,13 +365,22 @@ export default function MakerHome() {
             />
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects?.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onClick={() => setLocation(`/project/${project.id}`)}
-                />
-              ))}
+              {filteredProjects?.map((project) => {
+                const hasMyBid = myBidProjects?.some(p => p.id === project.id);
+                return (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onClick={() => {
+                      if (hasMyBid) {
+                        setLocation(`/maker/project/${project.id}`);
+                      } else {
+                        setLocation(`/project/${project.id}`);
+                      }
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

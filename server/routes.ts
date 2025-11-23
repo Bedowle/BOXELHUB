@@ -303,6 +303,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/my-bids', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can access this endpoint" });
+      }
+
+      const projects = await storage.getProjectsWithMakerBids(userId);
+      
+      // Add bid count for each project
+      const projectsWithBids = await Promise.all(
+        projects.map(async (project) => {
+          const bids = await storage.getBidsByProject(project.id);
+          return { ...project, bidCount: bids.length };
+        })
+      );
+      
+      res.json(projectsWithBids);
+    } catch (error) {
+      console.error("Error fetching my projects with bids:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
   app.get('/api/projects/stats', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
@@ -336,6 +365,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching project:", error);
       res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.get('/api/projects/:id/download-stl', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const user = await storage.getUser(userId);
+      
+      // Only allow download for:
+      // 1. Project owner (client)
+      // 2. Makers who have a bid on this project
+      if (user?.userType === 'client') {
+        if (project.userId !== userId) {
+          return res.status(403).json({ message: "You can only download your own projects" });
+        }
+      } else if (user?.userType === 'maker') {
+        const bid = await storage.getMakerBidForProject(userId, id);
+        if (!bid) {
+          return res.status(403).json({ message: "You can only download projects you have bid on" });
+        }
+      } else {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      // Return the STL file name for now
+      // In a real app, this would serve the actual file
+      res.json({ 
+        fileName: project.stlFileName,
+        projectName: project.name,
+        downloadUrl: `/api/projects/${id}/stl-file/${project.stlFileName}`
+      });
+    } catch (error) {
+      console.error("Error downloading STL:", error);
+      res.status(500).json({ message: "Failed to download STL" });
     }
   });
 
