@@ -166,6 +166,33 @@ export default function MakerHome() {
     <div className="min-h-screen bg-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4 py-4 max-w-7xl">
+          {/* Profile Section */}
+          {profile && (
+            <Card className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Printer className="h-5 w-5 text-primary" />
+                      {profile.printerType}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Materiales: {profile.materials.join(", ")} {profile.hasMulticolor && "• Multicolor"}
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setProfileDialogOpen(true)}
+                    data-testid="button-edit-profile"
+                  >
+                    Editar Perfil
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -247,32 +274,6 @@ export default function MakerHome() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Profile Section */}
-        {profile && (
-          <Card className="mb-10 border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
-            <CardContent className="pt-6 pb-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Printer className="h-5 w-5 text-primary" />
-                    {profile.printerType}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Materiales: {profile.materials.join(", ")} {profile.hasMulticolor && "• Multicolor"}
-                  </p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setProfileDialogOpen(true)}
-                  data-testid="button-edit-profile"
-                >
-                  Editar Perfil
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* My Conversations Section */}
         {conversations && conversations.length > 0 && (
