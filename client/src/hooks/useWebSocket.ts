@@ -99,6 +99,8 @@ export function useWebSocket() {
                 description: "Has recibido un nuevo mensaje",
               });
               queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/my-conversations"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
               break;
           }
         } catch (error) {
