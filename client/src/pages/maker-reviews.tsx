@@ -91,7 +91,7 @@ export default function MakerReviews() {
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1">
                           {[...Array(5)].map((_, i) => {
-                            const rating = (review.rating as unknown as number) || 0;
+                            const rating = parseFloat(String(review.rating || 0));
                             return (
                               <Star
                                 key={i}
@@ -107,7 +107,7 @@ export default function MakerReviews() {
                           })}
                         </div>
                         <Badge variant="outline">
-                          {((review.rating as unknown as number) || 0).toFixed(1)}
+                          {parseFloat(String(review.rating || 0)).toFixed(1)}
                         </Badge>
                       </div>
                     </div>
