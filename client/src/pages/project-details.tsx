@@ -36,6 +36,12 @@ export default function ProjectDetails() {
 
   const projectId = params?.id;
 
+  // Track the page the user came from
+  useEffect(() => {
+    const previousPath = window.location.pathname.split('/').slice(0, -2).join('/') || '/';
+    localStorage.setItem('previousProjectPath', previousPath || (isMaker ? '/maker' : '/'));
+  }, [isMaker]);
+
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ["/api/projects", projectId],
     enabled: !!projectId && !!user,
@@ -187,7 +193,10 @@ export default function ProjectDetails() {
           <div className="flex items-center justify-between">
             <Button 
               variant="ghost" 
-              onClick={() => window.history.back()}
+              onClick={() => {
+                const previousPath = localStorage.getItem('previousProjectPath') || (isClient ? "/" : "/maker");
+                setLocation(previousPath);
+              }}
               data-testid="button-back"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -346,8 +355,11 @@ export default function ProjectDetails() {
         <BidEditDialog
           open={editBidDialogOpen}
           onOpenChange={setEditBidDialogOpen}
-          bid={selectedBidForEdit}
+          bidId={selectedBidForEdit.id}
           projectId={projectId!}
+          currentPrice={selectedBidForEdit.price}
+          currentDeliveryDays={selectedBidForEdit.deliveryDays}
+          currentMessage={selectedBidForEdit.message || ""}
         />
       )}
 
