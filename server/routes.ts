@@ -3,8 +3,9 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema } from "@shared/schema";
+import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema } from "@shared/schema";
 import { getAuthenticatedUserId } from "./replitAuth";
+import { z } from "zod";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -597,6 +598,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error rejecting bid:", error);
       res.status(500).json({ message: "Failed to reject bid" });
+    }
+  });
+
+  app.patch('/api/bids/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const bid = await storage.getBid(id);
+      if (!bid) {
+        return res.status(404).json({ message: "Bid not found" });
+      }
+
+      // Only the maker who created the bid can edit it
+      if (bid.makerId !== userId) {
+        return res.status(403).json({ message: "Only the bid creator can edit it" });
+      }
+
+      // Can only edit if bid is pending
+      if (bid.status !== 'pending') {
+        return res.status(400).json({ message: "Can only edit pending bids" });
+      }
+
+      const validated = updateBidSchema.parse(req.body);
+      
+      await storage.updateBid(id, validated);
+      
+      const updatedBid = await storage.getBid(id);
+      res.json(updatedBid);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error updating bid:", error);
+      res.status(500).json({ message: "Failed to update bid" });
     }
   });
 

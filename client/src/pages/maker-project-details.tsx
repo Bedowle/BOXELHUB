@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ChatDialog } from "@/components/ChatDialog";
-import { ArrowLeft, Calendar, FileText, Package, Download, MessageCircle } from "lucide-react";
+import { BidEditDialog } from "@/components/BidEditDialog";
+import { ArrowLeft, Calendar, FileText, Package, Download, MessageCircle, Edit2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project, User } from "@shared/schema";
@@ -18,6 +19,7 @@ export default function MakerProjectDetails() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [editBidDialogOpen, setEditBidDialogOpen] = useState(false);
   const [projectOwner, setProjectOwner] = useState<User | null>(null);
 
   const projectId = params?.id;
@@ -207,15 +209,28 @@ export default function MakerProjectDetails() {
                     </p>
                   )}
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  myBid.status === 'accepted' 
-                    ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100'
-                    : myBid.status === 'rejected'
-                    ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-100'
-                    : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-                }`}>
-                  {myBid.status === 'accepted' ? 'Aceptada' : myBid.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
-                </span>
+                <div className="flex flex-col gap-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium text-center ${
+                    myBid.status === 'accepted' 
+                      ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100'
+                      : myBid.status === 'rejected'
+                      ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-100'
+                      : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                  }`}>
+                    {myBid.status === 'accepted' ? 'Aceptada' : myBid.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                  </span>
+                  {myBid.status === 'pending' && (
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditBidDialogOpen(true)}
+                      data-testid="button-edit-bid"
+                    >
+                      <Edit2 className="mr-2 h-4 w-4" />
+                      Editar Oferta
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -229,6 +244,18 @@ export default function MakerProjectDetails() {
           otherUser={projectOwner}
           currentUserId={user.id}
           projectId={projectId!}
+        />
+      )}
+
+      {myBid && projectId && (
+        <BidEditDialog
+          open={editBidDialogOpen}
+          onOpenChange={setEditBidDialogOpen}
+          bidId={myBid.id}
+          projectId={projectId}
+          currentPrice={myBid.price}
+          currentDeliveryDays={myBid.deliveryDays}
+          currentMessage={myBid.message}
         />
       )}
     </div>

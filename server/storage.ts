@@ -309,6 +309,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bids.id, id));
   }
 
+  async updateBid(id: string, data: { price?: string; deliveryDays?: number; message?: string }): Promise<void> {
+    const updateData: any = { updatedAt: new Date() };
+    if (data.price !== undefined) {
+      updateData.price = data.price;
+    }
+    if (data.deliveryDays !== undefined) {
+      updateData.deliveryDays = data.deliveryDays;
+    }
+    if (data.message !== undefined) {
+      updateData.message = data.message;
+    }
+    
+    await db
+      .update(bids)
+      .set(updateData)
+      .where(eq(bids.id, id));
+  }
+
   async confirmBidDelivery(id: string): Promise<void> {
     await db
       .update(bids)

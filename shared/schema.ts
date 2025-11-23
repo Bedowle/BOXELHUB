@@ -277,6 +277,14 @@ export const insertBidSchema = createInsertSchema(bids).omit({
   deliveryDays: z.number().int().positive("Delivery days must be positive"),
 });
 
+export const updateBidSchema = z.object({
+  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format").optional(),
+  deliveryDays: z.number().int().positive("Delivery days must be positive").optional(),
+  message: z.string().optional(),
+}).refine((data) => Object.keys(data).length > 0, {
+  message: "At least one field must be updated",
+});
+
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
   createdAt: true,
