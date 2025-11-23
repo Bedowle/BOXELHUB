@@ -88,8 +88,10 @@ export function useWebSocket() {
               break;
               
             case "message_read":
-              // Invalidate messages query to show updated read status
-              queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+              // Invalidate messages query for the specific conversation
+              if (data.fromUserId) {
+                queryClient.invalidateQueries({ queryKey: ["/api/messages", data.fromUserId] });
+              }
               break;
           }
         } catch (error) {
