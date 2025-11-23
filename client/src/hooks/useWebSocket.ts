@@ -86,13 +86,6 @@ export function useWebSocket() {
               });
               queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
               break;
-              
-            case "message_read":
-              // Invalidate messages query for the specific conversation
-              if (data.fromUserId) {
-                queryClient.invalidateQueries({ queryKey: ["/api/messages", data.fromUserId] });
-              }
-              break;
           }
         } catch (error) {
           console.error("Error processing WebSocket message:", error);

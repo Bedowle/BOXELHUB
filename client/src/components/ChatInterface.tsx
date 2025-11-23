@@ -22,7 +22,6 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const markReadCalledRef = useRef(false);
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", otherUserId],
@@ -43,7 +42,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       }
     },
     enabled: !!otherUserId,
-    refetchInterval: 500, // Poll every 500ms for read status updates
+    refetchInterval: 2000,
   });
 
   const sendMutation = useMutation({
@@ -67,29 +66,6 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       });
     },
   });
-
-  // Mark messages as read ONLY when chat is opened, not on every update
-  useEffect(() => {
-    if (otherUserId && !markReadCalledRef.current) {
-      markReadCalledRef.current = true;
-      
-      const markAsRead = async () => {
-        try {
-          await apiRequest("PUT", `/api/messages/mark-read/${otherUserId}`, {});
-          queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
-        } catch (error) {
-          console.error("Failed to mark messages as read:", error);
-        }
-      };
-
-      markAsRead();
-    }
-  }, [otherUserId, queryClient]);
-
-  // Reset markReadCalledRef when chat changes
-  useEffect(() => {
-    markReadCalledRef.current = false;
-  }, [otherUserId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -157,8 +133,8 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
                   </p>
                   {msg.senderId === currentUserId && (
                     <CheckCheck 
-                      className={`h-4 w-4 ${msg.isRead ? "text-cyan-600 dark:text-cyan-400" : "text-blue-950/40 dark:text-blue-100/40"}`}
-                      data-testid={msg.isRead ? `ticks-read-${msg.id}` : `ticks-received-${msg.id}`}
+                      className="h-4 w-4 text-blue-950/40 dark:text-blue-100/40"
+                      data-testid={`ticks-${msg.id}`}
                     />
                   )}
                 </div>
