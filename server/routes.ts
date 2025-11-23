@@ -515,8 +515,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update bid status
       await storage.updateBidStatus(id, 'accepted');
       
-      // Update project status to reserved
-      await storage.updateProjectStatus(bid.projectId, 'reserved');
+      // Update project status to completed
+      await storage.updateProjectStatus(bid.projectId, 'completed');
 
       // Reject all other pending bids for this project
       const allBids = await storage.getBidsByProject(bid.projectId);
