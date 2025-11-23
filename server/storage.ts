@@ -75,7 +75,7 @@ export interface IStorage {
   getMakerStats(userId: string): Promise<{
     activeBids: number;
     wonProjects: number;
-    earnings: number;
+    completedProjects: number;
   }>;
 
   // Email token operations
@@ -502,7 +502,7 @@ export class DatabaseStorage implements IStorage {
   async getMakerStats(userId: string): Promise<{
     activeBids: number;
     wonProjects: number;
-    earnings: number;
+    completedProjects: number;
   }> {
     const activeBids = await this.getActiveBidCount(userId);
     
@@ -512,13 +512,13 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(bids.makerId, userId), eq(bids.status, "accepted")));
     const wonProjects = wonResult.count;
 
-    const [earningsResult] = await db
-      .select({ total: sql<string>`SUM(${bids.price})` })
+    const [completedResult] = await db
+      .select({ count: count() })
       .from(bids)
-      .where(and(eq(bids.makerId, userId), eq(bids.status, "accepted")));
-    const earnings = parseFloat(earningsResult[0]?.total || "0");
+      .where(and(eq(bids.makerId, userId), eq(bids.status, "accepted"), sql`${bids.deliveryConfirmedAt} IS NOT NULL`));
+    const completedProjects = completedResult.count;
 
-    return { activeBids, wonProjects, earnings };
+    return { activeBids, wonProjects, completedProjects };
   }
 
   // Email token operations

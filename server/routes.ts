@@ -576,6 +576,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: 'delivery_confirmed',
           projectId: bid.projectId,
           bidId: id,
+          clientName: user?.firstName || user?.email || "Cliente",
+          projectName: project?.name || "Proyecto",
         }));
       }
 

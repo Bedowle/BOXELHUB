@@ -78,6 +78,20 @@ export function useWebSocket() {
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "my-bid"] });
               }
               break;
+
+            case "delivery_confirmed":
+              toast({
+                title: "Entrega confirmada",
+                description: `${data.clientName} ha confirmado la recepción de "${data.projectName}"`,
+              });
+              queryClient.invalidateQueries({ queryKey: ["/api/bids/my-bids"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/bids/stats"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/projects/my-bids"] });
+              if (data.projectId) {
+                queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "bids"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId] });
+              }
+              break;
               
             case "new_message":
               toast({

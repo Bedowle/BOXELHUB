@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Printer, Package, DollarSign, Zap, Search, Filter, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
+import { Printer, Package, CheckCircle, Zap, Search, Filter, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useLocation } from "wouter";
@@ -52,7 +52,7 @@ export default function MakerHome() {
   const { data: stats } = useQuery<{
     activeBids: number;
     wonProjects: number;
-    earnings: number;
+    completedProjects: number;
   }>({
     queryKey: ["/api/bids/stats"],
     enabled: !!user && !!profile,
@@ -191,19 +191,19 @@ export default function MakerHome() {
             </CardContent>
           </Card>
 
-          {/* Earnings */}
+          {/* Completed Projects */}
           <Card className="border-2 border-accent/20 hover-elevate">
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Ganancias</span>
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
                   <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-accent" />
+                    <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold">${stats?.earnings || 0}</p>
-                  <p className="text-xs text-muted-foreground">en total</p>
+                  <p className="text-4xl font-bold">{stats?.completedProjects || 0}</p>
+                  <p className="text-xs text-muted-foreground">entregados</p>
                 </div>
               </div>
             </CardContent>
