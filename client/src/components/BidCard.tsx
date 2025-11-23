@@ -22,9 +22,7 @@ interface BidCardProps {
 
 export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, isClient, isMyBid, currentUserId, isPending }: BidCardProps) {
   const profile = bid.maker?.makerProfile;
-  const initials = bid.maker?.firstName && bid.maker?.lastName 
-    ? `${bid.maker.firstName[0]}${bid.maker.lastName[0]}`
-    : bid.maker?.email?.[0].toUpperCase() || "M";
+  const initials = bid.maker?.email?.[0].toUpperCase() || "M";
   
   const canEditBid = isMyBid && bid.status === "pending" && currentUserId === bid.makerId;
 
@@ -41,9 +39,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-semibold text-lg" data-testid={`text-maker-name-${bid.id}`}>
-                  {bid.maker?.firstName && bid.maker?.lastName 
-                    ? `${bid.maker.firstName} ${bid.maker.lastName}`
-                    : bid.maker?.email || "Maker"}
+                  {bid.maker?.email || "Maker"}
                 </h3>
                 {profile && (
                   <Badge variant="secondary" className="text-xs">

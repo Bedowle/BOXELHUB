@@ -115,9 +115,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
     }
   };
 
-  const otherUserInitials = otherUser?.firstName && otherUser?.lastName
-    ? `${otherUser.firstName[0]}${otherUser.lastName[0]}`
-    : otherUser?.email?.[0].toUpperCase() || "U";
+  const otherUserInitials = otherUser?.email?.[0].toUpperCase() || "U";
 
   return (
     <Card className="flex flex-col h-[500px] border">
@@ -129,9 +127,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
         </Avatar>
         <div>
           <p className="font-semibold">
-            {otherUser?.firstName && otherUser?.lastName
-              ? `${otherUser.firstName} ${otherUser.lastName}`
-              : otherUser?.email}
+            {otherUser?.email}
           </p>
           <p className="text-xs text-muted-foreground">
             {otherUser?.userType === "maker" ? "Maker" : "Cliente"}

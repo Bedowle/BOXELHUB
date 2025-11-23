@@ -74,13 +74,13 @@ export default function MakerReviews() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={review.fromUser?.profileImageUrl || ""} alt={review.fromUser?.firstName || "Usuario"} />
+                          <AvatarImage src={review.fromUser?.profileImageUrl || ""} alt={review.fromUser?.email || "Usuario"} />
                           <AvatarFallback>
-                            {(review.fromUser?.firstName || "U").charAt(0)}
+                            {(review.fromUser?.email || "U").charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold">{review.fromUser?.firstName || "Usuario Anónimo"}</p>
+                          <p className="font-semibold">{review.fromUser?.email || "Usuario Anónimo"}</p>
                           <p className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(review.createdAt), { locale: es, addSuffix: true })}
                           </p>
