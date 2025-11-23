@@ -36,12 +36,6 @@ export default function ProjectDetails() {
 
   const projectId = params?.id;
 
-  // Track the page the user came from
-  useEffect(() => {
-    const previousPath = window.location.pathname.split('/').slice(0, -2).join('/') || '/';
-    localStorage.setItem('previousProjectPath', previousPath || (isMaker ? '/maker' : '/'));
-  }, [isMaker]);
-
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ["/api/projects", projectId],
     enabled: !!projectId && !!user,

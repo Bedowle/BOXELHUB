@@ -16,6 +16,12 @@ export default function ClientHome() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Save the current home page URL when this component mounts
+  useEffect(() => {
+    localStorage.setItem('previousProjectPath', '/');
+  }, []);
+
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const { data: projects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({

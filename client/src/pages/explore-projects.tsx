@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,11 @@ export default function ExploreProjects() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Save the current explore page URL when this component mounts
+  useEffect(() => {
+    localStorage.setItem('previousProjectPath', '/maker/explore');
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
   const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
