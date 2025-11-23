@@ -73,24 +73,21 @@ export default function MakerProfile() {
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => {
-                          const rating = typeof profile.rating === 'string' ? parseFloat(profile.rating) : (profile.rating || 0);
-                          return (
-                            <Star
-                              key={i}
-                              className={`h-5 w-5 ${
-                                i < Math.floor(rating)
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : i < rating
-                                  ? "fill-yellow-400 text-yellow-400 opacity-50"
-                                  : "text-muted-foreground"
-                              }`}
-                            />
-                          );
-                        })}
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-5 w-5 ${
+                              i < Math.floor(profile.rating || 0)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : i < (profile.rating || 0)
+                                ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        ))}
                       </div>
                       <span className="font-semibold text-lg">
-                        {typeof profile.rating === 'string' ? parseFloat(profile.rating).toFixed(2) : (profile.rating || 0).toFixed(2)}
+                        {((profile.rating || 0) as number).toFixed(2)}
                       </span>
                     </div>
                     <Badge variant="secondary">

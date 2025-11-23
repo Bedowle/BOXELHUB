@@ -896,7 +896,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       const profile = await storage.getMakerProfile(userId);
-      res.json(profile || null);
+      if (!profile) {
+        return res.json(null);
+      }
+      // Normalize rating to number
+      const normalizedProfile = {
+        ...profile,
+        rating: profile.rating ? parseFloat(String(profile.rating)) : 0,
+      };
+      res.json(normalizedProfile);
     } catch (error) {
       console.error("Error fetching maker profile:", error);
       res.status(500).json({ message: "Failed to fetch maker profile" });
