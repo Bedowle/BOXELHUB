@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BidCard } from "@/components/BidCard";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
+import { BidEditDialog } from "@/components/BidEditDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { RatingDialog } from "@/components/RatingDialog";
 import { EmptyState } from "@/components/EmptyState";
@@ -26,6 +27,8 @@ export default function ProjectDetails() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [editBidDialogOpen, setEditBidDialogOpen] = useState(false);
+  const [selectedBidForEdit, setSelectedBidForEdit] = useState<Bid | null>(null);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedMaker, setSelectedMaker] = useState<User | null>(null);
@@ -273,7 +276,17 @@ export default function ProjectDetails() {
           ) : myBid && isMaker ? (
             <div className="mb-8">
               <p className="text-sm text-muted-foreground mb-4">Tu oferta para este proyecto:</p>
-              <BidCard bid={myBid} isClient={false} />
+              <BidCard 
+                bid={myBid} 
+                isClient={false}
+                isMyBid={true}
+                currentUserId={user?.id}
+                onEdit={(bidId) => {
+                  const bid = myBid;
+                  setSelectedBidForEdit(bid);
+                  setEditBidDialogOpen(true);
+                }}
+              />
             </div>
           ) : bids && bids.length > 0 ? (
             <div className="space-y-4">
@@ -282,11 +295,17 @@ export default function ProjectDetails() {
                   key={bid.id}
                   bid={bid}
                   isClient={isOwner}
+                  isMyBid={isMaker && bid.makerId === user?.id}
+                  currentUserId={user?.id}
                   onAccept={(bidId) => acceptBidMutation.mutate(bidId)}
                   onReject={(bidId) => rejectBidMutation.mutate(bidId)}
                   onConfirmDelivery={(bidId) => {
                     setSelectedBidForRating(bidId);
                     setRatingDialogOpen(true);
+                  }}
+                  onEdit={(bidId) => {
+                    setSelectedBidForEdit(bid);
+                    setEditBidDialogOpen(true);
                   }}
                   onContact={(makerId, projectId) => {
                     const makerUser = bid.maker;
@@ -319,6 +338,15 @@ export default function ProjectDetails() {
         <BidSubmissionDialog
           open={bidDialogOpen}
           onOpenChange={setBidDialogOpen}
+          projectId={projectId!}
+        />
+      )}
+
+      {selectedBidForEdit && (
+        <BidEditDialog
+          open={editBidDialogOpen}
+          onOpenChange={setEditBidDialogOpen}
+          bid={selectedBidForEdit}
           projectId={projectId!}
         />
       )}

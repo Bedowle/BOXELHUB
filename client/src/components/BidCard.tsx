@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Star, Clock, MessageCircle } from "lucide-react";
+import { Star, Clock, MessageCircle, Edit2 } from "lucide-react";
 import type { Bid, User, MakerProfile } from "@shared/schema";
 
 interface BidCardProps {
@@ -13,15 +13,20 @@ interface BidCardProps {
   onReject?: (bidId: string) => void;
   onContact?: (makerId: string, projectId: string) => void;
   onConfirmDelivery?: (bidId: string) => void;
+  onEdit?: (bidId: string) => void;
   isClient?: boolean;
+  isMyBid?: boolean;
+  currentUserId?: string;
   isPending?: boolean;
 }
 
-export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, isClient, isPending }: BidCardProps) {
+export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, isClient, isMyBid, currentUserId, isPending }: BidCardProps) {
   const profile = bid.maker?.makerProfile;
   const initials = bid.maker?.firstName && bid.maker?.lastName 
     ? `${bid.maker.firstName[0]}${bid.maker.lastName[0]}`
     : bid.maker?.email?.[0].toUpperCase() || "M";
+  
+  const canEditBid = isMyBid && bid.status === "pending" && currentUserId === bid.makerId;
 
   return (
     <Card className="border hover:border-primary/50 transition-colors" data-testid={`card-bid-${bid.id}`}>
@@ -114,6 +119,21 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                   data-testid={`button-accept-${bid.id}`}
                 >
                   Aceptar
+                </Button>
+              </div>
+            )}
+
+            {canEditBid && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit?.(bid.id)}
+                  disabled={isPending}
+                  data-testid={`button-edit-bid-${bid.id}`}
+                >
+                  <Edit2 className="h-4 w-4 mr-1" />
+                  Editar
                 </Button>
               </div>
             )}
