@@ -321,8 +321,8 @@ export default function MakerHome() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Cualquiera</SelectItem>
-                  <SelectItem value="yes">Con multicolor</SelectItem>
-                  <SelectItem value="no">Sin multicolor</SelectItem>
+                  <SelectItem value="yes">Multicolor</SelectItem>
+                  <SelectItem value="no">Monocolor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
