@@ -125,7 +125,7 @@ export default function MakerWonProjects() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/maker")}
+            onClick={() => setLocation("/auth")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >

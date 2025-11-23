@@ -28,8 +28,6 @@ export default function MakerBidsList() {
 
   if (!authLoading && !user) {
     toast({
-      title: language === 'es' ? "No autorizado" : "Unauthorized"},
-      description: language === 'es' ? "Iniciando sesión..." : "Signing in..."},
       variant: "destructive",
     });
     setTimeout(() => {
@@ -58,12 +56,11 @@ export default function MakerBidsList() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/maker")}
+            onClick={() => setLocation("/auth")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
-            language === 'es' ? 'Volver' : 'Back'}
           </Button>
         </div>
       </header>

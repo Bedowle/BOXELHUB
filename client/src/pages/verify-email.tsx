@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
         });
 
         // Redirect to home after 2 seconds
-        setTimeout(() => setLocation("/"), 2000);
+        setTimeout(() => setLocation("/auth"), 2000);
       } catch (error: any) {
         setStatus("error");
         setMessage(error.message || "Error al verificar el email");

@@ -19,7 +19,6 @@ export default function ClientHome() {
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
 
-  // Save the current home page URL when this component mounts
   useEffect(() => {
     localStorage.setItem('previousProjectPath', '/');
   }, []);
@@ -43,8 +42,8 @@ export default function ClientHome() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: t('common.unauthorized'),
-        description: t('common.loading'),
+        title: "Unauthorized",
+        description: "Redirecting to login...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -58,7 +57,7 @@ export default function ClientHome() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t('common.loading')}</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -74,7 +73,6 @@ export default function ClientHome() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-3 max-w-7xl">
           <Button
@@ -85,25 +83,22 @@ export default function ClientHome() {
             data-testid="button-back-to-home"
           >
             <ArrowLeft className="h-4 w-4" />
-            {t('common.back')}
+            Back
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            language === 'es' ? 'Bienvenido a tu Dashboard' : 'Welcome to your Dashboard'}
+            Welcome to Your Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">
-            language === 'es' ? 'Gestiona tus proyectos STL y recibe ofertas de los mejores makers' : 'Manage your STL projects and receive offers from the best makers'}
+            Manage your STL projects and receive offers from the best makers
           </p>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
-          {/* Projects in Progress */}
           <Card 
             className="border-2 border-primary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/projects-active")}
@@ -112,7 +107,9 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">language === 'es' ? 'Proyectos en Progreso' : 'Projects in Progress'}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    Projects in Progress
+                  </span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
@@ -121,13 +118,14 @@ export default function ClientHome() {
                   <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {activeProjects.length + inProgressProjects.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">language === 'es' ? 'activos y aceptados' : 'active and accepted'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    active and accepted
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Pending Bids */}
           <Card 
             className="border-2 border-secondary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/bids")}
@@ -136,7 +134,9 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">language === 'es' ? 'Ofertas Pendientes' : 'Pending Bids'}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    Pending Bids
+                  </span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
                     <Zap className="h-5 w-5 text-secondary" />
                   </div>
@@ -149,7 +149,6 @@ export default function ClientHome() {
             </CardContent>
           </Card>
 
-          {/* Completed Projects */}
           <Card 
             className="border-2 border-green-500/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/projects-completed")}
@@ -158,33 +157,36 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">language === 'es' ? 'Proyectos Terminados' : 'Completed Projects'}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    Completed Projects
+                  </span>
                   <div className="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{completedProjects.length}</p>
-                  <p className="text-xs text-muted-foreground">language === 'es' ? 'completados' : 'completed'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    completed
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* CTA Card - Upload Project */}
         <Card className="mb-12 border-2 border-dashed border-primary/30 hover-elevate bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
           <CardContent className="pt-10 pb-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 justify-center md:justify-start">
                   <FileUp className="h-6 w-6 text-primary" />
-                  language === 'es' ? 'Sube tu próximo proyecto' : 'Upload your next project'}
+                  Upload your next project
                 </h2>
                 <p className="text-muted-foreground max-w-sm">
                   {canUploadMore 
-                    ? (language === 'es' ? `Tienes ${10 - activeProjects.length} espacio${10 - activeProjects.length !== 1 ? 's' : ''} disponible${10 - activeProjects.length !== 1 ? 's' : ''}` : `You have ${10 - activeProjects.length} space${10 - activeProjects.length !== 1 ? 's' : ''} available`)
-                    : (language === 'es' ? "Has alcanzado el límite de 10 proyectos activos" : "You have reached the limit of 10 active projects")}
+                    ? `You have ${10 - activeProjects.length} space${10 - activeProjects.length !== 1 ? 's' : ''} available`
+                    : "You have reached the limit of 10 active projects"}
                 </p>
               </div>
               <Button 
@@ -195,20 +197,19 @@ export default function ClientHome() {
                 data-testid="button-upload-project"
               >
                 <Plus className="mr-2 h-5 w-5" />
-                language === 'es' ? 'Subir Archivo STL' : 'Upload STL File'}
+                Upload STL File
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Projects Section */}
         <div>
           <div className="mb-8">
-            <h2 className="text-3xl font-bold">language === 'es' ? 'Tus Proyectos' : 'Your Projects'}</h2>
+            <h2 className="text-3xl font-bold">
+              Your Projects
+            </h2>
             <p className="text-muted-foreground mt-1">
-              language === 'es' 
-                ? `${activeProjects.length} ${activeProjects.length === 1 ? "proyecto" : "proyectos"} activo${activeProjects.length !== 1 ? "s" : ""}` 
-                : `${activeProjects.length} active ${activeProjects.length === 1 ? "project" : "projects"}`}
+              {activeProjects.length} active project{activeProjects.length !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -221,9 +222,9 @@ export default function ClientHome() {
           ) : activeProjects.length === 0 ? (
             <EmptyState
               icon={Package}
-              title=language === 'es' ? 'Sin proyectos aún' : 'No projects yet'}
-              description=language === 'es' ? 'Sube tu primer archivo STL para recibir ofertas de makers profesionales' : 'Upload your first STL file to receive offers from professional makers'}
-              actionLabel=language === 'es' ? 'Subir Proyecto' : 'Upload Project'}
+              title="No projects yet"
+              description="Upload your first STL file to receive offers from professional makers"
+              actionLabel="Upload Project"
               onAction={() => setUploadDialogOpen(true)}
             />
           ) : (

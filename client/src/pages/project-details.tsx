@@ -37,7 +37,7 @@ export default function ProjectDetails() {
   const [selectedBidForRating, setSelectedBidForRating] = useState<string | null>(null);
 
   const projectId = params?.id;
-  const dateLocale = language === 'es' ? es : enUS;
+  const dateLocale = 'English'
 
   const { data: project, isLoading: projectLoading } = useQuery<Project>({
     queryKey: ["/api/projects", projectId],
@@ -65,8 +65,6 @@ export default function ProjectDetails() {
     },
     onSuccess: () => {
       toast({
-        title: language === 'es' ? "Oferta aceptada" : "Bid accepted",
-        description: language === 'es' ? "El maker ha sido notificado. Puedes contactarlo para coordinar la entrega." : "The maker has been notified. You can contact them to coordinate delivery.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bids"] });
@@ -75,8 +73,6 @@ export default function ProjectDetails() {
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: language === 'es' ? "No autorizado" : "Unauthorized",
-          description: language === 'es' ? "Iniciando sesión..." : "Signing in...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -86,7 +82,6 @@ export default function ProjectDetails() {
       }
       toast({
         title: t('common.error'),
-        description: error.message || (language === 'es' ? "No se pudo aceptar la oferta" : "Could not accept bid"),
         variant: "destructive",
       });
     },
@@ -98,16 +93,12 @@ export default function ProjectDetails() {
     },
     onSuccess: () => {
       toast({
-        title: language === 'es' ? "Oferta rechazada" : "Bid rejected",
-        description: language === 'es' ? "El maker ha sido notificado." : "The maker has been notified.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "bids"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: language === 'es' ? "No autorizado" : "Unauthorized",
-          description: language === 'es' ? "Iniciando sesión..." : "Signing in...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -117,7 +108,6 @@ export default function ProjectDetails() {
       }
       toast({
         title: t('common.error'),
-        description: error.message || (language === 'es' ? "No se pudo rechazar la oferta" : "Could not reject bid"),
         variant: "destructive",
       });
     },
@@ -129,8 +119,6 @@ export default function ProjectDetails() {
     },
     onSuccess: () => {
       toast({
-        title: language === 'es' ? "Entrega confirmada" : "Delivery confirmed",
-        description: language === 'es' ? "Has confirmado la recepción del proyecto. El maker ha sido notificado." : "You've confirmed receipt of the project. The maker has been notified.",
       });
       setRatingDialogOpen(false);
       setSelectedBidForRating(null);
@@ -140,8 +128,6 @@ export default function ProjectDetails() {
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: language === 'es' ? "No autorizado" : "Unauthorized",
-          description: language === 'es' ? "Iniciando sesión..." : "Signing in...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -151,7 +137,6 @@ export default function ProjectDetails() {
       }
       toast({
         title: t('common.error'),
-        description: error.message || (language === 'es' ? "No se pudo confirmar la entrega" : "Could not confirm delivery"),
         variant: "destructive",
       });
     },
@@ -160,8 +145,6 @@ export default function ProjectDetails() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: language === 'es' ? "No autorizado" : "Unauthorized",
-        description: language === 'es' ? "Iniciando sesión..." : "Signing in...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -174,12 +157,6 @@ export default function ProjectDetails() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">language === 'es' ? "Cargando proyecto..." : "Loading project..."}</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!user || !project) {
     return null;
@@ -199,18 +176,17 @@ export default function ProjectDetails() {
               onClick={() => {
                 const previousPath = localStorage.getItem('previousProjectPath') || (isClient ? "/" : "/maker");
                 setLocation(previousPath);
-              }}
+              }
               data-testid="button-back"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              language === 'es' ? 'Volver' : 'Back'}
             </Button>
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground">
                 {user.firstName || user.email}
               </span>
               <Button variant="outline" asChild size="sm">
-                <a href="/api/logout">language === 'es' ? 'Cerrar Sesión' : 'Logout'}</a>
+            {
               </Button>
             </div>
           </div>
@@ -235,21 +211,21 @@ export default function ProjectDetails() {
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Package className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">language === 'es' ? 'Material' : 'Material'}:</span>
+            {
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
                       {project.material}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">language === 'es' ? 'Archivo' : 'File'}:</span>
+            {
                     <span className="text-muted-foreground" data-testid="text-stl-filename">
                       {project.stlFileName}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">language === 'es' ? 'Publicado' : 'Published'}:</span>
+            {
                     <span className="text-muted-foreground">
                       {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true, locale: dateLocale })}
                     </span>
@@ -262,7 +238,6 @@ export default function ProjectDetails() {
                   onClick={() => setBidDialogOpen(true)}
                   data-testid="button-submit-bid"
                 >
-                  language === 'es' ? 'Enviar Oferta' : 'Submit Bid'}
                 </Button>
               )}
               {isOwner && acceptedBid && acceptedBid.maker && (
@@ -272,11 +247,10 @@ export default function ProjectDetails() {
                   onClick={() => {
                     setSelectedMaker(acceptedBid.maker!);
                     setChatDialogOpen(true);
-                  }}
+                  }
                   data-testid="button-chat-maker"
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
-                  language === 'es' ? 'Chatear con' : 'Chat with'} {acceptedBid.maker.username || acceptedBid.maker.email}
                 </Button>
               )}
             </div>
@@ -286,7 +260,6 @@ export default function ProjectDetails() {
         {/* Bids Section */}
         <div>
           <h2 className="text-2xl font-bold mb-6">
-            {isOwner ? (language === 'es' ? "Ofertas Recibidas" : "Received Bids") : (language === 'es' ? "Ofertas" : "Bids")}
             {bids && bids.length > 0 && (
               <span className="text-muted-foreground font-normal text-lg ml-2">
                 ({bids.length})
@@ -301,7 +274,7 @@ export default function ProjectDetails() {
             </div>
           ) : myBid && isMaker ? (
             <div className="mb-8">
-              <p className="text-sm text-muted-foreground mb-4">language === 'es' ? 'Tu oferta para este proyecto' : 'Your bid for this project'}:</p>
+            {
               <BidCard 
                 bid={myBid} 
                 isClient={false}
@@ -311,7 +284,7 @@ export default function ProjectDetails() {
                   const bid = myBid;
                   setSelectedBidForEdit(bid);
                   setEditBidDialogOpen(true);
-                }}
+                }
               />
             </div>
           ) : bids && bids.length > 0 ? (
@@ -328,18 +301,18 @@ export default function ProjectDetails() {
                   onConfirmDelivery={(bidId) => {
                     setSelectedBidForRating(bidId);
                     setRatingDialogOpen(true);
-                  }}
+                  }
                   onEdit={(bidId) => {
                     setSelectedBidForEdit(bid);
                     setEditBidDialogOpen(true);
-                  }}
+                  }
                   onContact={(makerId, projectId) => {
                     const makerUser = bid.maker;
                     if (makerUser) {
                       setSelectedMaker(makerUser);
                       setChatDialogOpen(true);
                     }
-                  }}
+                  }
                   isPending={acceptBidMutation.isPending || rejectBidMutation.isPending}
                 />
               ))}
@@ -347,13 +320,8 @@ export default function ProjectDetails() {
           ) : (
             <EmptyState
               icon={Package}
-              title={isOwner ? (language === 'es' ? "No hay ofertas aún" : "No bids yet") : (language === 'es' ? "Este proyecto no tiene ofertas" : "This project has no bids")}
               description={isOwner 
-                ? (language === 'es' ? "Los makers comenzarán a enviar ofertas pronto. Te notificaremos cuando lleguen." : "Makers will start sending bids soon. We'll notify you when they arrive.")
                 : canBid 
-                  ? (language === 'es' ? "Sé el primero en enviar una oferta para este proyecto" : "Be the first to submit a bid for this project")
-                  : (language === 'es' ? "Este proyecto ya tiene ofertas de otros makers" : "This project already has bids from other makers")}
-              actionLabel={canBid ? (language === 'es' ? "Enviar Oferta" : "Submit Bid") : undefined}
               onAction={canBid ? () => setBidDialogOpen(true) : undefined}
             />
           )}
@@ -394,12 +362,12 @@ export default function ProjectDetails() {
         <RatingDialog
           open={ratingDialogOpen}
           onOpenChange={setRatingDialogOpen}
-          title=language === 'es' ? "Califica al Maker" : "Rate the Maker"}
-          description=language === 'es' ? "Comparte tu experiencia con este maker. Tu calificación ayudará a otros clientes a tomar mejores decisiones." : "Share your experience with this maker. Your rating will help other clients make better decisions."}
+          title=English
+          description=English
           targetName={bids?.find((b) => b.id === selectedBidForRating)?.maker?.firstName || "Maker"}
           onSubmit={(rating, comment) => {
             confirmDeliveryMutation.mutate({ bidId: selectedBidForRating, rating, comment });
-          }}
+          }
           isLoading={confirmDeliveryMutation.isPending}
         />
       )}

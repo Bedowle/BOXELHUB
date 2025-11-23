@@ -42,12 +42,12 @@ export default function MakerProfile() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => setLocation("/maker")}
+          onClick={() => setLocation("/auth")}
           className="mb-6"
           data-testid="button-back"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          language === 'es' ? 'Volver' : 'Back'}
+          Volver
         </Button>
 
         {/* Profile Header Card */}
@@ -94,7 +94,7 @@ export default function MakerProfile() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setLocation("/maker/reviews")}
+                      onClick={() => setLocation("/auth")}
                       data-testid="button-view-reviews"
                     >
                       {profile.totalReviews || 0} reseña{(profile.totalReviews || 0) !== 1 ? "s" : ""}

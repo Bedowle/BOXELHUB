@@ -55,7 +55,7 @@ export default function ExploreProjects() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">language === 'es' ? 'Cargando...' : 'Loading...'}</p>
+            {
         </div>
       </div>
     );
@@ -112,12 +112,11 @@ export default function ExploreProjects() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/maker")}
+            onClick={() => setLocation("/auth")}
             className="flex items-center gap-2"
             data-testid="button-back-to-maker"
           >
             <ArrowLeft className="h-4 w-4" />
-            language === 'es' ? 'Volver' : 'Back'}
           </Button>
         </div>
       </header>
@@ -127,10 +126,8 @@ export default function ExploreProjects() {
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 flex items-center gap-3">
             <TrendingUp className="h-10 w-10 text-primary" />
-            language === 'es' ? 'Explora Proyectos' : 'Explore Projects'}
           </h1>
           <p className="text-lg text-muted-foreground">
-            language === 'es' ? 'Descubre proyectos disponibles y coloca tus ofertas' : 'Discover available projects and place your bids'}
           </p>
         </div>
 
@@ -140,7 +137,6 @@ export default function ExploreProjects() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder=language === 'es' ? "Busca proyectos por nombre o descripción..." : "Search projects by name or description..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-11"
@@ -158,7 +154,6 @@ export default function ExploreProjects() {
                   data-testid="button-open-filters"
                 >
                   <Sliders className="h-4 w-4" />
-                  language === 'es' ? 'Filtros' : 'Filters'}
                   {hasActiveFilters && (
                     <span className="ml-2 inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                       {[printerTypeFilter !== "all", multicolorFilter !== "all", minDimension > 0].filter(Boolean).length}
@@ -169,13 +164,13 @@ export default function ExploreProjects() {
               <PopoverContent className="w-80 p-4" align="end" data-testid="popover-filters">
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-semibold mb-2 block">language === 'es' ? 'Tipo de Impresora' : 'Printer Type'}</label>
+            {
                     <Select value={printerTypeFilter} onValueChange={setPrinterTypeFilter}>
                       <SelectTrigger data-testid="select-printer-type">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">language === 'es' ? 'Todas las impresoras' : 'All printers'}</SelectItem>
+            {
                         <SelectItem value="Ender3">Ender 3</SelectItem>
                         <SelectItem value="BambooLab">Bambu Lab</SelectItem>
                       </SelectContent>
@@ -183,21 +178,21 @@ export default function ExploreProjects() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold mb-2 block">language === 'es' ? 'Color' : 'Color'}</label>
+            {
                     <Select value={multicolorFilter} onValueChange={setMulticolorFilter}>
                       <SelectTrigger data-testid="select-multicolor">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">language === 'es' ? 'Cualquiera' : 'Any'}</SelectItem>
-                        <SelectItem value="yes">language === 'es' ? 'Multicolor' : 'Multicolor'}</SelectItem>
-                        <SelectItem value="no">language === 'es' ? 'Monocolor' : 'Single Color'}</SelectItem>
+            {
+            {
+            {
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold mb-3 block">language === 'es' ? 'Dimensión Mínima (mm)' : 'Min Dimension (mm)'}</label>
+            {
                     <div className="flex items-center gap-3">
                       <input
                         type="range"
@@ -214,7 +209,6 @@ export default function ExploreProjects() {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      language === 'es' ? `Solo mostrar proyectos donde tu impresora pueda imprimir al menos ${minDimension}mm en todos los lados` : `Only show projects your printer can handle at least ${minDimension}mm on all sides`}
                     </p>
                   </div>
 
@@ -225,11 +219,10 @@ export default function ExploreProjects() {
                       setPrinterTypeFilter("all");
                       setMulticolorFilter("all");
                       setMinDimension(0);
-                    }}
+                    }
                     className="w-full"
                     data-testid="button-reset-filters"
                   >
-                    language === 'es' ? 'Limpiar Filtros' : 'Clear Filters'}
                   </Button>
                 </div>
               </PopoverContent>
@@ -242,10 +235,8 @@ export default function ExploreProjects() {
           <div className="mb-8">
             <h2 className="text-3xl font-bold flex items-center gap-2">
               <Search className="h-8 w-8 text-primary" />
-              language === 'es' ? 'Resultados' : 'Results'}
             </h2>
             <p className="text-muted-foreground mt-2">
-              {filteredProjects?.length || 0} language === 'es' ? (filteredProjects?.length || 0) === 1 ? "proyecto" : "proyectos" : (filteredProjects?.length || 0) === 1 ? "project" : "projects"} language === 'es' ? (filteredProjects?.length || 0) === 1 ? "disponible" : "disponibles" : (filteredProjects?.length || 0) === 1 ? "available" : "available"}
             </p>
           </div>
 
@@ -258,11 +249,8 @@ export default function ExploreProjects() {
           ) : (filteredProjects?.length || 0) === 0 ? (
             <EmptyState
               icon={Search}
-              title=language === 'es' ? 'Sin resultados' : 'No results'}
               description={
                 searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimension > 0
-                  ? (language === 'es' ? 'Intenta ajustar tus filtros de búsqueda' : 'Try adjusting your search filters')
-                  : (language === 'es' ? 'No hay proyectos disponibles en este momento' : 'No projects available at this time')
               }
             />
           ) : (
@@ -281,7 +269,7 @@ export default function ExploreProjects() {
                       } else {
                         setLocation(`/project/${project.id}`);
                       }
-                    }}
+                    }
                   />
                 );
               })}

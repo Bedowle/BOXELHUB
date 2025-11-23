@@ -42,7 +42,7 @@ export default function MakerReviews() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => setLocation("/maker/profile")}
+          onClick={() => setLocation("/auth")}
           className="mb-6"
           data-testid="button-back"
         >

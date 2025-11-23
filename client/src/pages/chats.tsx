@@ -40,8 +40,6 @@ export default function ChatsPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: language === 'es' ? "No autorizado" : "Unauthorized"},
-        description: language === 'es' ? "Iniciando sesión..." : "Signing in..."},
         variant: "destructive",
       });
       setTimeout(() => {
@@ -88,7 +86,6 @@ export default function ChatsPage() {
             data-testid="button-back-to-dashboard"
           >
             <ArrowLeft className="h-4 w-4" />
-            language === 'es' ? 'Volver' : 'Back'}
           </Button>
         </div>
       </header>
@@ -179,7 +176,7 @@ export default function ChatsPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         conv.user && openChat(conv.user, conv.projectId);
-                      }}
+                      }
                       data-testid={`button-open-chat-${conv.userId}-${conv.projectId}`}
                     >
                       Abrir

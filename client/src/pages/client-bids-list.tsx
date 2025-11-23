@@ -20,6 +20,7 @@ export default function ClientBidsList() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   const { data: projects, isLoading: projectsLoading } = useQuery<ProjectWithBids[]>({
     queryKey: ["/api/projects/my-projects"],
@@ -28,8 +29,8 @@ export default function ClientBidsList() {
 
   if (!authLoading && !user) {
     toast({
-      title: language === 'es' ? "No autorizado" : "Unauthorized"},
-      description: language === 'es' ? "Iniciando sesión..." : "Signing in..."},
+      title: "Unauthorized",
+      description: "Signing in...",
       variant: "destructive",
     });
     setTimeout(() => {
@@ -43,7 +44,7 @@ export default function ClientBidsList() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -58,21 +59,21 @@ export default function ClientBidsList() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/")}
+            onClick={() => setLocation("/auth")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
-            language === 'es' ? 'Volver' : 'Back'}
+            Back
           </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Ofertas Recibidas</h1>
+          <h1 className="text-3xl font-bold mb-2">Received Bids</h1>
           <p className="text-muted-foreground">
-            {projectsWithBids.length} proyecto{projectsWithBids.length !== 1 ? "s" : ""} con ofertas
+            {projectsWithBids.length} project{projectsWithBids.length !== 1 ? "s" : ""} with bids
           </p>
         </div>
 
@@ -98,7 +99,7 @@ export default function ClientBidsList() {
                       <h3 className="font-bold text-lg">{project.name}</h3>
                       <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                        Posted {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 bg-secondary/10 px-3 py-2 rounded-lg">
@@ -113,8 +114,8 @@ export default function ClientBidsList() {
         ) : (
           <EmptyState
             icon={Zap}
-            title="No hay ofertas"
-            description="Aún no has recibido ofertas en tus proyectos"
+            title="No bids received"
+            description="You haven't received any bids on your projects yet"
           />
         )}
       </main>

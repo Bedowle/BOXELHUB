@@ -26,8 +26,6 @@ export default function ChatPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: language === 'es' ? "No autorizado" : "Unauthorized",
-        description: language === 'es' ? "Iniciando sesión..." : "Signing in...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -47,18 +45,17 @@ export default function ChatPage() {
           <div className="flex items-center justify-between">
             <Button 
               variant="ghost" 
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/auth")}
               data-testid="button-back"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              language === 'es' ? 'Volver' : 'Back'}
             </Button>
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground">
                 {user.firstName || user.email}
               </span>
               <Button variant="outline" asChild size="sm">
-                <a href="/api/logout">language === 'es' ? 'Cerrar Sesión' : 'Logout'}</a>
+            {
               </Button>
             </div>
           </div>
@@ -75,7 +72,7 @@ export default function ChatPage() {
         ) : (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">language === 'es' ? 'Cargando chat...' : 'Loading chat...'}</p>
+            {
           </div>
         )}
       </main>

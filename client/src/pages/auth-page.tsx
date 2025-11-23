@@ -28,7 +28,7 @@ export default function AuthPage() {
   }, []);
 
   const handleBackToLanding = () => {
-    setLocation("/");
+    setLocation("/auth");
   };
 
   return (
@@ -63,14 +63,14 @@ export default function AuthPage() {
               </div>
 
               <LoginForm 
-                onSuccess={() => setLocation("/")}
+                onSuccess={() => setLocation("/auth")}
                 onForgotPassword={() => setView("forgot-password")}
               />
 
               <div className="text-center text-sm">
                 ¿No tienes cuenta?{" "}
                 <button
-                  onClick={() => setLocation("/auth?type=client")}
+                  onClick={() => setLocation("/auth")}
                   className="text-primary font-semibold hover:underline"
                   data-testid="button-switch-register"
                 >
@@ -97,7 +97,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold">Registro - Cliente</h2>
               </div>
               <ClientRegisterForm
-                onSuccess={() => setLocation("/")}
+                onSuccess={() => setLocation("/auth")}
                 onBack={handleBackToLanding}
               />
               
@@ -130,7 +130,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold">Registro - Maker</h2>
               </div>
               <MakerRegisterForm
-                onSuccess={() => setLocation("/")}
+                onSuccess={() => setLocation("/auth")}
                 onBack={handleBackToLanding}
               />
               

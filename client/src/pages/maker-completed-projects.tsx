@@ -145,7 +145,7 @@ export default function MakerCompletedProjects() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/maker")}
+            onClick={() => setLocation("/auth")}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
@@ -252,7 +252,7 @@ export default function MakerCompletedProjects() {
               rating,
               comment,
             });
-          }}
+          }
           isLoading={ratingMutation.isPending}
         />
       )}
