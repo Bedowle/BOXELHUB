@@ -1,3 +1,4 @@
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { Badge } from "@/components/ui/badge";
 import type { Project } from "@shared/schema";
 

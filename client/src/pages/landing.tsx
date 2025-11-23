@@ -1,3 +1,4 @@
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Upload, Users, CheckCircle, Star, TrendingUp } from "lucide-react";

@@ -94,10 +94,10 @@ export default function ClientHome() {
         {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            {language === 'es' ? 'Bienvenido a tu Dashboard' : 'Welcome to your Dashboard'}
+            language === 'es' ? 'Bienvenido a tu Dashboard' : 'Welcome to your Dashboard'}
           </h1>
           <p className="text-lg text-muted-foreground">
-            {language === 'es' ? 'Gestiona tus proyectos STL y recibe ofertas de los mejores makers' : 'Manage your STL projects and receive offers from the best makers'}
+            language === 'es' ? 'Gestiona tus proyectos STL y recibe ofertas de los mejores makers' : 'Manage your STL projects and receive offers from the best makers'}
           </p>
         </div>
 
@@ -112,7 +112,7 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">{language === 'es' ? 'Proyectos en Progreso' : 'Projects in Progress'}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">language === 'es' ? 'Proyectos en Progreso' : 'Projects in Progress'}</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
@@ -121,7 +121,7 @@ export default function ClientHome() {
                   <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {activeProjects.length + inProgressProjects.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">{language === 'es' ? 'activos y aceptados' : 'active and accepted'}</p>
+                  <p className="text-xs text-muted-foreground">language === 'es' ? 'activos y aceptados' : 'active and accepted'}</p>
                 </div>
               </div>
             </CardContent>
@@ -136,7 +136,7 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">{language === 'es' ? 'Ofertas Pendientes' : 'Pending Bids'}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">language === 'es' ? 'Ofertas Pendientes' : 'Pending Bids'}</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
                     <Zap className="h-5 w-5 text-secondary" />
                   </div>
@@ -158,14 +158,14 @@ export default function ClientHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">{language === 'es' ? 'Proyectos Terminados' : 'Completed Projects'}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">language === 'es' ? 'Proyectos Terminados' : 'Completed Projects'}</span>
                   <div className="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{completedProjects.length}</p>
-                  <p className="text-xs text-muted-foreground">{language === 'es' ? 'completados' : 'completed'}</p>
+                  <p className="text-xs text-muted-foreground">language === 'es' ? 'completados' : 'completed'}</p>
                 </div>
               </div>
             </CardContent>
@@ -179,7 +179,7 @@ export default function ClientHome() {
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 justify-center md:justify-start">
                   <FileUp className="h-6 w-6 text-primary" />
-                  {language === 'es' ? 'Sube tu próximo proyecto' : 'Upload your next project'}
+                  language === 'es' ? 'Sube tu próximo proyecto' : 'Upload your next project'}
                 </h2>
                 <p className="text-muted-foreground max-w-sm">
                   {canUploadMore 
@@ -195,7 +195,7 @@ export default function ClientHome() {
                 data-testid="button-upload-project"
               >
                 <Plus className="mr-2 h-5 w-5" />
-                {language === 'es' ? 'Subir Archivo STL' : 'Upload STL File'}
+                language === 'es' ? 'Subir Archivo STL' : 'Upload STL File'}
               </Button>
             </div>
           </CardContent>
@@ -204,9 +204,9 @@ export default function ClientHome() {
         {/* Projects Section */}
         <div>
           <div className="mb-8">
-            <h2 className="text-3xl font-bold">{language === 'es' ? 'Tus Proyectos' : 'Your Projects'}</h2>
+            <h2 className="text-3xl font-bold">language === 'es' ? 'Tus Proyectos' : 'Your Projects'}</h2>
             <p className="text-muted-foreground mt-1">
-              {language === 'es' 
+              language === 'es' 
                 ? `${activeProjects.length} ${activeProjects.length === 1 ? "proyecto" : "proyectos"} activo${activeProjects.length !== 1 ? "s" : ""}` 
                 : `${activeProjects.length} active ${activeProjects.length === 1 ? "project" : "projects"}`}
             </p>
@@ -221,9 +221,9 @@ export default function ClientHome() {
           ) : activeProjects.length === 0 ? (
             <EmptyState
               icon={Package}
-              title={language === 'es' ? 'Sin proyectos aún' : 'No projects yet'}
-              description={language === 'es' ? 'Sube tu primer archivo STL para recibir ofertas de makers profesionales' : 'Upload your first STL file to receive offers from professional makers'}
-              actionLabel={language === 'es' ? 'Subir Proyecto' : 'Upload Project'}
+              title=language === 'es' ? 'Sin proyectos aún' : 'No projects yet'}
+              description=language === 'es' ? 'Sube tu primer archivo STL para recibir ofertas de makers profesionales' : 'Upload your first STL file to receive offers from professional makers'}
+              actionLabel=language === 'es' ? 'Subir Proyecto' : 'Upload Project'}
               onAction={() => setUploadDialogOpen(true)}
             />
           ) : (

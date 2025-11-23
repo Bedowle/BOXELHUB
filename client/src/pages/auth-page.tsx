@@ -1,3 +1,4 @@
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import ClientRegisterForm from "@/components/ClientRegisterForm";

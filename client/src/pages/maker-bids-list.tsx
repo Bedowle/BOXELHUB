@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -27,8 +28,8 @@ export default function MakerBidsList() {
 
   if (!authLoading && !user) {
     toast({
-      title: "No autorizado",
-      description: "Iniciando sesión...",
+      title: language === 'es' ? "No autorizado" : "Unauthorized"},
+      description: language === 'es' ? "Iniciando sesión..." : "Signing in..."},
       variant: "destructive",
     });
     setTimeout(() => {
@@ -62,7 +63,7 @@ export default function MakerBidsList() {
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver
+            language === 'es' ? 'Volver' : 'Back'}
           </Button>
         </div>
       </header>

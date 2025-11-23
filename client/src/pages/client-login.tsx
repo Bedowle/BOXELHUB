@@ -1,3 +1,4 @@
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +31,7 @@ export default function ClientLoginPage({ onSuccess }: ClientLoginPageProps) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: {t('common.error')},
         description: error.message || "No se pudo procesar el login",
         variant: "destructive",
       });

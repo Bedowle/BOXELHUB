@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,8 +40,8 @@ export default function ChatsPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "No autorizado",
-        description: "Iniciando sesión...",
+        title: language === 'es' ? "No autorizado" : "Unauthorized"},
+        description: language === 'es' ? "Iniciando sesión..." : "Signing in..."},
         variant: "destructive",
       });
       setTimeout(() => {
@@ -87,7 +88,7 @@ export default function ChatsPage() {
             data-testid="button-back-to-dashboard"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver
+            language === 'es' ? 'Volver' : 'Back'}
           </Button>
         </div>
       </header>

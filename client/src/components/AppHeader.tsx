@@ -9,7 +9,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 export default function AppHeader() {
   const [, setLocation] = useLocation();
   const { user, isClient, isMaker } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const { data: conversations } = useQuery<Array<{ userId: string; unreadCount: number }>>({
     queryKey: ["/api/my-conversations-full"],

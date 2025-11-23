@@ -17,7 +17,7 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const mutation = useMutation({
     mutationFn: async () => {

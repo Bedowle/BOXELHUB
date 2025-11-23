@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export default function ChatPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   const otherUserId = params?.userId;
 
@@ -24,15 +26,15 @@ export default function ChatPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "No autorizado",
-        description: "Iniciando sesión...",
+        title: language === 'es' ? "No autorizado" : "Unauthorized",
+        description: language === 'es' ? "Iniciando sesión..." : "Signing in...",
         variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
     }
-  }, [user, authLoading, toast]);
+  }, [user, authLoading, toast, language]);
 
   if (!match || authLoading || !user) {
     return null;
@@ -49,14 +51,14 @@ export default function ChatPage() {
               data-testid="button-back"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
+              language === 'es' ? 'Volver' : 'Back'}
             </Button>
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground">
                 {user.firstName || user.email}
               </span>
               <Button variant="outline" asChild size="sm">
-                <a href="/api/logout">Cerrar Sesión</a>
+                <a href="/api/logout">language === 'es' ? 'Cerrar Sesión' : 'Logout'}</a>
               </Button>
             </div>
           </div>
@@ -73,7 +75,7 @@ export default function ChatPage() {
         ) : (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Cargando chat...</p>
+            <p className="text-muted-foreground">language === 'es' ? 'Cargando chat...' : 'Loading chat...'}</p>
           </div>
         )}
       </main>

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useState } from "react";
 import {
   Dialog,
