@@ -19,9 +19,11 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInterfaceProps) {
   const [messageText, setMessageText] = useState("");
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const markedAsReadRef = useRef<Set<string>>(new Set());
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", otherUserId],
@@ -45,6 +47,11 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
     enabled: !!otherUserId,
     refetchInterval: 500, // Refresh every 500ms for near real-time updates while chat is visible
   });
+
+  // Update local messages when fetched messages change
+  useEffect(() => {
+    setLocalMessages(messages);
+  }, [messages]);
 
   const sendMutation = useMutation({
     mutationFn: async (content: string) => {
@@ -85,13 +92,43 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
     }
   }, [otherUserId, queryClient]);
 
+  // Use Intersection Observer to mark messages as read when visible
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const messageId = entry.target.getAttribute("data-message-id");
+          const senderId = entry.target.getAttribute("data-sender-id");
+          
+          // Mark as read if it's a message from currentUser and not already marked
+          if (messageId && senderId === currentUserId && !markedAsReadRef.current.has(messageId)) {
+            markedAsReadRef.current.add(messageId);
+            
+            // Update local state optimistically
+            setLocalMessages(prev =>
+              prev.map(msg =>
+                msg.id === messageId ? { ...msg, isRead: true } : msg
+              )
+            );
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    // Observe all message elements
+    const messageElements = document.querySelectorAll("[data-message-id]");
+    messageElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [currentUserId, localMessages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [localMessages]);
 
   const handleSend = () => {
     if (messageText.trim()) {
@@ -125,17 +162,19 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
+        {localMessages.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <p>No hay mensajes aún</p>
             <p className="text-sm">¡Inicia la conversación!</p>
           </div>
         ) : (
-          messages.map((msg) => (
+          localMessages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}
               data-testid={`message-bubble-${msg.id}`}
+              data-message-id={msg.id}
+              data-sender-id={msg.senderId}
             >
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
