@@ -49,6 +49,32 @@ export function RatingDialog({
     }
   };
 
+  const handleStarClick = (star: number, event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const isLeftHalf = x < rect.width / 2;
+    
+    if (isLeftHalf) {
+      setRating(star - 0.5);
+    } else {
+      setRating(star);
+    }
+  };
+
+  const handleStarHover = (star: number, event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const isLeftHalf = x < rect.width / 2;
+    
+    if (isLeftHalf) {
+      setHoverRating(star - 0.5);
+    } else {
+      setHoverRating(star);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent data-testid="dialog-rating">
@@ -67,18 +93,18 @@ export function RatingDialog({
                 <button
                   key={star}
                   type="button"
-                  onClick={() => setRating(star * 0.5)}
-                  onMouseEnter={() => setHoverRating(star * 0.5)}
+                  onClick={(e) => handleStarClick(star, e)}
+                  onMouseMove={(e) => handleStarHover(star, e)}
                   onMouseLeave={() => setHoverRating(0)}
                   disabled={isLoading}
-                  className="transition-transform hover:scale-110"
+                  className="transition-transform hover:scale-110 cursor-pointer"
                   data-testid={`rating-star-${star}`}
                 >
                   <Star
                     className={`h-8 w-8 ${
-                      (hoverRating || rating) >= star * 0.5
+                      (hoverRating || rating) >= star
                         ? "fill-yellow-400 text-yellow-400"
-                        : (hoverRating || rating) >= star * 0.5 - 0.5
+                        : (hoverRating || rating) >= star - 0.5
                         ? "fill-yellow-200 text-yellow-400"
                         : "text-gray-300"
                     }`}
