@@ -716,6 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const bids = await storage.getBidsByMaker(userId);
+      console.log(`[/api/bids/my-bids] User ${userId.slice(0, 8)}... has ${bids.length} bids:`, bids.map(b => ({ projectId: b.projectId, status: b.status })));
       res.json(bids);
     } catch (error) {
       console.error("Error fetching bids:", error);

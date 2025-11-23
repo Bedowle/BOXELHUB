@@ -49,9 +49,14 @@ export default function MakerWonProjects() {
 
   // Get delivery status for all bids
   useEffect(() => {
-    if (!allBids || !myBidProjects) return;
+    console.log("[useEffect] Checking delivery status:", { allBidsCount: allBids?.length, myBidProjectsCount: myBidProjects?.length });
+    if (!allBids || !myBidProjects || allBids.length === 0) {
+      console.log("[useEffect] Skipping - no data yet");
+      return;
+    }
 
     const getDeliveryStatus = async () => {
+      console.log("[getDeliveryStatus] Starting...");
       const statuses: Record<string, { deliveryConfirmed: boolean; projectStatus: string }> = {};
 
       for (const bid of allBids) {
@@ -63,11 +68,13 @@ export default function MakerWonProjects() {
               deliveryConfirmed: response.deliveryConfirmed,
               projectStatus: project?.status || "unknown",
             };
+            console.log(`[getDeliveryStatus] Project ${bid.projectId} - confirmed: ${response.deliveryConfirmed}`);
           } catch (error) {
             console.error("Failed to check delivery status:", error);
           }
         }
       }
+      console.log("[getDeliveryStatus] Complete, statuses:", statuses);
       setBidsWithDelivery(statuses);
     };
 
@@ -97,15 +104,9 @@ export default function MakerWonProjects() {
     );
   }
 
-  // Filter: bids accepted + project not completed
-  const wonProjects = myBidProjects?.filter(p => {
-    // Find if this maker has an accepted bid on this project
-    const hasAcceptedBid = allBids?.some(
-      b => b.projectId === p.id && b.status === "accepted"
-    );
-    // Include projects where we have an accepted bid AND project is not completed
-    return hasAcceptedBid && p.status !== "completed";
-  }) || [];
+  // Filter: Show all projects that are not completed
+  // These are projects from /api/projects/my-bids which are projects where I have made bids
+  const wonProjects = myBidProjects?.filter(p => p.status !== "completed") || [];
 
   return (
     <div className="min-h-screen bg-background">
