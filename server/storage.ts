@@ -290,10 +290,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMakerBidForProject(makerId: string, projectId: string): Promise<Bid | undefined> {
+    // First try to get the accepted bid
+    const [acceptedBid] = await db
+      .select()
+      .from(bids)
+      .where(and(eq(bids.makerId, makerId), eq(bids.projectId, projectId), eq(bids.status, 'accepted')));
+    
+    if (acceptedBid) {
+      return acceptedBid;
+    }
+    
+    // If no accepted bid, get the most recent pending bid
+    const [pendingBid] = await db
+      .select()
+      .from(bids)
+      .where(and(eq(bids.makerId, makerId), eq(bids.projectId, projectId), eq(bids.status, 'pending')))
+      .orderBy(desc(bids.createdAt))
+      .limit(1);
+    
+    if (pendingBid) {
+      return pendingBid;
+    }
+    
+    // If neither accepted nor pending, get the most recent bid
     const [bid] = await db
       .select()
       .from(bids)
-      .where(and(eq(bids.makerId, makerId), eq(bids.projectId, projectId)));
+      .where(and(eq(bids.makerId, makerId), eq(bids.projectId, projectId)))
+      .orderBy(desc(bids.createdAt))
+      .limit(1);
+    
     return bid;
   }
 
