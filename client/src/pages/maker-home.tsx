@@ -51,7 +51,7 @@ export default function MakerHome() {
     enabled: !!user && !!profile,
   });
 
-  const { data: myBids } = useQuery<{ projectId: string; status: string }[]>({
+  const { data: myBids } = useQuery<{ projectId: string; status: string; deliveryConfirmedAt?: string | null }[]>({
     queryKey: ["/api/bids/my-bids"],
     enabled: !!user && !!profile,
   });
@@ -115,9 +115,16 @@ export default function MakerHome() {
   const projectsLoading = availableLoading || myBidsLoading;
   const allProjects = [...(availableProjects || []), ...(myBidProjects?.filter(p => p.status !== "active") || [])];
   
+  // Get project IDs that have been delivered
+  const deliveredProjectIds = new Set(
+    myBids
+      ?.filter(bid => bid.deliveryConfirmedAt)
+      .map(bid => bid.projectId) || []
+  );
+  
   const filteredProjects = allProjects.filter(project => {
-    // Exclude completed projects
-    if (project.status === "completed") {
+    // Exclude completed/delivered projects
+    if (project.status === "completed" || deliveredProjectIds.has(project.id)) {
       return false;
     }
 
