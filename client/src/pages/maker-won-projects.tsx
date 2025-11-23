@@ -32,23 +32,35 @@ export default function MakerWonProjects() {
     enabled: !!user,
   });
 
-  // Load delivery status for all won projects
+  // Query delivery status for all won projects
+  const { data: allDeliveryStatuses } = useQuery<Record<string, { deliveryConfirmed: boolean; hasRated: boolean }>>({
+    queryKey: ["/api/maker/delivery-statuses"],
+    queryFn: async () => {
+      const wonProjects = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "accepted")) || [];
+      if (wonProjects.length === 0) return {};
+      
+      const statuses: Record<string, { deliveryConfirmed: boolean; hasRated: boolean }> = {};
+      await Promise.all(
+        wonProjects.map(async (project) => {
+          try {
+            const response = await apiRequest("GET", `/api/projects/${project.id}/check-rating-by-maker`);
+            statuses[project.id] = response;
+          } catch (error) {
+            console.error("Failed to check rating status:", error);
+          }
+        })
+      );
+      return statuses;
+    },
+    enabled: !!user && !!myBidProjects && !!myBids,
+  });
+
+  // Sync delivery statuses from query to state
   useEffect(() => {
-    const wonProjects = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "accepted")) || [];
-    if (wonProjects.length > 0) {
-      wonProjects.forEach(async (project) => {
-        try {
-          const response = await apiRequest("GET", `/api/projects/${project.id}/check-rating-by-maker`);
-          setDeliveryStatus(prev => ({
-            ...prev,
-            [project.id]: response
-          }));
-        } catch (error) {
-          console.error("Failed to check rating status:", error);
-        }
-      });
+    if (allDeliveryStatuses) {
+      setDeliveryStatus(allDeliveryStatuses);
     }
-  }, [myBidProjects, myBids]);
+  }, [allDeliveryStatuses]);
 
   const ratingMutation = useMutation({
     mutationFn: async (data: { projectId: string; rating: number; comment?: string }) => {

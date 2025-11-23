@@ -87,9 +87,11 @@ export function useWebSocket() {
               queryClient.invalidateQueries({ queryKey: ["/api/bids/my-bids"] });
               queryClient.invalidateQueries({ queryKey: ["/api/bids/stats"] });
               queryClient.invalidateQueries({ queryKey: ["/api/projects/my-bids"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/maker/delivery-statuses"] });
               if (data.projectId) {
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "bids"] });
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId] });
+                queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "check-rating-by-maker"] });
               }
               break;
               
