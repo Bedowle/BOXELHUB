@@ -238,7 +238,11 @@ export default function MakerHome() {
           </Card>
 
           {/* Completed Projects */}
-          <Card className="border-2 border-accent/20 hover-elevate">
+          <Card 
+            className="border-2 border-accent/20 hover-elevate cursor-pointer"
+            onClick={() => setLocation("/maker/completed-projects")}
+            data-testid="card-stats-completed-projects"
+          >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
