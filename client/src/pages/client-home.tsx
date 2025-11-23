@@ -94,7 +94,11 @@ export default function ClientHome() {
         {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Projects */}
-          <Card className="border-2 border-primary/20 hover-elevate">
+          <Card 
+            className="border-2 border-primary/20 hover-elevate cursor-pointer"
+            onClick={() => setLocation("/client/projects")}
+            data-testid="card-stats-active-projects"
+          >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -114,7 +118,11 @@ export default function ClientHome() {
           </Card>
 
           {/* Pending Bids */}
-          <Card className="border-2 border-secondary/20 hover-elevate">
+          <Card 
+            className="border-2 border-secondary/20 hover-elevate cursor-pointer"
+            onClick={() => setLocation("/client/bids")}
+            data-testid="card-stats-pending-bids"
+          >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -132,7 +140,11 @@ export default function ClientHome() {
           </Card>
 
           {/* Accepted Offers */}
-          <Card className="border-2 border-accent/20 hover-elevate">
+          <Card 
+            className="border-2 border-accent/20 hover-elevate cursor-pointer"
+            onClick={() => setLocation("/client/projects-in-progress")}
+            data-testid="card-stats-accepted-offers"
+          >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">

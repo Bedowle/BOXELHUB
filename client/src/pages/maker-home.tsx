@@ -148,7 +148,11 @@ export default function MakerHome() {
         {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
-          <Card className="border-2 border-primary/20 hover-elevate">
+          <Card 
+            className="border-2 border-primary/20 hover-elevate cursor-pointer"
+            onClick={() => setLocation("/maker/bids")}
+            data-testid="card-stats-active-bids"
+          >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -166,7 +170,11 @@ export default function MakerHome() {
           </Card>
 
           {/* Won Projects */}
-          <Card className="border-2 border-secondary/20 hover-elevate">
+          <Card 
+            className="border-2 border-secondary/20 hover-elevate cursor-pointer"
+            onClick={() => setLocation("/maker/won-projects")}
+            data-testid="card-stats-won-projects"
+          >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">

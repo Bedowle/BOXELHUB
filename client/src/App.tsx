@@ -16,6 +16,11 @@ import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import ProjectDetails from "@/pages/project-details";
 import MakerProjectDetails from "@/pages/maker-project-details";
+import ClientProjectsList from "@/pages/client-projects-list";
+import ClientBidsList from "@/pages/client-bids-list";
+import ClientInProgress from "@/pages/client-in-progress";
+import MakerBidsList from "@/pages/maker-bids-list";
+import MakerWonProjects from "@/pages/maker-won-projects";
 import ChatPage from "@/pages/chat-page";
 import ChatsPage from "@/pages/chats";
 import VerifyEmailPage from "@/pages/verify-email";
@@ -66,6 +71,9 @@ function Router() {
             <>
               <Route path="/" component={ClientHome} />
               <Route path="/client" component={ClientHome} />
+              <Route path="/client/projects" component={ClientProjectsList} />
+              <Route path="/client/bids" component={ClientBidsList} />
+              <Route path="/client/projects-in-progress" component={ClientInProgress} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
             </>
@@ -76,6 +84,8 @@ function Router() {
             <>
               <Route path="/" component={MakerHome} />
               <Route path="/maker" component={MakerHome} />
+              <Route path="/maker/bids" component={MakerBidsList} />
+              <Route path="/maker/won-projects" component={MakerWonProjects} />
               <Route path="/maker/project/:id" component={MakerProjectDetails} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
