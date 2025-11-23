@@ -335,8 +335,8 @@ export default function MakerHome() {
           )}
 
           {/* Fade & Button Section - Always visible */}
-          <div className="relative mt-0 pt-4">
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
+          <div className="relative -mt-24 pt-0">
+            <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
             <div className="flex justify-center">
               <Button
                 size="lg"
