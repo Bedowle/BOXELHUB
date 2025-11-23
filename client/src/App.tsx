@@ -15,6 +15,7 @@ import AuthPage from "@/pages/auth-page";
 import ClientHome from "@/pages/client-home";
 import MakerHome from "@/pages/maker-home";
 import MakerProfile from "@/pages/maker-profile";
+import MakerReviews from "@/pages/maker-reviews";
 import ProjectDetails from "@/pages/project-details";
 import MakerProjectDetails from "@/pages/maker-project-details";
 import ClientProjectsActive from "@/pages/client-projects-active";
@@ -87,6 +88,7 @@ function Router() {
               <Route path="/" component={MakerHome} />
               <Route path="/maker" component={MakerHome} />
               <Route path="/maker/profile" component={MakerProfile} />
+              <Route path="/maker/reviews" component={MakerReviews} />
               <Route path="/maker/bids" component={MakerBidsList} />
               <Route path="/maker/won-projects" component={MakerWonProjects} />
               <Route path="/maker/completed-projects" component={MakerCompletedProjects} />

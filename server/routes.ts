@@ -1084,6 +1084,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/reviews/my-reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const reviews = await storage.getReviewsForMaker(userId);
+      
+      // Enrich reviews with author user data
+      const enriched = await Promise.all(
+        reviews.map(async (review) => {
+          const fromUser = await storage.getUser(review.fromUserId);
+          return {
+            ...review,
+            fromUser,
+          };
+        })
+      );
+      
+      res.json(enriched);
+    } catch (error) {
+      console.error("Error fetching maker reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);

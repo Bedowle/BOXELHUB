@@ -90,9 +90,14 @@ export default function MakerProfile() {
                         {((profile.rating || 0) as number).toFixed(2)}
                       </span>
                     </div>
-                    <Badge variant="secondary">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation("/maker/reviews")}
+                      data-testid="button-view-reviews"
+                    >
                       {profile.totalReviews || 0} reseña{(profile.totalReviews || 0) !== 1 ? "s" : ""}
-                    </Badge>
+                    </Button>
                   </div>
                 )}
               </div>

@@ -1,0 +1,130 @@
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/EmptyState";
+import { ArrowLeft, Star, MessageCircle } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+import type { Review, User } from "@shared/schema";
+
+interface ReviewWithAuthor extends Review {
+  fromUser?: User;
+}
+
+export default function MakerReviews() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const { data: reviews = [], isLoading } = useQuery<ReviewWithAuthor[]>({
+    queryKey: ["/api/reviews/my-reviews"],
+    enabled: !!user,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando reseñas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/maker/profile")}
+          className="mb-6"
+          data-testid="button-back"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Mis Reseñas</h1>
+          <p className="text-muted-foreground">
+            {reviews.length} reseña{reviews.length !== 1 ? "s" : ""} recibida{reviews.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {/* Reviews List */}
+        {reviews.length === 0 ? (
+          <EmptyState
+            icon={MessageCircle}
+            title="Sin reseñas"
+            description="Aún no has recibido ninguna reseña. Cuando completes tus primeros proyectos, tus clientes podrán valorarte."
+          />
+        ) : (
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <Card key={review.id} className="overflow-hidden">
+                <CardContent className="pt-6 pb-6">
+                  <div className="space-y-4">
+                    {/* Review Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={review.fromUser?.profileImageUrl || ""} alt={review.fromUser?.firstName || "Usuario"} />
+                          <AvatarFallback>
+                            {(review.fromUser?.firstName || "U").charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold">{review.fromUser?.firstName || "Usuario Anónimo"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(review.createdAt), { locale: es, addSuffix: true })}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Rating Stars */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => {
+                            const rating = (review.rating as unknown as number) || 0;
+                            return (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < Math.floor(rating)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : i < rating
+                                    ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                    : "text-muted-foreground"
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
+                        <Badge variant="outline">
+                          {((review.rating as unknown as number) || 0).toFixed(1)}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Review Comment */}
+                    {review.comment && (
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <p className="text-sm text-foreground">{review.comment}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
