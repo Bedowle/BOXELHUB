@@ -1058,6 +1058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const user = await storage.getUser(conv.userId);
           return {
             userId: conv.userId,
+            projectId: conv.projectId,
             user,
             lastMessage: conv.lastMessage,
             unreadCount: conv.unreadCount,

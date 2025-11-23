@@ -58,7 +58,7 @@ export interface IStorage {
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
   getMessagesByProject(userId: string, projectId: string, otherUserId: string): Promise<Message[]>;
   getConversationsForUser(userId: string): Promise<Array<{ userId: string; lastMessage?: Message }>>;
-  getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; lastMessage?: Message; unreadCount: number }>>;
+  getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; projectId?: string | null; lastMessage?: Message; unreadCount: number }>>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(userId: string, senderId: string): Promise<void>;
   markMessagesAsReadByProject(userId: string, projectId: string, otherUserId: string): Promise<void>;
@@ -451,7 +451,7 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; lastMessage?: Message; unreadCount: number }>> {
+  async getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; projectId?: string | null; lastMessage?: Message; unreadCount: number }>> {
     // Get all messages where user is sender or receiver
     const allMessages = await db
       .select()
@@ -461,19 +461,22 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(messages.createdAt));
 
-    // Group messages by conversation partner and count unread
+    // Group messages by conversation partner AND project ID (unique key per conversation)
     const conversationMap = new Map<string, { lastMsg: Message; unreadCount: number }>();
     
     for (const msg of allMessages) {
       const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
-      if (!conversationMap.has(partnerId)) {
-        conversationMap.set(partnerId, { 
+      // Create unique key combining partner ID and project ID (project ID might be null)
+      const conversationKey = `${partnerId}::${msg.projectId || 'no-project'}`;
+      
+      if (!conversationMap.has(conversationKey)) {
+        conversationMap.set(conversationKey, { 
           lastMsg: msg, 
           unreadCount: msg.receiverId === userId && !msg.isRead ? 1 : 0 
         });
       } else {
         // Increment unread count for messages from this partner that are unread
-        const existing = conversationMap.get(partnerId)!;
+        const existing = conversationMap.get(conversationKey)!;
         if (msg.receiverId === userId && !msg.isRead) {
           existing.unreadCount++;
         }
@@ -481,11 +484,15 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Convert to array
-    return Array.from(conversationMap.entries()).map(([partnerId, data]) => ({
-      userId: partnerId,
-      lastMessage: data.lastMsg,
-      unreadCount: data.unreadCount,
-    }));
+    return Array.from(conversationMap.entries()).map(([key, data]) => {
+      const [partnerId, projectKey] = key.split('::');
+      return {
+        userId: partnerId,
+        projectId: projectKey === 'no-project' ? null : projectKey,
+        lastMessage: data.lastMsg,
+        unreadCount: data.unreadCount,
+      };
+    });
   }
 
   // Stats operations
