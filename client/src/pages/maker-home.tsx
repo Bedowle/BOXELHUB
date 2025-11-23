@@ -116,6 +116,11 @@ export default function MakerHome() {
   const allProjects = [...(availableProjects || []), ...(myBidProjects?.filter(p => p.status !== "active") || [])];
   
   const filteredProjects = allProjects.filter(project => {
+    // Exclude completed projects
+    if (project.status === "completed") {
+      return false;
+    }
+
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase());
     
