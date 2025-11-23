@@ -123,6 +123,16 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                 <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
                   Aceptada
                 </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onContact?.(bid.makerId)}
+                  disabled={isPending}
+                  data-testid={`button-contact-${bid.id}`}
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  Chat
+                </Button>
                 {isClient && !bid.deliveryConfirmedAt && (
                   <Button
                     size="sm"
