@@ -244,6 +244,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/my-bids', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can access this endpoint" });
+      }
+
+      // Get all bids from this maker
+      const bids = await storage.getBidsByMaker(userId);
+      
+      // Get unique project IDs
+      const projectIds = [...new Set(bids.map(b => b.projectId))];
+      
+      // Get projects for those IDs
+      const projects = await Promise.all(
+        projectIds.map(projectId => storage.getProject(projectId))
+      );
+      
+      // Filter out any null projects
+      const validProjects = projects.filter(p => p !== undefined) as any[];
+      
+      // Add bid count for each project
+      const projectsWithBids = await Promise.all(
+        validProjects.map(async (project) => {
+          const projectBids = await storage.getBidsByProject(project.id);
+          return { ...project, bidCount: projectBids.length };
+        })
+      );
+      
+      res.json(projectsWithBids);
+    } catch (error) {
+      console.error("Error fetching my-bid projects:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
   app.get('/api/projects/stats', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
