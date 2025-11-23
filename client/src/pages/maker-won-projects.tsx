@@ -9,18 +9,26 @@ import { ArrowLeft, Trophy, Clock, CheckCircle2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { apiRequest } from "@/lib/queryClient";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { Project } from "@shared/schema";
-
-interface BidWithDelivery {
-  projectId: string;
-  status: string;
-  deliveryConfirmedAt: string | null;
-}
 
 interface RatingCheckResponse {
   deliveryConfirmed: boolean;
   hasRated: boolean;
+}
+
+// Bid type from database
+interface Bid {
+  id: string;
+  projectId: string;
+  makerId: string;
+  price: string;
+  deliveryDays: number;
+  message?: string;
+  status: "pending" | "accepted" | "rejected";
+  deliveryConfirmedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function MakerWonProjects() {
@@ -29,7 +37,7 @@ export default function MakerWonProjects() {
   const { toast } = useToast();
   const [bidsWithDelivery, setBidsWithDelivery] = useState<Record<string, { deliveryConfirmed: boolean; projectStatus: string }>>({});
 
-  const { data: allBids } = useQuery<BidWithDelivery[]>({
+  const { data: allBids } = useQuery<Bid[]>({
     queryKey: ["/api/bids/my-bids"],
     enabled: !!user,
   });
@@ -91,8 +99,12 @@ export default function MakerWonProjects() {
 
   // Filter: bids accepted + project not completed
   const wonProjects = myBidProjects?.filter(p => {
-    const bid = allBids?.find(b => b.projectId === p.id && b.status === "accepted");
-    return !!bid && p.status !== "completed";
+    // Find if this maker has an accepted bid on this project
+    const hasAcceptedBid = allBids?.some(
+      b => b.projectId === p.id && b.status === "accepted"
+    );
+    // Include projects where we have an accepted bid AND project is not completed
+    return hasAcceptedBid && p.status !== "completed";
   }) || [];
 
   return (
