@@ -228,6 +228,7 @@ export default function MakerProjectDetails() {
           onOpenChange={setChatDialogOpen}
           otherUser={projectOwner}
           currentUserId={user.id}
+          projectId={projectId!}
         />
       )}
     </div>

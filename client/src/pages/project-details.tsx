@@ -288,7 +288,7 @@ export default function ProjectDetails() {
                     setSelectedBidForRating(bidId);
                     setRatingDialogOpen(true);
                   }}
-                  onContact={(makerId) => {
+                  onContact={(makerId, projectId) => {
                     const makerUser = bid.maker;
                     if (makerUser) {
                       setSelectedMaker(makerUser);
@@ -329,6 +329,7 @@ export default function ProjectDetails() {
           onOpenChange={setChatDialogOpen}
           otherUser={selectedMaker}
           currentUserId={user.id}
+          projectId={projectId!}
         />
       )}
 

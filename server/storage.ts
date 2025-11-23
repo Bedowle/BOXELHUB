@@ -56,10 +56,12 @@ export interface IStorage {
 
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
+  getMessagesByProject(userId: string, projectId: string, otherUserId: string): Promise<Message[]>;
   getConversationsForUser(userId: string): Promise<Array<{ userId: string; lastMessage?: Message }>>;
   getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; lastMessage?: Message; unreadCount: number }>>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(userId: string, senderId: string): Promise<void>;
+  markMessagesAsReadByProject(userId: string, projectId: string, otherUserId: string): Promise<void>;
 
   // Review operations
   getReviewsForMaker(makerId: string): Promise<Review[]>;
@@ -331,6 +333,20 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
+  async getMessagesByProject(userId: string, projectId: string, otherUserId: string): Promise<Message[]> {
+    const results = await db
+      .select()
+      .from(messages)
+      .where(
+        and(
+          eq(messages.projectId, projectId),
+          sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
+        )
+      )
+      .orderBy(asc(messages.createdAt));
+    return results;
+  }
+
   async createMessage(messageData: InsertMessage): Promise<Message> {
     const [message] = await db.insert(messages).values(messageData).returning();
     return message;
@@ -344,6 +360,20 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(messages.receiverId, userId),
           eq(messages.senderId, senderId),
+          eq(messages.isRead, false)
+        )
+      );
+  }
+
+  async markMessagesAsReadByProject(userId: string, projectId: string, otherUserId: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(messages.projectId, projectId),
+          eq(messages.receiverId, userId),
+          eq(messages.senderId, otherUserId),
           eq(messages.isRead, false)
         )
       );

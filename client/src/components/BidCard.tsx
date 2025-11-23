@@ -11,7 +11,7 @@ interface BidCardProps {
   };
   onAccept?: (bidId: string) => void;
   onReject?: (bidId: string) => void;
-  onContact?: (makerId: string) => void;
+  onContact?: (makerId: string, projectId: string) => void;
   onConfirmDelivery?: (bidId: string) => void;
   isClient?: boolean;
   isPending?: boolean;
@@ -91,7 +91,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onContact?.(bid.makerId)}
+                  onClick={() => onContact?.(bid.makerId, bid.projectId)}
                   disabled={isPending}
                   data-testid={`button-contact-${bid.id}`}
                 >
@@ -126,7 +126,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onContact?.(bid.makerId)}
+                  onClick={() => onContact?.(bid.makerId, bid.projectId)}
                   disabled={isPending}
                   data-testid={`button-contact-${bid.id}`}
                 >

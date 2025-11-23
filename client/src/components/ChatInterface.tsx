@@ -15,9 +15,10 @@ interface ChatInterfaceProps {
   otherUserId: string;
   otherUser: User | undefined;
   currentUserId: string;
+  projectId?: string;
 }
 
-export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInterfaceProps) {
+export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId }: ChatInterfaceProps) {
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -25,10 +26,12 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
   const markReadTimeoutRef = useRef<NodeJS.Timeout>();
 
   const { data: messages = [] } = useQuery<Message[]>({
-    queryKey: ["/api/messages", otherUserId],
+    queryKey: ["/api/messages", projectId, otherUserId],
     queryFn: async () => {
       try {
-        const url = `/api/messages?otherUserId=${encodeURIComponent(otherUserId)}`;
+        const url = projectId 
+          ? `/api/messages?projectId=${encodeURIComponent(projectId)}&otherUserId=${encodeURIComponent(otherUserId)}`
+          : `/api/messages?otherUserId=${encodeURIComponent(otherUserId)}`;
         const response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
@@ -52,12 +55,12 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
         senderId: currentUserId,
         receiverId: otherUserId,
         content,
-        projectId: undefined,
+        projectId: projectId || undefined,
       });
     },
     onSuccess: () => {
       setMessageText("");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages", otherUserId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", projectId, otherUserId] });
     },
     onError: (error: Error) => {
       toast({
@@ -78,7 +81,10 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       
       markReadTimeoutRef.current = setTimeout(async () => {
         try {
-          await apiRequest("PUT", `/api/messages/mark-read/${otherUserId}`, {});
+          const url = projectId 
+            ? `/api/messages/mark-read/${projectId}/${otherUserId}`
+            : `/api/messages/mark-read/${otherUserId}`;
+          await apiRequest("PUT", url, {});
           // Invalidate conversations to remove unread badges
           queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
           queryClient.invalidateQueries({ queryKey: ["/api/my-conversations"] });
@@ -93,7 +99,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
         clearTimeout(markReadTimeoutRef.current);
       }
     };
-  }, [otherUserId, queryClient]);
+  }, [otherUserId, projectId, queryClient]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

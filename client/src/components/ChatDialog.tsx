@@ -13,9 +13,10 @@ interface ChatDialogProps {
   onOpenChange: (open: boolean) => void;
   otherUser: User;
   currentUserId: string;
+  projectId?: string;
 }
 
-export function ChatDialog({ open, onOpenChange, otherUser, currentUserId }: ChatDialogProps) {
+export function ChatDialog({ open, onOpenChange, otherUser, currentUserId, projectId }: ChatDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -41,6 +42,7 @@ export function ChatDialog({ open, onOpenChange, otherUser, currentUserId }: Cha
           otherUserId={otherUser.id}
           otherUser={otherUser}
           currentUserId={currentUserId}
+          projectId={projectId}
         />
       </DialogContent>
     </Dialog>
