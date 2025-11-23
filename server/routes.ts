@@ -756,6 +756,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/:projectId/check-rating-by-maker', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const bid = await storage.getMakerBidForProject(userId, projectId);
+      if (!bid) {
+        return res.status(404).json({ message: "No bid found for this project" });
+      }
+
+      if (!bid.deliveryConfirmedAt) {
+        return res.json({ hasRated: false, deliveryConfirmed: false });
+      }
+
+      const review = await storage.getReviewForProject(projectId, userId, project.userId);
+      res.json({ hasRated: !!review, deliveryConfirmed: true });
+    } catch (error) {
+      console.error("Error checking rating:", error);
+      res.status(500).json({ message: "Failed to check rating" });
+    }
+  });
+
+  app.put('/api/projects/:projectId/rate-client-from-won-project', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const { rating, comment } = req.body;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can rate clients" });
+      }
+
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const bid = await storage.getMakerBidForProject(userId, projectId);
+      if (!bid) {
+        return res.status(404).json({ message: "No bid found for this project" });
+      }
+
+      if (bid.status !== 'accepted' || !bid.deliveryConfirmedAt) {
+        return res.status(400).json({ message: "Can only rate after delivery is confirmed" });
+      }
+
+      const existingReview = await storage.getReviewForProject(projectId, userId, project.userId);
+      if (existingReview) {
+        return res.status(400).json({ message: "You have already rated this client" });
+      }
+
+      await storage.createReview({
+        projectId: projectId,
+        fromUserId: userId,
+        toUserId: project.userId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
+
+      res.json({ message: "Client rated successfully" });
+    } catch (error) {
+      console.error("Error rating client:", error);
+      res.status(500).json({ message: "Failed to rate client" });
+    }
+  });
+
   // Maker profile routes
   app.get('/api/maker-profile', isAuthenticated, async (req: any, res) => {
     try {

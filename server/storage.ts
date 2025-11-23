@@ -67,6 +67,7 @@ export interface IStorage {
   getReviewsForMaker(makerId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
   getReviewStats(makerId: string): Promise<{ averageRating: number; totalReviews: number }>;
+  getReviewForProject(projectId: string, fromUserId: string, toUserId: string): Promise<Review | undefined>;
 
   // Stats operations
   getClientStats(userId: string): Promise<{
@@ -527,6 +528,18 @@ export class DatabaseStorage implements IStorage {
       averageRating: result?.averageRating ? parseFloat(result.averageRating) : 0,
       totalReviews: result?.totalReviews || 0,
     };
+  }
+
+  async getReviewForProject(projectId: string, fromUserId: string, toUserId: string): Promise<Review | undefined> {
+    const [review] = await db
+      .select()
+      .from(reviews)
+      .where(and(
+        eq(reviews.projectId, projectId),
+        eq(reviews.fromUserId, fromUserId),
+        eq(reviews.toUserId, toUserId)
+      ));
+    return review;
   }
 
   async getMakerStats(userId: string): Promise<{

@@ -82,7 +82,7 @@ export function useWebSocket() {
             case "delivery_confirmed":
               toast({
                 title: "Entrega confirmada",
-                description: `${data.clientName} ha confirmado la recepción de "${data.projectName}"`,
+                description: `${data.clientName} ha confirmado la recepción de "${data.projectName}". Puedes calificar desde tus proyectos ganados.`,
               });
               queryClient.invalidateQueries({ queryKey: ["/api/bids/my-bids"] });
               queryClient.invalidateQueries({ queryKey: ["/api/bids/stats"] });
@@ -91,14 +91,6 @@ export function useWebSocket() {
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "bids"] });
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId] });
               }
-              // Emit custom event so maker-home can show rating dialog
-              window.dispatchEvent(new CustomEvent("delivery_confirmed", { 
-                detail: { 
-                  bidId: data.bidId,
-                  clientName: data.clientName,
-                  projectName: data.projectName
-                }
-              }));
               break;
               
             case "new_message":
