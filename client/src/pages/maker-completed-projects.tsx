@@ -31,6 +31,7 @@ export default function MakerCompletedProjects() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectName, setSelectedProjectName] = useState<string>("");
   const [ratingStatuses, setRatingStatuses] = useState<Record<string, boolean>>({});
+  const [deliveryConfirmedProjectIds, setDeliveryConfirmedProjectIds] = useState<Set<string>>(new Set());
 
   const { data: myBidProjects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-bids"],
@@ -42,27 +43,34 @@ export default function MakerCompletedProjects() {
     enabled: !!user,
   });
 
-  // Check rating status for all completed projects
+  // Check rating status for all projects with accepted bids
   useEffect(() => {
     if (!myBidProjects || !myBids) return;
 
-    const completedProjects = myBidProjects.filter(p => {
+    const projectsWithAcceptedBids = myBidProjects.filter(p => {
       const bid = myBids.find(b => b.projectId === p.id);
-      return bid?.status === "accepted" && p.status === "completed";
+      return bid?.status === "accepted";
     });
 
     const checkRatingStatus = async () => {
       const statuses: Record<string, boolean> = {};
+      const confirmedIds = new Set<string>();
 
-      for (const project of completedProjects) {
+      for (const project of projectsWithAcceptedBids) {
         try {
-          const response = await apiRequest("GET", `/api/projects/${project.id}/check-rating-by-maker`) as unknown as RatingCheckResponse;
+          const res = await apiRequest("GET", `/api/projects/${project.id}/check-rating-by-maker`);
+          const response = await res.json() as RatingCheckResponse;
           statuses[project.id] = response.hasRated;
+          // Mark projects with confirmed delivery
+          if (response.deliveryConfirmed) {
+            confirmedIds.add(project.id);
+          }
         } catch (error) {
           console.error("Failed to check rating status:", error);
         }
       }
       setRatingStatuses(statuses);
+      setDeliveryConfirmedProjectIds(confirmedIds);
     };
 
     checkRatingStatus();
@@ -120,8 +128,7 @@ export default function MakerCompletedProjects() {
   }
 
   const completedProjects = myBidProjects?.filter(p => {
-    const bid = myBids?.find(b => b.projectId === p.id);
-    return bid?.status === "accepted" && p.status === "completed";
+    return deliveryConfirmedProjectIds.has(p.id);
   }) || [];
 
   const handleRateClick = (projectId: string, projectName: string) => {
