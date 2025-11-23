@@ -15,7 +15,7 @@ import { ChatDialog } from "@/components/ChatDialog";
 import { RatingDialog } from "@/components/RatingDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BidCardSkeleton } from "@/components/LoadingSkeleton";
-import { ArrowLeft, Calendar, FileText, Package } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Package, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project, Bid, User, MakerProfile } from "@shared/schema";
@@ -49,6 +49,11 @@ export default function ProjectDetails() {
   const { data: myBid } = useQuery<Bid | null>({
     queryKey: ["/api/projects", projectId, "my-bid"],
     enabled: !!projectId && !!user && isMaker,
+  });
+
+  const { data: acceptedBid } = useQuery<(Bid & { maker?: User & { makerProfile?: MakerProfile | null } }) | null>({
+    queryKey: ["/api/projects", projectId, "accepted-bid"],
+    enabled: !!projectId && !!user && isClient,
   });
 
   const acceptBidMutation = useMutation({
@@ -254,6 +259,20 @@ export default function ProjectDetails() {
                   data-testid="button-submit-bid"
                 >
                   Enviar Oferta
+                </Button>
+              )}
+              {isOwner && acceptedBid && acceptedBid.maker && (
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedMaker(acceptedBid.maker!);
+                    setChatDialogOpen(true);
+                  }}
+                  data-testid="button-chat-maker"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
                 </Button>
               )}
             </div>

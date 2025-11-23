@@ -411,6 +411,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/:id/accepted-bid', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Only project owner can see accepted bid
+      if (user?.userType === 'client' && project.userId !== userId) {
+        return res.status(403).json({ message: "You can only see bids for your own projects" });
+      }
+
+      const bids = await storage.getBidsByProject(id);
+      const acceptedBid = bids.find(b => b.status === 'accepted');
+      
+      if (!acceptedBid) {
+        return res.json(null);
+      }
+
+      // Populate maker information
+      const maker = await storage.getUser(acceptedBid.makerId);
+      const makerProfile = maker ? await storage.getMakerProfile(maker.id) : null;
+      
+      res.json({ 
+        ...acceptedBid, 
+        maker: maker ? { ...maker, makerProfile } : undefined 
+      });
+    } catch (error) {
+      console.error("Error fetching accepted bid:", error);
+      res.status(500).json({ message: "Failed to fetch accepted bid" });
+    }
+  });
+
   app.get('/api/projects/:id/download-stl', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
