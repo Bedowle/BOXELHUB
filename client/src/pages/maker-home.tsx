@@ -305,7 +305,7 @@ export default function MakerHome() {
             />
           ) : (
             <div className="relative">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-0">
                 {filteredProjects?.map((project, index) => {
                   const hasMyBid = myBidProjects?.some(p => p.id === project.id);
                   const isHidden = index >= 3;
@@ -329,13 +329,13 @@ export default function MakerHome() {
                 })}
               </div>
               {filteredProjects && filteredProjects.length > 3 && (
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background pointer-events-none" />
               )}
             </div>
           )}
 
           {/* Fade & Button Section - Always visible */}
-          <div className="relative mt-12 pt-12">
+          <div className="relative mt-0 pt-4">
             <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
             <div className="flex justify-center">
               <Button
