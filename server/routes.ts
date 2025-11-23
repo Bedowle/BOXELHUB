@@ -774,7 +774,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No bid found for this project" });
       }
 
-      if (!bid.deliveryConfirmedAt) {
+      console.log("Checking bid delivery status:", { bidId: bid.id, deliveryConfirmedAt: bid.deliveryConfirmedAt, status: bid.status });
+
+      // Check if delivery has been confirmed by looking at deliveryConfirmedAt
+      const deliveryConfirmed = !!bid.deliveryConfirmedAt;
+      
+      if (!deliveryConfirmed) {
         return res.json({ hasRated: false, deliveryConfirmed: false });
       }
 
