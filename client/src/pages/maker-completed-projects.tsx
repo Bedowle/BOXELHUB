@@ -1,19 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { RatingDialog } from "@/components/RatingDialog";
+import { ArrowLeft, CheckCircle, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useState } from "react";
 import type { Project } from "@shared/schema";
 
 export default function MakerCompletedProjects() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectName, setSelectedProjectName] = useState<string>("");
 
   const { data: myBidProjects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-bids"],
@@ -23,6 +29,31 @@ export default function MakerCompletedProjects() {
   const { data: myBids } = useQuery<{ projectId: string; status: string }[]>({
     queryKey: ["/api/bids/my-bids"],
     enabled: !!user,
+  });
+
+  const ratingMutation = useMutation({
+    mutationFn: async (data: { projectId: string; rating: number; comment?: string }) => {
+      return apiRequest("PUT", `/api/projects/${data.projectId}/rate-client-from-won-project`, {
+        rating: data.rating,
+        comment: data.comment,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Calificación enviada",
+        description: "Gracias por calificar al cliente",
+      });
+      setRatingDialogOpen(false);
+      setSelectedProjectId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/my-bids"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo enviar la calificación",
+        variant: "destructive",
+      });
+    },
   });
 
   if (!authLoading && !user) {
@@ -52,6 +83,12 @@ export default function MakerCompletedProjects() {
     const bid = myBids?.find(b => b.projectId === p.id);
     return bid?.status === "accepted" && p.status === "completed";
   }) || [];
+
+  const handleRateClick = (projectId: string, projectName: string) => {
+    setSelectedProjectId(projectId);
+    setSelectedProjectName(projectName);
+    setRatingDialogOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,13 +131,12 @@ export default function MakerCompletedProjects() {
             {completedProjects.map((project) => (
               <Card 
                 key={project.id}
-                className="hover-elevate cursor-pointer transition-all border-green-200 dark:border-green-900"
-                onClick={() => setLocation(`/maker/project/${project.id}`)}
+                className="border-green-200 dark:border-green-900"
                 data-testid={`card-completed-project-${project.id}`}
               >
                 <CardContent className="pt-6 pb-6">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
+                    <div className="flex-1 cursor-pointer hover-elevate" onClick={() => setLocation(`/maker/project/${project.id}`)}>
                       <h3 className="font-bold text-lg">{project.name}</h3>
                       <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                       <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
@@ -110,10 +146,20 @@ export default function MakerCompletedProjects() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="flex flex-col items-end gap-3">
                       <div className="bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg">
                         <p className="text-sm font-bold text-green-600 dark:text-green-400">Entregado</p>
                       </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRateClick(project.id, project.name)}
+                        className="flex items-center gap-2"
+                        data-testid={`button-rate-${project.id}`}
+                      >
+                        <Star className="h-4 w-4" />
+                        Calificar
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -124,10 +170,26 @@ export default function MakerCompletedProjects() {
           <EmptyState
             icon={CheckCircle}
             title="Sin proyectos completados aún"
-            description="Tus proyectos completados aparecerán aquí una vez que se confirme la entrega y califiques al cliente"
+            description="Tus proyectos completados aparecerán aquí una vez que se confirme la entrega"
           />
         )}
       </main>
+
+      {selectedProjectId && (
+        <RatingDialog
+          open={ratingDialogOpen}
+          onOpenChange={setRatingDialogOpen}
+          projectName={selectedProjectName}
+          onSubmit={(rating, comment) => {
+            ratingMutation.mutate({
+              projectId: selectedProjectId,
+              rating,
+              comment,
+            });
+          }}
+          isLoading={ratingMutation.isPending}
+        />
+      )}
     </div>
   );
 }
