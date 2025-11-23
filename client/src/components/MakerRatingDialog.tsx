@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Star } from "lucide-react";
+import { HalfStarRating } from "./HalfStarRating";
 
 interface MakerRatingDialogProps {
   open: boolean;
@@ -88,30 +88,14 @@ export function MakerRatingDialog({
             <label className="block text-sm font-medium mb-3">
               Mi calificación para {clientName}
             </label>
-            <div className="flex gap-2" data-testid="rating-stars">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={(e) => handleStarClick(star, e)}
-                  onMouseMove={(e) => handleStarHover(star, e)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  disabled={isLoading}
-                  className="transition-transform hover:scale-110 cursor-pointer"
-                  data-testid={`rating-star-${star}`}
-                >
-                  <Star
-                    className={`h-8 w-8 ${
-                      (hoverRating || rating) >= star
-                        ? "fill-yellow-400 text-yellow-400"
-                        : (hoverRating || rating) >= star - 0.5
-                        ? "fill-yellow-200 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
+            <HalfStarRating
+              rating={rating}
+              hoverRating={hoverRating}
+              onStarClick={handleStarClick}
+              onStarHover={handleStarHover}
+              onMouseLeave={() => setHoverRating(0)}
+              isLoading={isLoading}
+            />
             {rating > 0 && (
               <p className="text-sm text-muted-foreground mt-2">
                 {rating} / 5 estrellas
