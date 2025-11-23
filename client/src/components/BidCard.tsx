@@ -26,8 +26,18 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
   
   const canEditBid = isMyBid && bid.status === "pending" && currentUserId === bid.makerId;
 
+  const handleCardClick = () => {
+    if (isClient && onContact) {
+      onContact(bid.makerId, bid.projectId);
+    }
+  };
+
   return (
-    <Card className="border hover:border-primary/50 transition-colors" data-testid={`card-bid-${bid.id}`}>
+    <Card 
+      className="border hover:border-primary/50 transition-colors hover-elevate active-elevate-2 cursor-pointer" 
+      onClick={handleCardClick}
+      data-testid={`card-bid-${bid.id}`}
+    >
       <div className="p-6">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Maker Info */}
