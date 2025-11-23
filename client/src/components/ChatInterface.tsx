@@ -22,6 +22,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const markReadTimeoutRef = useRef<NodeJS.Timeout>();
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", otherUserId],
@@ -66,6 +67,33 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       });
     },
   });
+
+  // Mark messages as read when chat is opened
+  useEffect(() => {
+    if (otherUserId) {
+      // Debounce the mark as read call to avoid too many requests
+      if (markReadTimeoutRef.current) {
+        clearTimeout(markReadTimeoutRef.current);
+      }
+      
+      markReadTimeoutRef.current = setTimeout(async () => {
+        try {
+          await apiRequest("PUT", `/api/messages/mark-read/${otherUserId}`, {});
+          // Invalidate conversations to remove unread badges
+          queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/my-conversations"] });
+        } catch (error) {
+          console.error("Failed to mark messages as read:", error);
+        }
+      }, 300); // Small delay to avoid multiple calls
+    }
+
+    return () => {
+      if (markReadTimeoutRef.current) {
+        clearTimeout(markReadTimeoutRef.current);
+      }
+    };
+  }, [otherUserId, queryClient]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
