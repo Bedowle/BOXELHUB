@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { ArrowLeft, Search, TrendingUp } from "lucide-react";
+import { ArrowLeft, Search, TrendingUp, Sliders } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Project, MakerProfile } from "@shared/schema";
 
@@ -20,6 +21,7 @@ export default function ExploreProjects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
   const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
+  const [minDimension, setMinDimension] = useState<number>(0);
 
   const { data: profile, isLoading: profileLoading } = useQuery<MakerProfile>({
     queryKey: ["/api/maker-profile"],
@@ -80,8 +82,20 @@ export default function ExploreProjects() {
       (multicolorFilter === "yes" && profile?.hasMulticolor) ||
       (multicolorFilter === "no" && !profile?.hasMulticolor);
 
-    return matchesSearch && matchesPrinter && matchesMulticolor;
+    // Filter by dimensions - check if maker's max dimensions are >= minimum dimension
+    let matchesDimensions = true;
+    if (minDimension > 0 && profile) {
+      const makerMaxX = profile.maxPrintDimensionX || 0;
+      const makerMaxY = profile.maxPrintDimensionY || 0;
+      const makerMaxZ = profile.maxPrintDimensionZ || 0;
+      const minMax = Math.min(makerMaxX, makerMaxY, makerMaxZ);
+      matchesDimensions = minMax >= minDimension;
+    }
+
+    return matchesSearch && matchesPrinter && matchesMulticolor && matchesDimensions;
   });
+
+  const hasActiveFilters = printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimension > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,43 +129,104 @@ export default function ExploreProjects() {
 
         {/* Search & Filters */}
         <div className="mb-8 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Busca proyectos por nombre o descripción..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-11"
-              data-testid="input-search-projects"
-            />
-          </div>
-
-          <div className="flex gap-3 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <Select value={printerTypeFilter} onValueChange={setPrinterTypeFilter}>
-                <SelectTrigger data-testid="select-printer-type">
-                  <SelectValue placeholder="Tipo de Impresora" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las impresoras</SelectItem>
-                  <SelectItem value="Ender3">Ender 3</SelectItem>
-                  <SelectItem value="BambooLab">Bambu Lab</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Busca proyectos por nombre o descripción..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-11"
+                data-testid="input-search-projects"
+              />
             </div>
 
-            <div className="flex-1 min-w-[200px]">
-              <Select value={multicolorFilter} onValueChange={setMulticolorFilter}>
-                <SelectTrigger data-testid="select-multicolor">
-                  <SelectValue placeholder="Multicolor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Cualquiera</SelectItem>
-                  <SelectItem value="yes">Multicolor</SelectItem>
-                  <SelectItem value="no">Monocolor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Filters Popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="flex items-center gap-2 whitespace-nowrap"
+                  data-testid="button-open-filters"
+                >
+                  <Sliders className="h-4 w-4" />
+                  Filtros
+                  {hasActiveFilters && (
+                    <span className="ml-2 inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                      {[printerTypeFilter !== "all", multicolorFilter !== "all", minDimension > 0].filter(Boolean).length}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end" data-testid="popover-filters">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-semibold mb-2 block">Tipo de Impresora</label>
+                    <Select value={printerTypeFilter} onValueChange={setPrinterTypeFilter}>
+                      <SelectTrigger data-testid="select-printer-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas las impresoras</SelectItem>
+                        <SelectItem value="Ender3">Ender 3</SelectItem>
+                        <SelectItem value="BambooLab">Bambu Lab</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold mb-2 block">Color</label>
+                    <Select value={multicolorFilter} onValueChange={setMulticolorFilter}>
+                      <SelectTrigger data-testid="select-multicolor">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Cualquiera</SelectItem>
+                        <SelectItem value="yes">Multicolor</SelectItem>
+                        <SelectItem value="no">Monocolor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold mb-3 block">Dimensión Mínima (mm)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="300"
+                        step="10"
+                        value={minDimension}
+                        onChange={(e) => setMinDimension(Number(e.target.value))}
+                        className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+                        data-testid="slider-min-dimension"
+                      />
+                      <span className="text-sm font-semibold bg-muted px-3 py-1 rounded-md w-16 text-center">
+                        {minDimension}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Solo mostrar proyectos donde tu impresora pueda imprimir al menos {minDimension}mm en todos los lados
+                    </p>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setPrinterTypeFilter("all");
+                      setMulticolorFilter("all");
+                      setMinDimension(0);
+                    }}
+                    className="w-full"
+                    data-testid="button-reset-filters"
+                  >
+                    Limpiar Filtros
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -178,7 +253,7 @@ export default function ExploreProjects() {
               icon={Search}
               title="Sin resultados"
               description={
-                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all"
+                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimension > 0
                   ? "Intenta ajustar tus filtros de búsqueda"
                   : "No hay proyectos disponibles en este momento"
               }
