@@ -461,6 +461,8 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(messages.createdAt));
 
+    console.log(`[getConversationsWithUnread] User ${userId.slice(0, 8)}... has ${allMessages.length} total messages`);
+
     // Group messages by conversation partner AND project ID (unique key per conversation)
     const conversationMap = new Map<string, { lastMsg: Message; unreadCount: number }>();
     
@@ -483,8 +485,7 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Convert to array
-    return Array.from(conversationMap.entries()).map(([key, data]) => {
+    const result = Array.from(conversationMap.entries()).map(([key, data]) => {
       const [partnerId, projectKey] = key.split('::');
       return {
         userId: partnerId,
@@ -493,6 +494,10 @@ export class DatabaseStorage implements IStorage {
         unreadCount: data.unreadCount,
       };
     });
+
+    console.log(`[getConversationsWithUnread] Generated ${result.length} conversations:`, result.map(c => ({ userId: c.userId.slice(0, 8), projectId: c.projectId?.slice(0, 8) })));
+
+    return result;
   }
 
   // Stats operations
