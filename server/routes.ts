@@ -1052,14 +1052,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const conversations = await storage.getConversationsWithUnread(userId);
       
-      // Enrich with user data
+      // Enrich with user data and project data
       const enriched = await Promise.all(
         conversations.map(async (conv) => {
           const user = await storage.getUser(conv.userId);
+          const project = conv.projectId ? await storage.getProject(conv.projectId) : null;
           return {
             userId: conv.userId,
             projectId: conv.projectId,
             user,
+            project,
             lastMessage: conv.lastMessage,
             unreadCount: conv.unreadCount,
           };

@@ -17,6 +17,7 @@ interface ConversationWithUnread {
   userId: string;
   projectId?: string | null;
   user?: User;
+  project?: { name: string } | null;
   lastMessage?: any;
   unreadCount: number;
 }
@@ -149,7 +150,11 @@ export default function ChatsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <h3 className="font-semibold text-lg">
-                          {conv.user?.firstName || conv.user?.email}
+                          {conv.project?.name && conv.user?.firstName 
+                            ? `${conv.project.name} con ${conv.user.firstName}`
+                            : conv.project?.name
+                            ? conv.project.name
+                            : conv.user?.firstName || conv.user?.email}
                         </h3>
                         {conv.unreadCount > 0 && (
                           <div className="flex items-center justify-center h-6 w-6 rounded-full bg-red-500 text-white text-xs font-bold">
