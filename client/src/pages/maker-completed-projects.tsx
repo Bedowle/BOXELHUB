@@ -10,8 +10,18 @@ import { ArrowLeft, CheckCircle, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Project } from "@shared/schema";
+
+interface RatingCheckResponse {
+  deliveryConfirmed: boolean;
+  hasRated: boolean;
+}
+
+interface RatingStatus {
+  projectId: string;
+  hasRated: boolean;
+}
 
 export default function MakerCompletedProjects() {
   const [, setLocation] = useLocation();
@@ -20,6 +30,7 @@ export default function MakerCompletedProjects() {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectName, setSelectedProjectName] = useState<string>("");
+  const [ratingStatuses, setRatingStatuses] = useState<Record<string, boolean>>({});
 
   const { data: myBidProjects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-bids"],
@@ -30,6 +41,32 @@ export default function MakerCompletedProjects() {
     queryKey: ["/api/bids/my-bids"],
     enabled: !!user,
   });
+
+  // Check rating status for all completed projects
+  useEffect(() => {
+    if (!myBidProjects || !myBids) return;
+
+    const completedProjects = myBidProjects.filter(p => {
+      const bid = myBids.find(b => b.projectId === p.id);
+      return bid?.status === "accepted" && p.status === "completed";
+    });
+
+    const checkRatingStatus = async () => {
+      const statuses: Record<string, boolean> = {};
+
+      for (const project of completedProjects) {
+        try {
+          const response = await apiRequest("GET", `/api/projects/${project.id}/check-rating-by-maker`) as unknown as RatingCheckResponse;
+          statuses[project.id] = response.hasRated;
+        } catch (error) {
+          console.error("Failed to check rating status:", error);
+        }
+      }
+      setRatingStatuses(statuses);
+    };
+
+    checkRatingStatus();
+  }, [myBidProjects, myBids]);
 
   const ratingMutation = useMutation({
     mutationFn: async (data: { projectId: string; rating: number; comment?: string }) => {
@@ -44,6 +81,9 @@ export default function MakerCompletedProjects() {
         description: "Gracias por calificar al cliente",
       });
       setRatingDialogOpen(false);
+      if (selectedProjectId) {
+        setRatingStatuses(prev => ({ ...prev, [selectedProjectId]: true }));
+      }
       setSelectedProjectId(null);
       queryClient.invalidateQueries({ queryKey: ["/api/projects/my-bids"] });
     },
@@ -128,43 +168,59 @@ export default function MakerCompletedProjects() {
           </div>
         ) : completedProjects.length > 0 ? (
           <div className="space-y-4">
-            {completedProjects.map((project) => (
-              <Card 
-                key={project.id}
-                className="border-green-200 dark:border-green-900"
-                data-testid={`card-completed-project-${project.id}`}
-              >
-                <CardContent className="pt-6 pb-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 cursor-pointer hover-elevate" onClick={() => setLocation(`/maker/project/${project.id}`)}>
-                      <h3 className="font-bold text-lg">{project.name}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                      <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                          Completado {formatDistanceToNow(new Date(project.updatedAt), { locale: es, addSuffix: true })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-3">
-                      <div className="bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg">
-                        <p className="text-sm font-bold text-green-600 dark:text-green-400">Entregado</p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRateClick(project.id, project.name)}
-                        className="flex items-center gap-2"
-                        data-testid={`button-rate-${project.id}`}
+            {completedProjects.map((project) => {
+              const hasRated = ratingStatuses[project.id];
+
+              return (
+                <Card 
+                  key={project.id}
+                  className="border-green-200 dark:border-green-900"
+                  data-testid={`card-completed-project-${project.id}`}
+                >
+                  <CardContent className="pt-6 pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div 
+                        className="flex-1 cursor-pointer hover-elevate"
+                        onClick={() => setLocation(`/maker/project/${project.id}`)}
                       >
-                        <Star className="h-4 w-4" />
-                        Calificar
-                      </Button>
+                        <h3 className="font-bold text-lg">{project.name}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                        <div className="mt-3 pt-3 border-t border-border flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                            Completado {formatDistanceToNow(new Date(project.updatedAt), { locale: es, addSuffix: true })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-3">
+                        <div className="bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg">
+                          <p className="text-sm font-bold text-green-600 dark:text-green-400">Entregado</p>
+                        </div>
+                        {hasRated ? (
+                          <div className="bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-lg">
+                            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-current" />
+                              Calificado
+                            </p>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRateClick(project.id, project.name)}
+                            className="flex items-center gap-2"
+                            data-testid={`button-rate-${project.id}`}
+                          >
+                            <Star className="h-4 w-4" />
+                            Calificar
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <EmptyState
@@ -179,7 +235,9 @@ export default function MakerCompletedProjects() {
         <RatingDialog
           open={ratingDialogOpen}
           onOpenChange={setRatingDialogOpen}
-          projectName={selectedProjectName}
+          title="Calificar Cliente"
+          description="¿Cómo fue tu experiencia trabajando en este proyecto?"
+          targetName={selectedProjectName}
           onSubmit={(rating, comment) => {
             ratingMutation.mutate({
               projectId: selectedProjectId,
