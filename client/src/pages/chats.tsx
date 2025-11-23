@@ -15,6 +15,7 @@ import type { User } from "@shared/schema";
 
 interface ConversationWithUnread {
   userId: string;
+  projectId?: string | null;
   user?: User;
   lastMessage?: any;
   unreadCount: number;
@@ -27,6 +28,7 @@ export default function ChatsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const { data: conversations } = useQuery<ConversationWithUnread[]>({
     queryKey: ["/api/my-conversations-full"],
@@ -65,8 +67,9 @@ export default function ChatsPage() {
 
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
 
-  const openChat = (chatUser: User) => {
+  const openChat = (chatUser: User, projectId?: string | null) => {
     setSelectedChatUser(chatUser);
+    setSelectedProjectId(projectId || null);
     setChatDialogOpen(true);
   };
 
@@ -136,10 +139,10 @@ export default function ChatsPage() {
           <div className="space-y-4">
             {filteredConversations.map((conv) => (
               <Card
-                key={conv.userId}
+                key={`${conv.userId}-${conv.projectId}`}
                 className="hover-elevate cursor-pointer transition-all"
-                onClick={() => conv.user && openChat(conv.user)}
-                data-testid={`card-chat-${conv.userId}`}
+                onClick={() => conv.user && openChat(conv.user, conv.projectId)}
+                data-testid={`card-chat-${conv.userId}-${conv.projectId}`}
               >
                 <CardContent className="pt-6 pb-6">
                   <div className="flex items-start justify-between gap-4">
@@ -169,9 +172,9 @@ export default function ChatsPage() {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        conv.user && openChat(conv.user);
+                        conv.user && openChat(conv.user, conv.projectId);
                       }}
-                      data-testid={`button-open-chat-${conv.userId}`}
+                      data-testid={`button-open-chat-${conv.userId}-${conv.projectId}`}
                     >
                       Abrir
                     </Button>
@@ -190,6 +193,7 @@ export default function ChatsPage() {
           onOpenChange={setChatDialogOpen}
           otherUser={selectedChatUser}
           currentUserId={user.id}
+          projectId={selectedProjectId || undefined}
         />
       )}
     </div>
