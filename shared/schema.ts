@@ -273,12 +273,17 @@ export const insertBidSchema = createInsertSchema(bids).omit({
   updatedAt: true,
   status: true,
 }).extend({
-  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+  price: z.string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
+    .refine(val => parseFloat(val) >= 0.5, "Minimum price is €0.50"),
   deliveryDays: z.number().int().positive("Delivery days must be positive"),
 });
 
 export const updateBidSchema = z.object({
-  price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format").optional(),
+  price: z.string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
+    .refine(val => parseFloat(val) >= 0.5, "Minimum price is €0.50")
+    .optional(),
   deliveryDays: z.number().int().positive("Delivery days must be positive").optional(),
   message: z.string().optional(),
 }).refine((data) => Object.keys(data).length > 0, {
