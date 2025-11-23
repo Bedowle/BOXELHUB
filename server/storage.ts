@@ -485,15 +485,18 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    const result = Array.from(conversationMap.entries()).map(([key, data]) => {
-      const [partnerId, projectKey] = key.split('::');
-      return {
-        userId: partnerId,
-        projectId: projectKey === 'no-project' ? null : projectKey,
-        lastMessage: data.lastMsg,
-        unreadCount: data.unreadCount,
-      };
-    });
+    const result = Array.from(conversationMap.entries())
+      .map(([key, data]) => {
+        const [partnerId, projectKey] = key.split('::');
+        return {
+          userId: partnerId,
+          projectId: projectKey === 'no-project' ? null : projectKey,
+          lastMessage: data.lastMsg,
+          unreadCount: data.unreadCount,
+        };
+      })
+      // Filter out conversations without a projectId (only show project-based conversations)
+      .filter(conv => conv.projectId !== null);
 
     console.log(`[getConversationsWithUnread] Generated ${result.length} conversations:`, result.map(c => ({ userId: c.userId.slice(0, 8), projectId: c.projectId?.slice(0, 8) })));
 
