@@ -87,8 +87,9 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
             </div>
 
             {/* Actions */}
-            {isClient && (bid.status === "pending" || bid.status === undefined || bid.status === null) && (
-              <div className="flex gap-2">
+            <div className="flex flex-col gap-2 items-end">
+              {/* Chat button - Always available for clients */}
+              {isClient && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -99,28 +100,33 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                   <MessageCircle className="h-4 w-4 mr-1" />
                   Chat
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onReject?.(bid.id)}
-                  disabled={isPending}
-                  data-testid={`button-reject-${bid.id}`}
-                >
-                  Rechazar
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => onAccept?.(bid.id)}
-                  disabled={isPending}
-                  data-testid={`button-accept-${bid.id}`}
-                >
-                  Aceptar
-                </Button>
-              </div>
-            )}
+              )}
 
-            {canEditBid && (
-              <div className="flex gap-2">
+              {/* Pending bid actions */}
+              {isClient && (bid.status === "pending" || bid.status === undefined || bid.status === null) && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onReject?.(bid.id)}
+                    disabled={isPending}
+                    data-testid={`button-reject-${bid.id}`}
+                  >
+                    Rechazar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => onAccept?.(bid.id)}
+                    disabled={isPending}
+                    data-testid={`button-accept-${bid.id}`}
+                  >
+                    Aceptar
+                  </Button>
+                </div>
+              )}
+
+              {/* Maker edit button */}
+              {canEditBid && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -131,48 +137,40 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                   <Edit2 className="h-4 w-4 mr-1" />
                   Editar
                 </Button>
-              </div>
-            )}
+              )}
 
-            {bid.status === "accepted" && (
-              <div className="flex flex-col gap-2 items-end">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                  Aceptada
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onContact?.(bid.makerId, bid.projectId)}
-                  disabled={isPending}
-                  data-testid={`button-contact-${bid.id}`}
-                >
-                  <MessageCircle className="h-4 w-4 mr-1" />
-                  Chat
-                </Button>
-                {isClient && !bid.deliveryConfirmedAt && (
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => onConfirmDelivery?.(bid.id)}
-                    disabled={isPending}
-                    data-testid={`button-confirm-delivery-${bid.id}`}
-                  >
-                    Confirmar Recepción
-                  </Button>
-                )}
-                {bid.deliveryConfirmedAt && (
-                  <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
-                    Entrega Confirmada
+              {/* Accepted bid status and actions */}
+              {bid.status === "accepted" && (
+                <>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                    Aceptada
                   </Badge>
-                )}
-              </div>
-            )}
+                  {isClient && !bid.deliveryConfirmedAt && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => onConfirmDelivery?.(bid.id)}
+                      disabled={isPending}
+                      data-testid={`button-confirm-delivery-${bid.id}`}
+                    >
+                      Confirmar Recepción
+                    </Button>
+                  )}
+                  {bid.deliveryConfirmedAt && (
+                    <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+                      Entrega Confirmada
+                    </Badge>
+                  )}
+                </>
+              )}
 
-            {bid.status === "rejected" && (
-              <Badge variant="secondary">
-                Rechazada
-              </Badge>
-            )}
+              {/* Rejected bid status */}
+              {bid.status === "rejected" && (
+                <Badge variant="secondary">
+                  Rechazada
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </div>
