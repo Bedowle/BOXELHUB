@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import type { Project, MakerProfile, User } from "@shared/schema";
 export default function MakerHome() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
+  const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
 
   // Save the current home page URL when this component mounts
@@ -74,15 +76,15 @@ export default function MakerHome() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "No autorizado",
-        description: "Iniciando sesión...",
+        title: t('common.unauthorized'),
+        description: t('common.loading'),
         variant: "destructive",
       });
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
     }
-  }, [user, authLoading, toast]);
+  }, [user, authLoading, toast, t]);
 
 
   useEffect(() => {
@@ -105,7 +107,7 @@ export default function MakerHome() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -149,8 +151,8 @@ export default function MakerHome() {
     },
     onSuccess: () => {
       toast({
-        title: "Calificación enviada",
-        description: "Tu calificación ha sido registrada.",
+        title: language === 'es' ? 'Calificación enviada' : 'Rating sent',
+        description: language === 'es' ? 'Tu calificación ha sido registrada.' : 'Your rating has been recorded.',
       });
       setRatingDialogOpen(false);
       setDeliveryToRate(null);
@@ -158,8 +160,8 @@ export default function MakerHome() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "No se pudo enviar la calificación",
+        title: t('common.error'),
+        description: error.message || (language === 'es' ? 'No se pudo enviar la calificación' : 'Could not send rating'),
         variant: "destructive",
       });
     },
@@ -185,7 +187,7 @@ export default function MakerHome() {
                       {profile.printerType}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Materiales: {profile.materials.join(", ")} {profile.hasMulticolor && "• Multicolor"}
+                      {language === 'es' ? 'Materiales' : 'Materials'}: {profile.materials.join(", ")} {profile.hasMulticolor && (language === 'es' ? "• Multicolor" : "• Multicolor")}
                     </p>
                   </div>
                   <Button 
@@ -196,7 +198,7 @@ export default function MakerHome() {
                     }}
                     data-testid="button-view-profile"
                   >
-                    Ver Perfil
+                    {language === 'es' ? 'Ver Perfil' : 'View Profile'}
                   </Button>
                 </div>
               </CardContent>
@@ -209,10 +211,10 @@ export default function MakerHome() {
         {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            Tu Panel de Maker
+            {language === 'es' ? 'Tu Panel de Maker' : 'Your Maker Dashboard'}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Gestiona tus ofertas, proyectos en progreso y entregas completadas
+            {language === 'es' ? 'Gestiona tus ofertas, proyectos en progreso y entregas completadas' : 'Manage your bids, ongoing projects and completed deliveries'}
           </p>
         </div>
 
@@ -227,14 +229,14 @@ export default function MakerHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
+                  <span className="text-sm font-semibold text-muted-foreground">{language === 'es' ? 'Ofertas Activas' : 'Active Bids'}</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Zap className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.activeBids || 0}</p>
-                  <p className="text-xs text-muted-foreground">en progreso</p>
+                  <p className="text-xs text-muted-foreground">{language === 'es' ? 'en progreso' : 'in progress'}</p>
                 </div>
               </div>
             </CardContent>
@@ -249,14 +251,14 @@ export default function MakerHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
+                  <span className="text-sm font-semibold text-muted-foreground">{language === 'es' ? 'Proyectos Ganados' : 'Won Projects'}</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.wonProjects || 0}</p>
-                  <p className="text-xs text-muted-foreground">completados</p>
+                  <p className="text-xs text-muted-foreground">{language === 'es' ? 'completados' : 'completed'}</p>
                 </div>
               </div>
             </CardContent>
@@ -271,14 +273,14 @@ export default function MakerHome() {
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
+                  <span className="text-sm font-semibold text-muted-foreground">{language === 'es' ? 'Proyectos Completados' : 'Completed Projects'}</span>
                   <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.completedProjects || 0}</p>
-                  <p className="text-xs text-muted-foreground">entregados</p>
+                  <p className="text-xs text-muted-foreground">{language === 'es' ? 'entregados' : 'delivered'}</p>
                 </div>
               </div>
             </CardContent>
@@ -290,10 +292,10 @@ export default function MakerHome() {
           <div className="mb-8">
             <h2 className="text-3xl font-bold flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-primary" />
-              Proyectos Recomendados
+              {language === 'es' ? 'Proyectos Recomendados' : 'Recommended Projects'}
             </h2>
             <p className="text-muted-foreground mt-2">
-              Proyectos seleccionados para ti
+              {language === 'es' ? 'Proyectos seleccionados para ti' : 'Projects selected for you'}
             </p>
           </div>
 
@@ -306,8 +308,8 @@ export default function MakerHome() {
           ) : (filteredProjects?.length || 0) === 0 ? (
             <EmptyState
               icon={Search}
-              title="Sin proyectos disponibles"
-              description="No hay proyectos disponibles en este momento"
+              title={language === 'es' ? 'Sin proyectos disponibles' : 'No projects available'}
+              description={language === 'es' ? 'No hay proyectos disponibles en este momento' : 'No projects available at this time'}
             />
           ) : (
             <div className="relative">
@@ -352,7 +354,7 @@ export default function MakerHome() {
                 className="px-8"
                 data-testid="button-explore-more-projects"
               >
-                Explora Más Proyectos
+                {language === 'es' ? 'Explora Más Proyectos' : 'Explore More Projects'}
               </Button>
             </div>
           </div>
