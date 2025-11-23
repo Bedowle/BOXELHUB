@@ -24,6 +24,7 @@ import ClientBidsList from "@/pages/client-bids-list";
 import MakerBidsList from "@/pages/maker-bids-list";
 import MakerWonProjects from "@/pages/maker-won-projects";
 import MakerCompletedProjects from "@/pages/maker-completed-projects";
+import ExploreProjects from "@/pages/explore-projects";
 import ChatPage from "@/pages/chat-page";
 import ChatsPage from "@/pages/chats";
 import VerifyEmailPage from "@/pages/verify-email";
@@ -89,6 +90,7 @@ function Router() {
               <Route path="/maker" component={MakerHome} />
               <Route path="/maker/profile" component={MakerProfile} />
               <Route path="/maker/reviews" component={MakerReviews} />
+              <Route path="/maker/explore" component={ExploreProjects} />
               <Route path="/maker/bids" component={MakerBidsList} />
               <Route path="/maker/won-projects" component={MakerWonProjects} />
               <Route path="/maker/completed-projects" component={MakerCompletedProjects} />

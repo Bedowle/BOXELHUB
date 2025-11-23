@@ -5,12 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Printer, Package, CheckCircle, Zap, Search, Filter, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
+import { Printer, Package, CheckCircle, Zap, Search, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { MakerRatingDialog } from "@/components/MakerRatingDialog";
@@ -26,9 +24,6 @@ export default function MakerHome() {
   const [hasShownProfileDialog, setHasShownProfileDialog] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
-  const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [deliveryToRate, setDeliveryToRate] = useState<{
     bidId: string;
@@ -122,24 +117,21 @@ export default function MakerHome() {
       .map(bid => bid.projectId) || []
   );
   
-  const filteredProjects = allProjects.filter(project => {
-    // Exclude completed/delivered projects
+  // Filter out completed/delivered projects and get random ones
+  const availableFilteredProjects = allProjects.filter(project => {
     if (project.status === "completed" || deliveredProjectIds.has(project.id)) {
       return false;
     }
-
-    const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesPrinter = printerTypeFilter === "all" || 
-      (profile?.printerType === printerTypeFilter);
-    
-    const matchesMulticolor = multicolorFilter === "all" || 
-      (multicolorFilter === "yes" && profile?.hasMulticolor) ||
-      (multicolorFilter === "no" && !profile?.hasMulticolor);
-
-    return matchesSearch && matchesPrinter && matchesMulticolor;
+    return true;
   });
+
+  // Get 3 random projects for recommendations
+  const getRandomProjects = (projects: typeof allProjects, count: number) => {
+    const shuffled = [...projects].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  };
+
+  const filteredProjects = getRandomProjects(availableFilteredProjects, 3);
 
   const activeBidsCount = myBids?.filter(bid => bid.status === "pending").length || 0;
   const canBidMore = activeBidsCount < 2;
@@ -287,57 +279,15 @@ export default function MakerHome() {
           </Card>
         </div>
 
-        {/* Search & Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Busca proyectos por nombre o descripción..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-11"
-              data-testid="input-search-projects"
-            />
-          </div>
-
-          <div className="flex gap-3 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <Select value={printerTypeFilter} onValueChange={setPrinterTypeFilter}>
-                <SelectTrigger data-testid="select-printer-type">
-                  <SelectValue placeholder="Tipo de Impresora" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las impresoras</SelectItem>
-                  <SelectItem value="Ender3">Ender 3</SelectItem>
-                  <SelectItem value="BambooLab">Bambu Lab</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex-1 min-w-[200px]">
-              <Select value={multicolorFilter} onValueChange={setMulticolorFilter}>
-                <SelectTrigger data-testid="select-multicolor">
-                  <SelectValue placeholder="Multicolor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Cualquiera</SelectItem>
-                  <SelectItem value="yes">Multicolor</SelectItem>
-                  <SelectItem value="no">Monocolor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        {/* Projects Section */}
-        <div>
+        {/* Recommended Projects Section */}
+        <div className="mb-12">
           <div className="mb-8">
             <h2 className="text-3xl font-bold flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-primary" />
-              Proyectos Activos
+              Proyectos Recomendados
             </h2>
             <p className="text-muted-foreground mt-2">
-              {filteredProjects?.length || 0} proyecto{(filteredProjects?.length || 0) !== 1 ? "s" : ""} disponible{(filteredProjects?.length || 0) !== 1 ? "s" : ""}
+              Proyectos seleccionados para ti
             </p>
           </div>
 
@@ -350,32 +300,45 @@ export default function MakerHome() {
           ) : (filteredProjects?.length || 0) === 0 ? (
             <EmptyState
               icon={Search}
-              title="Sin resultados"
-              description={
-                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all"
-                  ? "Intenta ajustar tus filtros de búsqueda"
-                  : "No hay proyectos disponibles en este momento"
-              }
+              title="Sin proyectos disponibles"
+              description="No hay proyectos disponibles en este momento"
             />
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects?.map((project) => {
-                const hasMyBid = myBidProjects?.some(p => p.id === project.id);
-                return (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onClick={() => {
-                      if (hasMyBid) {
-                        setLocation(`/maker/project/${project.id}`);
-                      } else {
-                        setLocation(`/project/${project.id}`);
-                      }
-                    }}
-                  />
-                );
-              })}
-            </div>
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {filteredProjects?.slice(0, 3).map((project) => {
+                  const hasMyBid = myBidProjects?.some(p => p.id === project.id);
+                  return (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={() => {
+                        if (hasMyBid) {
+                          setLocation(`/maker/project/${project.id}`);
+                        } else {
+                          setLocation(`/project/${project.id}`);
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Fade & Button Section */}
+              <div className="relative mt-12 pt-12">
+                <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
+                <div className="flex justify-center">
+                  <Button
+                    size="lg"
+                    onClick={() => setLocation("/maker/explore")}
+                    className="px-8"
+                    data-testid="button-explore-more-projects"
+                  >
+                    Explora Más Proyectos
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </main>
