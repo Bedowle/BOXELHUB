@@ -545,11 +545,12 @@ export class DatabaseStorage implements IStorage {
     // Update maker profile rating
     const makerReviews = await this.getReviewsForMaker(reviewData.toUserId);
     if (makerReviews.length > 0) {
-      const avgRating = makerReviews.reduce((sum, r) => sum + r.rating, 0) / makerReviews.length;
+      const avgRating = makerReviews.reduce((sum, r) => sum + parseFloat(String(r.rating)), 0) / makerReviews.length;
+      const roundedRating = parseFloat(avgRating.toFixed(2));
       await db
         .update(makerProfiles)
         .set({ 
-          rating: avgRating.toString(),
+          rating: roundedRating.toString(),
           totalReviews: makerReviews.length,
           updatedAt: new Date()
         })
