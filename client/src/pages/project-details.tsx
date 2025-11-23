@@ -67,6 +67,7 @@ export default function ProjectDetails() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bids"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "accepted-bid"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
