@@ -43,8 +43,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId }: ChatInt
       }
     },
     enabled: !!otherUserId,
-    staleTime: 0, // Always consider data stale to force refetch
-    refetchInterval: 1000, // Refresh every 1 second for real-time updates
+    refetchInterval: 2000, // Refresh every 2 seconds as backup, WebSocket handles real-time
   });
 
   const sendMutation = useMutation({

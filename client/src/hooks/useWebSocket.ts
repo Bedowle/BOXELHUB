@@ -86,6 +86,11 @@ export function useWebSocket() {
               });
               queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
               break;
+              
+            case "message_read":
+              // Invalidate messages query to show updated read status
+              queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+              break;
           }
         } catch (error) {
           console.error("Error processing WebSocket message:", error);

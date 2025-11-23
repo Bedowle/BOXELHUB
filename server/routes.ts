@@ -809,6 +809,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { senderId } = req.params;
       await storage.markMessagesAsRead(userId, senderId);
+      
+      // Send WebSocket notification to the sender that their messages were read
+      const senderWs = wsClients.get(senderId);
+      if (senderWs && senderWs.readyState === WebSocket.OPEN) {
+        senderWs.send(JSON.stringify({
+          type: 'message_read',
+          fromUserId: userId,
+        }));
+      }
+      
       res.json({ message: "Messages marked as read" });
     } catch (error) {
       console.error("Error marking messages as read:", error);
