@@ -275,68 +275,6 @@ export default function MakerHome() {
           </Card>
         </div>
 
-        {/* My Conversations Section */}
-        {conversations && conversations.length > 0 && (
-          <div className="mb-10">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <MessageCircle className="h-6 w-6 text-primary" />
-                Mis Conversaciones
-              </h2>
-              <p className="text-muted-foreground mt-2">
-                {conversations.length} conversación{conversations.length !== 1 ? "es" : ""} activa{conversations.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              {conversations.map((conv) => (
-                <Card 
-                  key={conv.userId}
-                  className="hover-elevate cursor-pointer transition-all"
-                  onClick={() => {
-                    if (conv.user) {
-                      setSelectedChatUser(conv.user);
-                      setChatDialogOpen(true);
-                    }
-                  }}
-                  data-testid={`card-conversation-${conv.userId}`}
-                >
-                  <CardContent className="pt-6 pb-6">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">
-                          {conv.user?.firstName || "Usuario"}
-                        </h3>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (conv.user) {
-                              setSelectedChatUser(conv.user);
-                              setChatDialogOpen(true);
-                            }
-                          }}
-                          data-testid={`button-open-chat-${conv.userId}`}
-                        >
-                          Abrir Chat
-                        </Button>
-                      </div>
-                      {conv.lastMessage && (
-                        <div className="text-sm text-muted-foreground">
-                          <p className="line-clamp-2 mb-1">{conv.lastMessage.content}</p>
-                          <p className="text-xs">
-                            {formatDistanceToNow(new Date(conv.lastMessage.createdAt), { locale: es, addSuffix: true })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Search & Filters */}
         <div className="mb-8 space-y-4">
           <div className="relative">
