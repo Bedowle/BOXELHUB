@@ -9,7 +9,7 @@ import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
 import { ArrowLeft, Package } from "lucide-react";
 import type { Project } from "@shared/schema";
 
-export default function ClientProjectsList() {
+export default function ClientProjectsActive() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -42,6 +42,10 @@ export default function ClientProjectsList() {
     );
   }
 
+  const activeProjects = projects?.filter(p => p.status === "active") || [];
+  const inProgressProjects = projects?.filter(p => p.status === "reserved") || [];
+  const allProjects = [...activeProjects, ...inProgressProjects];
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
@@ -60,10 +64,10 @@ export default function ClientProjectsList() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Tus Proyectos</h1>
+        <div className="mb-12">
+          <h1 className="text-3xl font-bold mb-2">Proyectos Activos y en Ejecución</h1>
           <p className="text-muted-foreground">
-            {projects?.length || 0} proyecto{(projects?.length || 0) !== 1 ? "s" : ""}
+            {allProjects.length} proyecto{allProjects.length !== 1 ? "s" : ""}
           </p>
         </div>
 
@@ -73,21 +77,45 @@ export default function ClientProjectsList() {
             <ProjectCardSkeleton />
             <ProjectCardSkeleton />
           </div>
-        ) : projects && projects.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onClick={() => setLocation(`/project/${project.id}`)}
-              />
-            ))}
-          </div>
+        ) : allProjects.length > 0 ? (
+          <>
+            {/* Active Projects Section */}
+            {activeProjects.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold mb-6 text-primary">Proyectos Activos</h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {activeProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={() => setLocation(`/project/${project.id}`)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* In Progress Projects Section */}
+            {inProgressProjects.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6 text-secondary">Proyectos en Ejecución</h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {inProgressProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={() => setLocation(`/project/${project.id}`)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <EmptyState
             icon={Package}
-            title="No hay proyectos"
-            description="Aún no has subido ningún proyecto"
+            title="Sin proyectos activos"
+            description="Todos tus proyectos han sido completados"
           />
         )}
       </main>
