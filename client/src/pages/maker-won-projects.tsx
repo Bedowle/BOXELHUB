@@ -62,13 +62,15 @@ export default function MakerWonProjects() {
       for (const bid of allBids) {
         if (bid.status === "accepted") {
           try {
-            const response = await apiRequest("GET", `/api/projects/${bid.projectId}/check-rating-by-maker`) as unknown as RatingCheckResponse;
+            const res = await apiRequest("GET", `/api/projects/${bid.projectId}/check-rating-by-maker`);
+            const response = await res.json() as RatingCheckResponse;
             const project = myBidProjects.find(p => p.id === bid.projectId);
+            console.log(`[getDeliveryStatus] Full response for ${bid.projectId}:`, response);
             statuses[bid.projectId] = {
-              deliveryConfirmed: response.deliveryConfirmed,
+              deliveryConfirmed: response.deliveryConfirmed ?? false,
               projectStatus: project?.status || "unknown",
             };
-            console.log(`[getDeliveryStatus] Project ${bid.projectId} - confirmed: ${response.deliveryConfirmed}`);
+            console.log(`[getDeliveryStatus] Project ${bid.projectId} - confirmed: ${response.deliveryConfirmed}, stored as: ${statuses[bid.projectId].deliveryConfirmed}`);
           } catch (error) {
             console.error("Failed to check delivery status:", error);
           }
@@ -152,7 +154,7 @@ export default function MakerWonProjects() {
           <div className="space-y-4">
             {wonProjects.map((project) => {
               const deliveryStatus = bidsWithDelivery[project.id];
-              const isConfirmed = deliveryStatus?.deliveryConfirmed;
+              const isConfirmed = deliveryStatus?.deliveryConfirmed ?? false;
 
               return (
                 <Card 
@@ -167,25 +169,23 @@ export default function MakerWonProjects() {
                         <h3 className="font-bold text-lg">{project.name}</h3>
                         <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                         <div className="mt-3 pt-3 border-t border-border">
-                          {isConfirmed !== undefined && (
-                            <div className="flex items-center gap-2">
-                              {isConfirmed ? (
-                                <>
-                                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                  <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                    Recepción confirmada
-                                  </p>
-                                </>
-                              ) : (
-                                <>
-                                  <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                                    Esperando confirmación de entrega
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {isConfirmed ? (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                  Recepción confirmada
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                  Esperando confirmación de entrega
+                                </p>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
