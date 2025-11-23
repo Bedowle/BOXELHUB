@@ -95,25 +95,25 @@ export default function ClientHome() {
 
         {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-10">
-          {/* Awaiting Bids */}
+          {/* Projects in Progress */}
           <Card 
             className="border-2 border-primary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/client/projects-active")}
-            data-testid="card-stats-active-projects"
+            data-testid="card-stats-in-progress"
           >
             <CardContent className="pt-6 pb-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Esperando Ofertas</span>
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos en Progreso</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    {activeProjects.length}
+                    {activeProjects.length + inProgressProjects.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">de 10 máximo</p>
+                  <p className="text-xs text-muted-foreground">activos y aceptados</p>
                 </div>
               </div>
             </CardContent>
@@ -136,28 +136,6 @@ export default function ClientHome() {
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.pendingBids || 0}</p>
                   <p className="text-xs text-muted-foreground">{totalBids} total</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Active & In Progress */}
-          <Card 
-            className="border-2 border-accent/20 hover-elevate cursor-pointer"
-            onClick={() => setLocation("/client/projects-active")}
-            data-testid="card-stats-active-and-inprogress"
-          >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos en Progreso</span>
-                  <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-accent" />
-                  </div>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold">{(stats?.acceptedOffers || 0) + activeProjects.length}</p>
-                  <p className="text-xs text-muted-foreground">activos y en ejecución</p>
                 </div>
               </div>
             </CardContent>
