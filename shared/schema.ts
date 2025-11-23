@@ -114,6 +114,7 @@ export const bids = pgTable("bids", {
   deliveryDays: integer("delivery_days").notNull(),
   message: text("message"),
   status: bidStatusEnum("status").default("pending").notNull(),
+  deliveryConfirmedAt: timestamp("delivery_confirmed_at"), // When client confirms receipt
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [

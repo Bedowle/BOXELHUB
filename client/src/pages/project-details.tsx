@@ -108,6 +108,38 @@ export default function ProjectDetails() {
     },
   });
 
+  const confirmDeliveryMutation = useMutation({
+    mutationFn: async (bidId: string) => {
+      await apiRequest("PUT", `/api/bids/${bidId}/confirm-delivery`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Entrega confirmada",
+        description: "Has confirmado la recepción del proyecto. El maker ha sido notificado.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "bids"] });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "No autorizado",
+          description: "Iniciando sesión...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo confirmar la entrega",
+        variant: "destructive",
+      });
+    },
+  });
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -247,6 +279,7 @@ export default function ProjectDetails() {
                   isClient={isOwner}
                   onAccept={(bidId) => acceptBidMutation.mutate(bidId)}
                   onReject={(bidId) => rejectBidMutation.mutate(bidId)}
+                  onConfirmDelivery={(bidId) => confirmDeliveryMutation.mutate(bidId)}
                   onContact={(makerId) => {
                     const makerUser = bid.maker;
                     if (makerUser) {

@@ -539,6 +539,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/bids/:id/confirm-delivery', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'client') {
+        return res.status(403).json({ message: "Only clients can confirm delivery" });
+      }
+
+      const bid = await storage.getBid(id);
+      if (!bid) {
+        return res.status(404).json({ message: "Bid not found" });
+      }
+
+      if (bid.status !== 'accepted') {
+        return res.status(400).json({ message: "Can only confirm delivery for accepted bids" });
+      }
+
+      const project = await storage.getProject(bid.projectId);
+      if (!project || project.userId !== userId) {
+        return res.status(403).json({ message: "You can only confirm delivery for your own projects" });
+      }
+
+      await storage.confirmBidDelivery(id);
+      await storage.updateProjectStatus(bid.projectId, 'completed');
+
+      // Notify maker via WebSocket
+      const makerWs = wsClients.get(bid.makerId);
+      if (makerWs && makerWs.readyState === WebSocket.OPEN) {
+        makerWs.send(JSON.stringify({
+          type: 'delivery_confirmed',
+          projectId: bid.projectId,
+          bidId: id,
+        }));
+      }
+
+      res.json({ message: "Delivery confirmed successfully" });
+    } catch (error) {
+      console.error("Error confirming delivery:", error);
+      res.status(500).json({ message: "Failed to confirm delivery" });
+    }
+  });
+
   app.get('/api/bids/my-bids', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);

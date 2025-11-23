@@ -52,6 +52,7 @@ export interface IStorage {
   getMakerBidForProject(makerId: string, projectId: string): Promise<Bid | undefined>;
   createBid(bid: InsertBid): Promise<Bid>;
   updateBidStatus(id: string, status: Bid["status"]): Promise<void>;
+  confirmBidDelivery(id: string): Promise<void>;
 
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
@@ -302,6 +303,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(bids)
       .set({ status, updatedAt: new Date() })
+      .where(eq(bids.id, id));
+  }
+
+  async confirmBidDelivery(id: string): Promise<void> {
+    await db
+      .update(bids)
+      .set({ deliveryConfirmedAt: new Date(), updatedAt: new Date() })
       .where(eq(bids.id, id));
   }
 

@@ -12,11 +12,12 @@ interface BidCardProps {
   onAccept?: (bidId: string) => void;
   onReject?: (bidId: string) => void;
   onContact?: (makerId: string) => void;
+  onConfirmDelivery?: (bidId: string) => void;
   isClient?: boolean;
   isPending?: boolean;
 }
 
-export function BidCard({ bid, onAccept, onReject, onContact, isClient, isPending }: BidCardProps) {
+export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, isClient, isPending }: BidCardProps) {
   const profile = bid.maker?.makerProfile;
   const initials = bid.maker?.firstName && bid.maker?.lastName 
     ? `${bid.maker.firstName[0]}${bid.maker.lastName[0]}`
@@ -118,9 +119,27 @@ export function BidCard({ bid, onAccept, onReject, onContact, isClient, isPendin
             )}
 
             {bid.status === "accepted" && (
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                Aceptada
-              </Badge>
+              <div className="flex flex-col gap-2 items-end">
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                  Aceptada
+                </Badge>
+                {isClient && !bid.deliveryConfirmedAt && (
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => onConfirmDelivery?.(bid.id)}
+                    disabled={isPending}
+                    data-testid={`button-confirm-delivery-${bid.id}`}
+                  >
+                    Confirmar Recepción
+                  </Button>
+                )}
+                {bid.deliveryConfirmedAt && (
+                  <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+                    Entrega Confirmada
+                  </Badge>
+                )}
+              </div>
             )}
 
             {bid.status === "rejected" && (
