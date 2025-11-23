@@ -234,7 +234,7 @@ export default function MakerHome() {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold">{stats?.activeBids || 0}</p>
-                  <p className="text-xs text-muted-foreground">de 2 máximo</p>
+                  <p className="text-xs text-muted-foreground">en progreso</p>
                 </div>
               </div>
             </CardContent>
