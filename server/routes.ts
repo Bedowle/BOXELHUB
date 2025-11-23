@@ -542,6 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/bids/:id/confirm-delivery', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
+      const { rating, comment } = req.body;
       const userId = getAuthenticatedUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -550,6 +551,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (user?.userType !== 'client') {
         return res.status(403).json({ message: "Only clients can confirm delivery" });
+      }
+
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
       }
 
       const bid = await storage.getBid(id);
@@ -566,6 +571,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only confirm delivery for your own projects" });
       }
 
+      // Create review for maker by client
+      await storage.createReview({
+        projectId: bid.projectId,
+        fromUserId: userId,
+        toUserId: bid.makerId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
+
       await storage.confirmBidDelivery(id);
       await storage.updateProjectStatus(bid.projectId, 'completed');
 
@@ -578,6 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bidId: id,
           clientName: user?.firstName || user?.email || "Cliente",
           projectName: project?.name || "Proyecto",
+          clientId: userId,
         }));
       }
 
@@ -625,6 +640,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching stats:", error);
       res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  app.put('/api/bids/:id/rate-client', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { rating, comment } = req.body;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can rate clients" });
+      }
+
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
+      }
+
+      const bid = await storage.getBid(id);
+      if (!bid) {
+        return res.status(404).json({ message: "Bid not found" });
+      }
+
+      if (bid.makerId !== userId) {
+        return res.status(403).json({ message: "You can only rate your own clients" });
+      }
+
+      if (!bid.deliveryConfirmedAt) {
+        return res.status(400).json({ message: "Can only rate after delivery is confirmed" });
+      }
+
+      // Create review for client by maker
+      const project = await storage.getProject(bid.projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      await storage.createReview({
+        projectId: bid.projectId,
+        fromUserId: userId,
+        toUserId: project.userId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
+
+      res.json({ message: "Client rated successfully" });
+    } catch (error) {
+      console.error("Error rating client:", error);
+      res.status(500).json({ message: "Failed to rate client" });
     }
   });
 

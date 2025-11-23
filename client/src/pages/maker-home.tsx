@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
 import { Printer, Package, CheckCircle, Zap, Search, Filter, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { ChatDialog } from "@/components/ChatDialog";
+import { MakerRatingDialog } from "@/components/MakerRatingDialog";
 import { useLocation } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -28,6 +30,12 @@ export default function MakerHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
   const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [deliveryToRate, setDeliveryToRate] = useState<{
+    bidId: string;
+    clientName: string;
+    projectName: string;
+  } | null>(null);
 
   const { data: profile, isLoading: profileLoading } = useQuery<MakerProfile>({
     queryKey: ["/api/maker-profile"],
@@ -83,6 +91,21 @@ export default function MakerHome() {
     }
   }, [user, profile, profileLoading, hasShownProfileDialog]);
 
+  useEffect(() => {
+    const handleDeliveryConfirmed = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setDeliveryToRate({
+        bidId: customEvent.detail.bidId,
+        clientName: customEvent.detail.clientName,
+        projectName: customEvent.detail.projectName,
+      });
+      setRatingDialogOpen(true);
+    };
+
+    window.addEventListener("delivery_confirmed", handleDeliveryConfirmed);
+    return () => window.removeEventListener("delivery_confirmed", handleDeliveryConfirmed);
+  }, []);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -115,6 +138,29 @@ export default function MakerHome() {
 
   const activeBidsCount = myBids?.filter(bid => bid.status === "pending").length || 0;
   const canBidMore = activeBidsCount < 2;
+  const queryClient = useQueryClient();
+
+  const rateClientMutation = useMutation({
+    mutationFn: async ({ bidId, rating, comment }: { bidId: string; rating: number; comment?: string }) => {
+      await apiRequest("PUT", `/api/bids/${bidId}/rate-client`, { rating, comment });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Calificación enviada",
+        description: "Tu calificación ha sido registrada.",
+      });
+      setRatingDialogOpen(false);
+      setDeliveryToRate(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/bids/my-bids"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo enviar la calificación",
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -401,6 +447,18 @@ export default function MakerHome() {
           onOpenChange={setChatDialogOpen}
           otherUser={selectedChatUser}
           currentUserId={user?.id || ""}
+        />
+      )}
+      {deliveryToRate && (
+        <MakerRatingDialog
+          open={ratingDialogOpen}
+          onOpenChange={setRatingDialogOpen}
+          clientName={deliveryToRate.clientName}
+          projectName={deliveryToRate.projectName}
+          onSubmit={(rating, comment) => {
+            rateClientMutation.mutate({ bidId: deliveryToRate.bidId, rating, comment });
+          }}
+          isLoading={rateClientMutation.isPending}
         />
       )}
     </div>

@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { BidCard } from "@/components/BidCard";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
 import { ChatDialog } from "@/components/ChatDialog";
+import { RatingDialog } from "@/components/RatingDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BidCardSkeleton } from "@/components/LoadingSkeleton";
 import { ArrowLeft, Calendar, FileText, Package } from "lucide-react";
@@ -26,7 +27,9 @@ export default function ProjectDetails() {
   const queryClient = useQueryClient();
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedMaker, setSelectedMaker] = useState<User | null>(null);
+  const [selectedBidForRating, setSelectedBidForRating] = useState<string | null>(null);
 
   const projectId = params?.id;
 
@@ -109,14 +112,16 @@ export default function ProjectDetails() {
   });
 
   const confirmDeliveryMutation = useMutation({
-    mutationFn: async (bidId: string) => {
-      await apiRequest("PUT", `/api/bids/${bidId}/confirm-delivery`, {});
+    mutationFn: async ({ bidId, rating, comment }: { bidId: string; rating: number; comment?: string }) => {
+      await apiRequest("PUT", `/api/bids/${bidId}/confirm-delivery`, { rating, comment });
     },
     onSuccess: () => {
       toast({
         title: "Entrega confirmada",
         description: "Has confirmado la recepción del proyecto. El maker ha sido notificado.",
       });
+      setRatingDialogOpen(false);
+      setSelectedBidForRating(null);
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "bids"] });
     },
@@ -279,7 +284,10 @@ export default function ProjectDetails() {
                   isClient={isOwner}
                   onAccept={(bidId) => acceptBidMutation.mutate(bidId)}
                   onReject={(bidId) => rejectBidMutation.mutate(bidId)}
-                  onConfirmDelivery={(bidId) => confirmDeliveryMutation.mutate(bidId)}
+                  onConfirmDelivery={(bidId) => {
+                    setSelectedBidForRating(bidId);
+                    setRatingDialogOpen(true);
+                  }}
                   onContact={(makerId) => {
                     const makerUser = bid.maker;
                     if (makerUser) {
@@ -321,6 +329,20 @@ export default function ProjectDetails() {
           onOpenChange={setChatDialogOpen}
           otherUser={selectedMaker}
           currentUserId={user.id}
+        />
+      )}
+
+      {selectedBidForRating && (
+        <RatingDialog
+          open={ratingDialogOpen}
+          onOpenChange={setRatingDialogOpen}
+          title="Califica al Maker"
+          description="Comparte tu experiencia con este maker. Tu calificación ayudará a otros clientes a tomar mejores decisiones."
+          targetName={bids?.find((b) => b.id === selectedBidForRating)?.maker?.firstName || "Maker"}
+          onSubmit={(rating, comment) => {
+            confirmDeliveryMutation.mutate({ bidId: selectedBidForRating, rating, comment });
+          }}
+          isLoading={confirmDeliveryMutation.isPending}
         />
       )}
     </div>

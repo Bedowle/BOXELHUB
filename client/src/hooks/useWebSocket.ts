@@ -91,6 +91,14 @@ export function useWebSocket() {
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "bids"] });
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId] });
               }
+              // Emit custom event so maker-home can show rating dialog
+              window.dispatchEvent(new CustomEvent("delivery_confirmed", { 
+                detail: { 
+                  bidId: data.bidId,
+                  clientName: data.clientName,
+                  projectName: data.projectName
+                }
+              }));
               break;
               
             case "new_message":
