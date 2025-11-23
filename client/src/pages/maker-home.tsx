@@ -23,7 +23,6 @@ export default function MakerHome() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [hasShownProfileDialog, setHasShownProfileDialog] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
@@ -84,12 +83,6 @@ export default function MakerHome() {
     }
   }, [user, authLoading, toast]);
 
-  useEffect(() => {
-    if (user && user.userType === "maker" && !profileLoading && !profile && !hasShownProfileDialog) {
-      setProfileDialogOpen(true);
-      setHasShownProfileDialog(true);
-    }
-  }, [user, profile, profileLoading, hasShownProfileDialog]);
 
   useEffect(() => {
     const handleDeliveryConfirmed = (event: Event) => {
@@ -167,9 +160,13 @@ export default function MakerHome() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
-          {/* Profile Section */}
+          {/* Profile Section - Clickable */}
           {profile && (
-            <Card className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
+            <Card 
+              className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10 hover-elevate cursor-pointer"
+              onClick={() => setLocation("/maker/profile")}
+              data-testid="card-profile-header"
+            >
               <CardContent className="pt-6 pb-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
@@ -183,10 +180,13 @@ export default function MakerHome() {
                   </div>
                   <Button 
                     variant="outline" 
-                    onClick={() => setProfileDialogOpen(true)}
-                    data-testid="button-edit-profile"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLocation("/maker/profile");
+                    }}
+                    data-testid="button-view-profile"
                   >
-                    Editar Perfil
+                    Ver Perfil
                   </Button>
                 </div>
               </CardContent>
@@ -371,7 +371,6 @@ export default function MakerHome() {
         </div>
       </main>
 
-      <MakerProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} profile={profile || null} />
       {selectedChatUser && (
         <ChatDialog
           open={chatDialogOpen}
