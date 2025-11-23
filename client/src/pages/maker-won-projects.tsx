@@ -9,7 +9,7 @@ import { ArrowLeft, Trophy, Clock, CheckCircle2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { apiRequest } from "@/lib/queryClient";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Project } from "@shared/schema";
 
 interface BidWithDelivery {
@@ -90,10 +90,17 @@ export default function MakerWonProjects() {
   }
 
   // Filter: bids accepted + project not completed
-  const wonProjects = myBidProjects?.filter(p => {
-    const bid = allBids?.find(b => b.projectId === p.id && b.status === "accepted");
-    return bid && p.status !== "completed";
-  }) || [];
+  const wonProjects = useMemo(() => {
+    if (!myBidProjects || !allBids) return [];
+    
+    const acceptedBidProjectIds = allBids
+      .filter(b => b.status === "accepted")
+      .map(b => b.projectId);
+    
+    return myBidProjects.filter(p => 
+      acceptedBidProjectIds.includes(p.id) && p.status !== "completed"
+    );
+  }, [myBidProjects, allBids]);
 
   return (
     <div className="min-h-screen bg-background">
