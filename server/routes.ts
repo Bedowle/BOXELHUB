@@ -410,6 +410,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/:id/download-stl', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      res.json({ fileName: project.stlFileName });
+    } catch (error) {
+      console.error("Error downloading STL:", error);
+      res.status(500).json({ message: "Failed to download STL" });
+    }
+  });
+
   app.post('/api/projects/:id/bids', isAuthenticated, async (req: any, res) => {
     try {
       const { id: projectId } = req.params;
