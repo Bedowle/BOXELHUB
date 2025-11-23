@@ -310,9 +310,6 @@ export default function MakerHome() {
                   <SelectItem value="all">Todas las impresoras</SelectItem>
                   <SelectItem value="Ender3">Ender 3</SelectItem>
                   <SelectItem value="BambooLab">Bambu Lab</SelectItem>
-                  <SelectItem value="FDM">FDM</SelectItem>
-                  <SelectItem value="SLA">SLA</SelectItem>
-                  <SelectItem value="SLS">SLS</SelectItem>
                 </SelectContent>
               </Select>
             </div>
