@@ -156,7 +156,7 @@ export const reviews = pgTable("reviews", {
   projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   fromUserId: varchar("from_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   toUserId: varchar("to_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  rating: integer("rating").notNull(), // 1-5
+  rating: decimal("rating", { precision: 2, scale: 1 }).notNull(), // 0.5-5 in 0.5 increments
   comment: text("comment"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => [
