@@ -1,12 +1,15 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { LogOut, MessageCircle } from "lucide-react";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export default function AppHeader() {
   const [, setLocation] = useLocation();
   const { user, isClient, isMaker } = useAuth();
+  const { t } = useLanguage();
 
   const { data: conversations } = useQuery<Array<{ userId: string; unreadCount: number }>>({
     queryKey: ["/api/my-conversations-full"],
@@ -56,6 +59,9 @@ export default function AppHeader() {
             <span className="text-sm font-medium hidden sm:block">
               {user?.firstName || user?.email}
             </span>
+
+            <LanguageSwitcher />
+
             <Button
               variant="outline"
               size="sm"
@@ -65,7 +71,7 @@ export default function AppHeader() {
               data-testid="button-logout"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Salir
+              {t('nav.logout')}
             </Button>
           </div>
         </div>

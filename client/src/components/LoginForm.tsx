@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage.tsx";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -27,8 +29,8 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
     },
     onSuccess: () => {
       toast({
-        title: "¡Bienvenido!",
-        description: "Iniciando sesión...",
+        title: t('auth.loginSuccess'),
+        description: t('common.loading'),
       });
       setTimeout(() => {
         window.location.href = "/";
@@ -36,8 +38,8 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
     },
     onError: (error: any) => {
       toast({
-        title: "Error de login",
-        description: error.message || "Credenciales inválidas",
+        title: t('common.error'),
+        description: error.message || t('auth.invalidCredentials'),
         variant: "destructive",
       });
     },
@@ -47,7 +49,8 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
     e.preventDefault();
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       toast({
-        title: "Email inválido",
+        title: t('common.error'),
+        description: t('validation.materialRequired'),
         variant: "destructive",
       });
       return;
@@ -59,14 +62,14 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="login-email" className="text-sm">
-          Email
+          {t('auth.email')}
         </Label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="login-email"
             type="email"
-            placeholder="tu@email.com"
+            placeholder={t('auth.email')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={mutation.isPending}
@@ -79,14 +82,14 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
 
       <div>
         <Label htmlFor="login-password" className="text-sm">
-          Contraseña
+          {t('auth.password')}
         </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="login-password"
             type="password"
-            placeholder="••••••••"
+            placeholder={t('auth.password')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={mutation.isPending}
@@ -97,25 +100,27 @@ export default function LoginForm({ onSuccess, onForgotPassword }: LoginFormProp
         </div>
       </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={mutation.isPending || !email || !password}
-        size="lg"
-        data-testid="button-login-submit"
-      >
-        {mutation.isPending ? "Iniciando..." : "Iniciar Sesión"}
-      </Button>
-
-      <div className="text-center">
-        <button
-          type="button"
-          onClick={onForgotPassword}
-          className="text-primary text-sm hover:underline"
-          data-testid="button-forgot-password"
+      <div className="flex gap-2 pt-2">
+        <Button
+          type="submit"
+          disabled={mutation.isPending}
+          className="flex-1"
+          data-testid="button-login-submit"
         >
-          ¿Olvidaste tu contraseña?
-        </button>
+          {mutation.isPending ? t('common.loading') : t('auth.login')}
+        </Button>
+        {onForgotPassword && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onForgotPassword}
+            disabled={mutation.isPending}
+            data-testid="button-forgot-password"
+          >
+            {t('auth.loginSuccess')}
+          </Button>
+        )}
       </div>
     </form>
   );
