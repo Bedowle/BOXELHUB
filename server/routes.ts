@@ -465,12 +465,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "You already have a bid for this project" });
       }
 
-      // Check active bid limit (2 max)
-      const activeBidCount = await storage.getActiveBidCount(userId);
-      if (activeBidCount >= 2) {
-        return res.status(400).json({ message: "You have reached the limit of 2 active bids" });
-      }
-
       const validated = insertBidSchema.parse(req.body);
       const bid = await storage.createBid({ 
         ...validated, 
