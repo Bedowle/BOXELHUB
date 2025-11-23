@@ -199,10 +199,10 @@ export default function MakerHome() {
         {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
-            Explora Proyectos
+            Tu Panel de Maker
           </h1>
           <p className="text-lg text-muted-foreground">
-            Encuentra proyectos que coincidan con tus capacidades y haz ofertas competitivas
+            Gestiona tus ofertas, proyectos en progreso y entregas completadas
           </p>
         </div>
 
@@ -325,10 +325,10 @@ export default function MakerHome() {
           <div className="mb-8">
             <h2 className="text-3xl font-bold flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-primary" />
-              Proyectos Disponibles
+              Proyectos Activos
             </h2>
             <p className="text-muted-foreground mt-2">
-              {filteredProjects?.length || 0} proyecto{(filteredProjects?.length || 0) !== 1 ? "s" : ""} coincide{(filteredProjects?.length || 0) !== 1 ? "n" : ""}
+              {filteredProjects?.length || 0} proyecto{(filteredProjects?.length || 0) !== 1 ? "s" : ""} disponible{(filteredProjects?.length || 0) !== 1 ? "s" : ""}
             </p>
           </div>
 
