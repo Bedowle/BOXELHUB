@@ -131,7 +131,7 @@ export default function MakerHome() {
     return shuffled.slice(0, count);
   };
 
-  const filteredProjects = getRandomProjects(availableFilteredProjects, 3);
+  const filteredProjects = getRandomProjects(availableFilteredProjects, 6);
 
   const activeBidsCount = myBids?.filter(bid => bid.status === "pending").length || 0;
   const canBidMore = activeBidsCount < 2;
@@ -304,23 +304,33 @@ export default function MakerHome() {
               description="No hay proyectos disponibles en este momento"
             />
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {filteredProjects?.slice(0, 3).map((project) => {
-                const hasMyBid = myBidProjects?.some(p => p.id === project.id);
-                return (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onClick={() => {
-                      if (hasMyBid) {
-                        setLocation(`/maker/project/${project.id}`);
-                      } else {
-                        setLocation(`/project/${project.id}`);
-                      }
-                    }}
-                  />
-                );
-              })}
+            <div className="relative">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {filteredProjects?.map((project, index) => {
+                  const hasMyBid = myBidProjects?.some(p => p.id === project.id);
+                  const isHidden = index >= 3;
+                  return (
+                    <div
+                      key={project.id}
+                      className={isHidden ? "opacity-40 pointer-events-none" : ""}
+                    >
+                      <ProjectCard
+                        project={project}
+                        onClick={() => {
+                          if (hasMyBid) {
+                            setLocation(`/maker/project/${project.id}`);
+                          } else {
+                            setLocation(`/project/${project.id}`);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              {filteredProjects && filteredProjects.length > 3 && (
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+              )}
             </div>
           )}
 
