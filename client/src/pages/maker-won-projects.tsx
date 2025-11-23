@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
 import { RatingDialog } from "@/components/RatingDialog";
-import { ArrowLeft, Trophy, Star } from "lucide-react";
+import { ArrowLeft, Trophy, Star, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Project } from "@shared/schema";
 
 export default function MakerWonProjects() {
@@ -20,7 +20,7 @@ export default function MakerWonProjects() {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectName, setSelectedProjectName] = useState<string>("");
-  const [needsRating, setNeedsRating] = useState<Set<string>>(new Set());
+  const [deliveryStatus, setDeliveryStatus] = useState<Record<string, { deliveryConfirmed: boolean; hasRated: boolean }>>({});
 
   const { data: myBidProjects } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-bids"],
@@ -31,6 +31,24 @@ export default function MakerWonProjects() {
     queryKey: ["/api/bids/my-bids"],
     enabled: !!user,
   });
+
+  // Load delivery status for all won projects
+  useEffect(() => {
+    const wonProjects = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "accepted")) || [];
+    if (wonProjects.length > 0) {
+      wonProjects.forEach(async (project) => {
+        try {
+          const response = await apiRequest("GET", `/api/projects/${project.id}/check-rating-by-maker`);
+          setDeliveryStatus(prev => ({
+            ...prev,
+            [project.id]: response
+          }));
+        } catch (error) {
+          console.error("Failed to check rating status:", error);
+        }
+      });
+    }
+  }, [myBidProjects, myBids]);
 
   const ratingMutation = useMutation({
     mutationFn: async (data: { projectId: string; rating: number; comment?: string }) => {
@@ -95,21 +113,27 @@ export default function MakerWonProjects() {
 
   const wonProjects = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "accepted")) || [];
 
-  const handleRateClick = async (projectId: string, projectName: string) => {
-    const result = await checkRatingMutation.mutateAsync(projectId);
-    if (!result.deliveryConfirmed) {
+  const handleRateClick = (projectId: string, projectName: string) => {
+    const status = deliveryStatus[projectId];
+    if (!status?.deliveryConfirmed) {
       toast({
-        title: "No disponible",
-        description: "Puedes calificar una vez que se confirme la entrega",
-        variant: "destructive",
+        title: "En espera de confirmación",
+        description: "El cliente debe confirmar la entrega primero. Te notificaremos cuando lo haga.",
+        variant: "default",
       });
       return;
     }
-    if (!result.hasRated) {
-      setSelectedProjectId(projectId);
-      setSelectedProjectName(projectName);
-      setRatingDialogOpen(true);
+    if (status.hasRated) {
+      toast({
+        title: "Ya calificado",
+        description: "Ya has calificado este cliente",
+        variant: "default",
+      });
+      return;
     }
+    setSelectedProjectId(projectId);
+    setSelectedProjectName(projectName);
+    setRatingDialogOpen(true);
   };
 
   const handleRatingSubmit = (rating: number, comment?: string) => {
@@ -157,46 +181,84 @@ export default function MakerWonProjects() {
           </div>
         ) : wonProjects.length > 0 ? (
           <div className="space-y-4">
-            {wonProjects.map((project) => (
-              <Card 
-                key={project.id}
-                className="border-amber-200 dark:border-amber-900"
-              >
-                <CardContent className="pt-6 pb-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div 
-                      className="flex-1 hover-elevate cursor-pointer"
-                      onClick={() => setLocation(`/maker/project/${project.id}`)}
-                    >
-                      <h3 className="font-bold text-lg">{project.name}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <div className="flex items-center gap-2 bg-amber-100 dark:bg-amber-900/30 px-3 py-2 rounded-lg">
-                        <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        <span className="font-bold text-amber-600 dark:text-amber-400">Ganado</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRateClick(project.id, project.name);
-                        }}
-                        className="gap-1"
-                        data-testid={`button-rate-${project.id}`}
+            {wonProjects.map((project) => {
+              const status = deliveryStatus[project.id];
+              const canRate = status?.deliveryConfirmed && !status?.hasRated;
+              
+              return (
+                <Card 
+                  key={project.id}
+                  className={status?.deliveryConfirmed 
+                    ? "border-green-200 dark:border-green-900" 
+                    : "border-amber-200 dark:border-amber-900"
+                  }
+                >
+                  <CardContent className="pt-6 pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div 
+                        className="flex-1 hover-elevate cursor-pointer"
+                        onClick={() => setLocation(`/maker/project/${project.id}`)}
                       >
-                        <Star className="h-4 w-4" />
-                        Calificar
-                      </Button>
+                        <h3 className="font-bold text-lg">{project.name}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                        </p>
+                        {status && (
+                          <div className="mt-3 pt-3 border-t border-border">
+                            {status.deliveryConfirmed ? (
+                              <p className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
+                                <Trophy className="h-3 w-3" />
+                                Entrega confirmada - Puedes calificar
+                              </p>
+                            ) : (
+                              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                Esperando confirmación del cliente...
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                          status?.deliveryConfirmed
+                            ? 'bg-green-100 dark:bg-green-900/30'
+                            : 'bg-amber-100 dark:bg-amber-900/30'
+                        }`}>
+                          <Trophy className={`h-5 w-5 ${
+                            status?.deliveryConfirmed
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-amber-600 dark:text-amber-400'
+                          }`} />
+                          <span className={`font-bold ${
+                            status?.deliveryConfirmed
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-amber-600 dark:text-amber-400'
+                          }`}>
+                            {status?.deliveryConfirmed ? 'Completado' : 'Ganado'}
+                          </span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={canRate ? "default" : "outline"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRateClick(project.id, project.name);
+                          }}
+                          className="gap-1"
+                          data-testid={`button-rate-${project.id}`}
+                          disabled={!canRate && status?.deliveryConfirmed}
+                        >
+                          <Star className="h-4 w-4" />
+                          {status?.hasRated ? "Calificado" : "Calificar"}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <EmptyState
