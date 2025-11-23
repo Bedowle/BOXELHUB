@@ -48,7 +48,7 @@ export function ProjectCard({ project, onClick, showBidCount = true }: ProjectCa
           <Calendar className="h-3.5 w-3.5" />
           {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true, locale: es })}
         </span>
-        <Button size="sm" variant="ghost" className="h-8">
+        <Button size="sm" variant="ghost" className="h-8" onClick={onClick} data-testid={`button-view-details-${project.id}`}>
           Ver detalles
         </Button>
       </CardFooter>
