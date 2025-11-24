@@ -55,112 +55,88 @@ export default function WhatIsSTL() {
           <h2 className="text-3xl font-bold mb-12 text-center">¿Cómo funciona?</h2>
           
           {/* Flow Diagram */}
-          <div className="overflow-x-auto pb-4">
-            <div className="min-w-max px-4 relative pt-4">
-              {/* Top Row - All 4 steps */}
-              <div className="flex items-center gap-4 justify-start">
-                {/* Diseña */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 border-blue-300 dark:border-blue-700">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="text-blue-600 font-bold">1</span>
-                      </div>
-                      <h3 className="font-semibold mb-1">Diseña</h3>
-                      <p className="text-muted-foreground text-xs">Tu modelo</p>
-                    </CardContent>
-                  </Card>
+          <div className="grid grid-cols-4 gap-4 mb-32">
+            {/* Diseña */}
+            <Card className="border-2 border-blue-300 dark:border-blue-700">
+              <CardContent className="pt-5 pb-5 text-center text-xs">
+                <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-blue-600 font-bold">1</span>
                 </div>
+                <h3 className="font-semibold mb-1">Diseña</h3>
+                <p className="text-muted-foreground text-xs">Tu modelo</p>
+              </CardContent>
+            </Card>
 
-                <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
-
-                {/* Exporta STL */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 border-blue-300 dark:border-blue-700">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="text-blue-600 font-bold">2</span>
-                      </div>
-                      <h4 className="font-semibold mb-1">Exporta STL</h4>
-                      <p className="text-muted-foreground text-xs">Archivo 3D</p>
-                    </CardContent>
-                  </Card>
+            {/* Exporta STL */}
+            <Card className="border-2 border-blue-300 dark:border-blue-700">
+              <CardContent className="pt-5 pb-5 text-center text-xs">
+                <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-blue-600 font-bold">2</span>
                 </div>
+                <h4 className="font-semibold mb-1">Exporta STL</h4>
+                <p className="text-muted-foreground text-xs">Archivo 3D</p>
+              </CardContent>
+            </Card>
 
-                <ArrowRight className="h-4 w-4 text-secondary flex-shrink-0" />
-
-                {/* Comparte */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 border-secondary">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="font-bold text-secondary">3</span>
-                      </div>
-                      <h3 className="font-semibold mb-1">Comparte</h3>
-                      <p className="text-muted-foreground text-xs">VoxelHub</p>
-                    </CardContent>
-                  </Card>
+            {/* Comparte */}
+            <Card className="border-2 border-secondary">
+              <CardContent className="pt-5 pb-5 text-center text-xs">
+                <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="font-bold text-secondary">3</span>
                 </div>
+                <h3 className="font-semibold mb-1">Comparte</h3>
+                <p className="text-muted-foreground text-xs">VoxelHub</p>
+              </CardContent>
+            </Card>
 
-                <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
-
-                {/* Recibe Ofertas */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 bg-green-100/10 dark:bg-green-900/10">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="font-bold text-green-600">4</span>
-                      </div>
-                      <h3 className="font-semibold mb-1">Recibe</h3>
-                      <p className="text-muted-foreground text-xs">Ofertas</p>
-                    </CardContent>
-                  </Card>
+            {/* Recibe Ofertas */}
+            <Card className="border-2 bg-green-100/10 dark:bg-green-900/10">
+              <CardContent className="pt-5 pb-5 text-center text-xs">
+                <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="font-bold text-green-600">4</span>
                 </div>
-              </div>
+                <h3 className="font-semibold mb-1">Recibe</h3>
+                <p className="text-muted-foreground text-xs">Ofertas</p>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Bottom Row - Descarga */}
-              <div className="flex items-center gap-4 justify-start mt-12">
-                {/* Descarga */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 border-green-300 dark:border-green-700">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="text-green-600 font-bold">1</span>
-                      </div>
-                      <h3 className="font-semibold mb-1">Descarga</h3>
-                      <p className="text-muted-foreground text-xs">STL listo</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Arrow from Descarga pointing right to Comparte */}
-                <div className="flex-grow h-px border-t-2 border-green-600" style={{ minWidth: "16rem" }}></div>
-                <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
-              </div>
-
-              {/* SVG Arrows Connector */}
-              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible" style={{ height: "280px" }}>
-                {/* Arrow from Exporta down to Comparte */}
-                <path
-                  d="M 240 60 Q 280 100 320 140"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  className="text-blue-600"
-                />
-                <polygon points="320,140 315,130 325,135" className="text-blue-600" fill="currentColor" />
-
-                {/* Arrow from Descarga right to Comparte */}
-                <path
-                  d="M 120 200 L 310 200 L 310 150"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  className="text-green-600"
-                />
-                <polygon points="310,150 305,160 315,155" className="text-green-600" fill="currentColor" />
-              </svg>
+          {/* Descarga - positioned below with connecting arrows */}
+          <div className="relative">
+            <div className="w-40">
+              <Card className="border-2 border-green-300 dark:border-green-700">
+                <CardContent className="pt-5 pb-5 text-center text-xs">
+                  <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-green-600 font-bold">1</span>
+                  </div>
+                  <h3 className="font-semibold mb-1">Descarga</h3>
+                  <p className="text-muted-foreground text-xs">STL listo</p>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* SVG arrows connecting to top row */}
+            <svg className="absolute top-0 left-0 w-full" style={{ height: "180px", overflow: "visible" }} viewBox="0 0 800 180" preserveAspectRatio="none">
+              {/* Arrow from Exporta down to Comparte (diagonal) */}
+              <path
+                d="M 200 0 Q 280 60 380 80"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                className="text-secondary"
+              />
+              <polygon points="380,80 375,68 385,75" className="text-secondary" fill="currentColor" />
+
+              {/* Arrow from Descarga up and right to Comparte */}
+              <path
+                d="M 80 180 Q 200 90 380 80"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="none"
+                className="text-green-600"
+              />
+              <polygon points="380,80 375,68 385,75" className="text-green-600" fill="currentColor" />
+            </svg>
           </div>
         </div>
 
