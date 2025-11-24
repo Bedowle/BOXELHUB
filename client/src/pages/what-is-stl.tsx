@@ -53,11 +53,14 @@ export default function WhatIsSTL() {
         <div className="mb-12" style={{ 
           display: 'flex', 
           flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
           transform: 'rotate(-90deg)', 
           transformOrigin: 'center',
-          width: '100vh',
-          marginLeft: 'calc((100vw - 100vh) / 2)',
-          marginRight: 'calc((100vw - 100vh) / 2)'
+          width: '70vh',
+          height: 'auto',
+          marginLeft: 'auto',
+          marginRight: 'auto'
         }}>
           <div style={{
             transform: 'rotate(90deg)',
@@ -66,10 +69,10 @@ export default function WhatIsSTL() {
             flexDirection: 'column',
             width: '100%'
           }}>
-            <h2 className="text-2xl font-bold mb-6 text-center">¿Cómo funciona?</h2>
+            <h2 className="text-xl font-bold mb-3 text-center">¿Cómo funciona?</h2>
             
             {/* Step 1 - Two Initial Branches */}
-            <div className="grid md:grid-cols-2 gap-3 mb-3">
+            <div className="grid md:grid-cols-2 gap-2 mb-2">
               {/* Left Branch - Design Path */}
               <Card className="border-2">
                 <CardContent className="p-4">
@@ -98,7 +101,7 @@ export default function WhatIsSTL() {
             </div>
 
             {/* Connector Lines - Straight down */}
-            <div className="grid md:grid-cols-2 gap-3 mb-3">
+            <div className="grid md:grid-cols-2 gap-2 mb-2">
               <div className="flex justify-center">
                 <div className="w-1 h-4 bg-gradient-to-b from-primary to-transparent"></div>
               </div>
@@ -108,7 +111,7 @@ export default function WhatIsSTL() {
             </div>
 
             {/* Step 2 - Two Branches */}
-            <div className="grid md:grid-cols-2 gap-3 mb-3">
+            <div className="grid md:grid-cols-2 gap-2 mb-2">
               {/* Left Branch - Design Path */}
               <Card className="border-2">
                 <CardContent className="p-4">
@@ -137,7 +140,7 @@ export default function WhatIsSTL() {
             </div>
 
             {/* Convergent Lines - Meet in the middle */}
-            <div className="flex justify-center mb-3">
+            <div className="flex justify-center mb-2">
               <svg viewBox="0 0 400 30" className="w-full max-w-2xl h-6" preserveAspectRatio="none">
                 <path d="M 100 0 L 200 30" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
                 <path d="M 300 0 L 200 30" stroke="hsl(var(--secondary))" strokeWidth="2" fill="none"/>
@@ -145,7 +148,7 @@ export default function WhatIsSTL() {
             </div>
 
             {/* Step 3 - Converged */}
-            <div className="flex justify-center mb-3">
+            <div className="flex justify-center mb-2">
               <Card className="border-2 w-full max-w-sm">
                 <CardContent className="p-4">
                   <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
@@ -160,7 +163,7 @@ export default function WhatIsSTL() {
             </div>
 
             {/* Connector Line Down */}
-            <div className="flex justify-center mb-3">
+            <div className="flex justify-center mb-2">
               <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-transparent"></div>
             </div>
 
