@@ -311,7 +311,7 @@ export default function WhatIsSTL() {
           <Button 
             size="lg" 
             className="px-8"
-            onClick={() => setLocation("/auth?type=client")}
+            onClick={() => setLocation("/auth?type=client&redirectTo=/what-is-stl")}
             data-testid="button-get-started-stl"
           >
             Empezar Ahora

@@ -11,11 +11,17 @@ import { ArrowLeft } from "lucide-react";
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
   const [view, setView] = useState<"login" | "register-client" | "register-maker" | "forgot-password">("login");
+  const [redirectTo, setRedirectTo] = useState<string>("/");
 
   // Auto-set view from URL query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const typeParam = params.get("type");
+    const redirectParam = params.get("redirectTo");
+    
+    if (redirectParam) {
+      setRedirectTo(redirectParam);
+    }
     
     if (typeParam === "maker") {
       setView("register-maker");
@@ -27,7 +33,7 @@ export default function AuthPage() {
   }, []);
 
   const handleBackToLanding = () => {
-    setLocation("/");
+    setLocation(redirectTo);
   };
 
   return (
@@ -62,7 +68,7 @@ export default function AuthPage() {
               </div>
 
               <LoginForm 
-                onSuccess={() => setLocation("/")}
+                onSuccess={() => setLocation(redirectTo)}
                 onForgotPassword={() => setView("forgot-password")}
               />
 
@@ -96,7 +102,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold">Registro - Cliente</h2>
               </div>
               <ClientRegisterForm
-                onSuccess={() => setLocation("/")}
+                onSuccess={() => setLocation(redirectTo)}
                 onBack={handleBackToLanding}
               />
               
@@ -129,7 +135,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold">Registro - Maker</h2>
               </div>
               <MakerRegisterForm
-                onSuccess={() => setLocation("/")}
+                onSuccess={() => setLocation(redirectTo)}
                 onBack={handleBackToLanding}
               />
               
