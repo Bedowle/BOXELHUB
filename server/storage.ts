@@ -9,6 +9,7 @@ import {
   messages,
   reviews,
   emailTokens,
+  marketplaceDesigns,
   type User,
   type UpsertUser,
   type MakerProfile,
@@ -21,6 +22,8 @@ import {
   type InsertMessage,
   type Review,
   type InsertReview,
+  type MarketplaceDesign,
+  type InsertMarketplaceDesign,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -87,6 +90,14 @@ export interface IStorage {
 
   // Password reset operations
   updateUserPassword(userId: string, newPassword: string): Promise<void>;
+
+  // Marketplace design operations
+  getMarketplaceDesign(id: string): Promise<MarketplaceDesign | undefined>;
+  getMarketplaceDesigns(filters?: { makerId?: string; status?: string }): Promise<MarketplaceDesign[]>;
+  createMarketplaceDesign(design: InsertMarketplaceDesign & { makerId: string }): Promise<MarketplaceDesign>;
+  updateMarketplaceDesign(id: string, data: Partial<InsertMarketplaceDesign>): Promise<void>;
+  deleteMarketplaceDesign(id: string): Promise<void>;
+  getMakerDesignCount(makerId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -668,6 +679,51 @@ export class DatabaseStorage implements IStorage {
   async updateUserPassword(userId: string, newPassword: string): Promise<void> {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+  }
+
+  // Marketplace design operations
+  async getMarketplaceDesign(id: string): Promise<MarketplaceDesign | undefined> {
+    const [design] = await db.select().from(marketplaceDesigns).where(eq(marketplaceDesigns.id, id));
+    return design;
+  }
+
+  async getMarketplaceDesigns(filters?: { makerId?: string; status?: string }): Promise<MarketplaceDesign[]> {
+    let query = db.select().from(marketplaceDesigns);
+
+    if (filters?.makerId) {
+      query = query.where(eq(marketplaceDesigns.makerId, filters.makerId));
+    }
+
+    if (filters?.status) {
+      query = query.where(eq(marketplaceDesigns.status, filters.status as any));
+    }
+
+    const results = await query.orderBy(desc(marketplaceDesigns.createdAt));
+    return results;
+  }
+
+  async createMarketplaceDesign(designData: InsertMarketplaceDesign & { makerId: string }): Promise<MarketplaceDesign> {
+    const [design] = await db.insert(marketplaceDesigns).values(designData).returning();
+    return design;
+  }
+
+  async updateMarketplaceDesign(id: string, data: Partial<InsertMarketplaceDesign>): Promise<void> {
+    await db
+      .update(marketplaceDesigns)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(marketplaceDesigns.id, id));
+  }
+
+  async deleteMarketplaceDesign(id: string): Promise<void> {
+    await db.delete(marketplaceDesigns).where(eq(marketplaceDesigns.id, id));
+  }
+
+  async getMakerDesignCount(makerId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(marketplaceDesigns)
+      .where(and(eq(marketplaceDesigns.makerId, makerId), eq(marketplaceDesigns.status, "active")));
+    return result.count;
   }
 }
 

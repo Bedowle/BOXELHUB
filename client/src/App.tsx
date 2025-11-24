@@ -30,6 +30,8 @@ import ChatsPage from "@/pages/chats";
 import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
 import WhatIsSTLPage from "@/pages/what-is-stl";
+import MakerMarketplaceUpload from "@/pages/maker-marketplace-upload";
+import ClientMarketplace from "@/pages/client-marketplace";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -82,6 +84,7 @@ function Router() {
               <Route path="/client/projects-active" component={ClientProjectsActive} />
               <Route path="/client/projects-completed" component={ClientProjectsCompleted} />
               <Route path="/client/bids" component={ClientBidsList} />
+              <Route path="/client/marketplace" component={ClientMarketplace} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
             </>
@@ -98,6 +101,7 @@ function Router() {
               <Route path="/maker/bids" component={MakerBidsList} />
               <Route path="/maker/won-projects" component={MakerWonProjects} />
               <Route path="/maker/completed-projects" component={MakerCompletedProjects} />
+              <Route path="/maker/marketplace" component={MakerMarketplaceUpload} />
               <Route path="/maker/project/:id" component={MakerProjectDetails} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />

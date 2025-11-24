@@ -20,6 +20,7 @@ export const userTypeEnum = pgEnum("user_type", ["client", "maker"]);
 export const printerTypeEnum = pgEnum("printer_type", ["Ender3", "BambooLab"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "reserved", "completed"]);
 export const bidStatusEnum = pgEnum("bid_status", ["pending", "accepted", "rejected"]);
+export const designStatusEnum = pgEnum("design_status", ["active", "archived"]);
 
 // Session storage table (mandatory for Replit Auth)
 export const sessions = pgTable(
@@ -165,6 +166,26 @@ export const reviews = pgTable("reviews", {
   index("idx_reviews_to_user_id").on(table.toUserId),
 ]);
 
+// Marketplace designs table (maker-uploaded designs for direct purchase)
+export const marketplaceDesigns = pgTable("marketplace_designs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  makerId: varchar("maker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  imageUrl: varchar("image_url").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  material: varchar("material").notNull(),
+  printerType: printerTypeEnum("printer_type").notNull(),
+  estimatedPrintTime: integer("estimated_print_time"), // in hours
+  estimatedWeight: varchar("estimated_weight"), // in grams, as string for precision
+  status: designStatusEnum("status").default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_marketplace_designs_maker_id").on(table.makerId),
+  index("idx_marketplace_designs_status").on(table.status),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   makerProfile: one(makerProfiles, {
@@ -177,6 +198,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   receivedMessages: many(messages, { relationName: "receivedMessages" }),
   reviewsGiven: many(reviews, { relationName: "reviewsGiven" }),
   reviewsReceived: many(reviews, { relationName: "reviewsReceived" }),
+  marketplaceDesigns: many(marketplaceDesigns),
 }));
 
 export const makerProfilesRelations = relations(makerProfiles, ({ one }) => ({
@@ -238,6 +260,13 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
     fields: [reviews.toUserId],
     references: [users.id],
     relationName: "reviewsReceived",
+  }),
+}));
+
+export const marketplaceDesignsRelations = relations(marketplaceDesigns, ({ one }) => ({
+  maker: one(users, {
+    fields: [marketplaceDesigns.makerId],
+    references: [users.id],
   }),
 }));
 
@@ -306,6 +335,20 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   comment: z.string().optional(),
 });
 
+export const insertMarketplaceDesignSchema = createInsertSchema(marketplaceDesigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  makerId: true,
+}).extend({
+  price: z.string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
+    .refine(val => parseFloat(val) >= 0.5, "Minimum price is €0.50"),
+  estimatedPrintTime: z.number().int().positive("Estimated print time must be positive").optional(),
+  estimatedWeight: z.string().optional(),
+});
+
 // TypeScript types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -324,3 +367,6 @@ export type Message = typeof messages.$inferSelect;
 
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
+
+export type InsertMarketplaceDesign = z.infer<typeof insertMarketplaceDesignSchema>;
+export type MarketplaceDesign = typeof marketplaceDesigns.$inferSelect;

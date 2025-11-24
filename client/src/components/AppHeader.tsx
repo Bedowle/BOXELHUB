@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { LogOut, MessageCircle } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, Package } from "lucide-react";
 
 export default function AppHeader() {
   const [, setLocation] = useLocation();
@@ -34,7 +34,31 @@ export default function AppHeader() {
             </div>
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {isClient && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/client/marketplace")}
+                data-testid="button-marketplace"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Explorar</span>
+              </Button>
+            )}
+            
+            {isMaker && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/maker/marketplace")}
+                data-testid="button-my-designs"
+              >
+                <Package className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Mi Tienda</span>
+              </Button>
+            )}
+
             <Button
               variant="ghost"
               size="icon"

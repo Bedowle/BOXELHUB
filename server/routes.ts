@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema } from "@shared/schema";
+import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema, insertMarketplaceDesignSchema } from "@shared/schema";
 import { getAuthenticatedUserId } from "./replitAuth";
 import { z } from "zod";
 
@@ -1172,6 +1172,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating review:", error);
       res.status(400).json({ message: error.message || "Failed to create review" });
+    }
+  });
+
+  // Marketplace design routes
+  app.get('/api/marketplace/designs', async (req: any, res) => {
+    try {
+      const designs = await storage.getMarketplaceDesigns({ status: 'active' });
+      
+      // Enrich with maker data
+      const enriched = await Promise.all(
+        designs.map(async (design) => {
+          const maker = await storage.getUser(design.makerId);
+          const makerProfile = await storage.getMakerProfile(design.makerId);
+          return {
+            ...design,
+            maker,
+            makerProfile,
+          };
+        })
+      );
+      
+      res.json(enriched);
+    } catch (error) {
+      console.error("Error fetching marketplace designs:", error);
+      res.status(500).json({ message: "Failed to fetch designs" });
+    }
+  });
+
+  app.get('/api/marketplace/designs/:id', async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+      
+      const maker = await storage.getUser(design.makerId);
+      const makerProfile = await storage.getMakerProfile(design.makerId);
+      
+      res.json({
+        ...design,
+        maker,
+        makerProfile,
+      });
+    } catch (error) {
+      console.error("Error fetching design:", error);
+      res.status(500).json({ message: "Failed to fetch design" });
+    }
+  });
+
+  app.get('/api/my-designs', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can upload designs" });
+      }
+      
+      const designs = await storage.getMarketplaceDesigns({ makerId: userId });
+      res.json(designs);
+    } catch (error) {
+      console.error("Error fetching my designs:", error);
+      res.status(500).json({ message: "Failed to fetch designs" });
+    }
+  });
+
+  app.post('/api/marketplace/designs', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can upload designs" });
+      }
+      
+      const validated = insertMarketplaceDesignSchema.parse(req.body);
+      const design = await storage.createMarketplaceDesign({ ...validated, makerId: userId });
+      res.json(design);
+    } catch (error: any) {
+      console.error("Error creating design:", error);
+      res.status(400).json({ message: error.message || "Failed to create design" });
+    }
+  });
+
+  app.put('/api/marketplace/designs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+      
+      if (design.makerId !== userId) {
+        return res.status(403).json({ message: "You can only edit your own designs" });
+      }
+      
+      const validated = insertMarketplaceDesignSchema.partial().parse(req.body);
+      await storage.updateMarketplaceDesign(id, validated);
+      const updated = await storage.getMarketplaceDesign(id);
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating design:", error);
+      res.status(400).json({ message: error.message || "Failed to update design" });
+    }
+  });
+
+  app.delete('/api/marketplace/designs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+      
+      if (design.makerId !== userId) {
+        return res.status(403).json({ message: "You can only delete your own designs" });
+      }
+      
+      await storage.deleteMarketplaceDesign(id);
+      res.json({ message: "Design deleted" });
+    } catch (error) {
+      console.error("Error deleting design:", error);
+      res.status(500).json({ message: "Failed to delete design" });
     }
   });
 
