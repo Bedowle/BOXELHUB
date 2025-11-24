@@ -98,15 +98,7 @@ export default function WhatIsSTL() {
           </div>
 
           {/* Step 2 - Two Branches */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8 relative">
-            {/* Left connector line */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-8 w-full max-w-2xl">
-              <svg viewBox="0 0 400 40" className="w-full h-8" preserveAspectRatio="none">
-                <path d="M 200 0 L 100 40" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
-                <path d="M 200 0 L 300 40" stroke="hsl(var(--secondary))" strokeWidth="2" fill="none"/>
-              </svg>
-            </div>
-
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
             {/* Left Branch - Design Path */}
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
