@@ -417,6 +417,10 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(asc(messages.createdAt));
+    
+    console.log(`[getMessagesByContext] contextType: ${contextType}, contextId: ${contextId.slice(0, 8)}..., userId: ${userId.slice(0, 8)}..., otherUserId: ${otherUserId.slice(0, 8)}...`);
+    console.log(`[getMessagesByContext] Found ${results.length} messages:`, results.map(m => ({ id: m.id.slice(0, 8), projectId: m.projectId?.slice(0, 8), designId: m.marketplaceDesignId?.slice(0, 8) })));
+    
     return results;
   }
 

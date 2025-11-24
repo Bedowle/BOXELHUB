@@ -100,8 +100,16 @@ export function useWebSocket() {
                 title: "Nuevo mensaje",
                 description: "Has recibido un nuevo mensaje",
               });
-              queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
-              queryClient.invalidateQueries({ queryKey: ["/api/my-conversations"] });
+              // Invalidate specific conversation by context
+              if (data.contextType === "project" && data.projectId) {
+                queryClient.invalidateQueries({
+                  queryKey: ["/api/messages", data.projectId, undefined, data.senderId],
+                });
+              } else if (data.contextType === "marketplace_design" && data.marketplaceDesignId) {
+                queryClient.invalidateQueries({
+                  queryKey: ["/api/messages", undefined, data.marketplaceDesignId, data.senderId],
+                });
+              }
               queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
               break;
           }

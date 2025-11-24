@@ -141,6 +141,22 @@ Preferred communication style: Simple, everyday language.
   - Improved selectedConv finding logic in chats-split.tsx to be more defensive
 - **Impact**: ✅ Messages are now strictly isolated by conversation context (project or marketplace design). Same user can have multiple separate conversations without message bleeding
 
+### Bug Fix #4: WebSocket Cache Invalidation Too Broad
+- **Issue**: When receiving `new_message` event, the entire `/api/messages` queryKey was invalidated without context, potentially causing React Query to show stale data for wrong conversations
+- **Root Cause**: Invalidation was `queryClient.invalidateQueries({ queryKey: ["/api/messages"] })` which invalidates ALL message queries regardless of context
+- **Solution**: Changed to context-specific invalidation:
+  - If `contextType === "project"`: Only invalidate `["/api/messages", projectId, undefined, senderId]`
+  - If `contextType === "marketplace_design"`: Only invalidate `["/api/messages", undefined, marketplaceDesignId, senderId]`
+- **Impact**: ✅ Each conversation's cache is invalidated independently, preventing cross-conversation data bleeding
+
+### Bug Fix #5: contextType Not Validated as Required
+- **Issue**: `contextType` was optional in insertMessageSchema, allowing potential context mismatch scenarios
+- **Root Cause**: Schema defined `contextType: z.enum(["project", "marketplace_design"]).optional()`
+- **Solution**:
+  - Changed to REQUIRED: `contextType: z.enum(["project", "marketplace_design"])`
+  - Added validation refine to ensure `contextType` matches the provided context (project → projectId required, marketplace_design → marketplaceDesignId required)
+- **Impact**: ✅ All messages MUST have explicit context type that matches their context, preventing orphaned or miscontexted messages
+
 ### New Chat UI - Wallapop/Milanuncios Style
 - **New Components**:
   - `ChatListItem.tsx`: Individual conversation item with avatar, username, preview, timestamp, unread badge

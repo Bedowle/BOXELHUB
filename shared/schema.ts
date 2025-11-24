@@ -330,7 +330,7 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   content: z.string().min(1, "Message cannot be empty"),
   projectId: z.string().optional(),
   marketplaceDesignId: z.string().optional(),
-  contextType: z.enum(["project", "marketplace_design"]).optional(),
+  contextType: z.enum(["project", "marketplace_design"]),
 }).refine(
   (data) => {
     // Must have either projectId or marketplaceDesignId
@@ -339,6 +339,22 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   {
     message: "Either projectId or marketplaceDesignId is required",
     path: ["projectId"],
+  }
+).refine(
+  (data) => {
+    // If contextType is project, projectId must be present
+    if (data.contextType === "project") {
+      return !!data.projectId;
+    }
+    // If contextType is marketplace_design, marketplaceDesignId must be present
+    if (data.contextType === "marketplace_design") {
+      return !!data.marketplaceDesignId;
+    }
+    return true;
+  },
+  {
+    message: "contextType must match the provided context (project/marketplaceDesignId)",
+    path: ["contextType"],
   }
 );
 
