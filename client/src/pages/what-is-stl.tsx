@@ -89,12 +89,14 @@ export default function WhatIsSTL() {
             </Card>
           </div>
 
-          {/* Connector Lines */}
-          <div className="flex justify-center mb-8">
-            <svg viewBox="0 0 400 40" className="w-full max-w-2xl h-8" preserveAspectRatio="none">
-              <path d="M 100 0 L 200 40" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
-              <path d="M 300 0 L 200 40" stroke="hsl(var(--secondary))" strokeWidth="2" fill="none"/>
-            </svg>
+          {/* Connector Lines - Straight down */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="flex justify-center">
+              <div className="w-1 h-8 bg-gradient-to-b from-primary to-transparent"></div>
+            </div>
+            <div className="flex justify-center">
+              <div className="w-1 h-8 bg-gradient-to-b from-secondary to-transparent"></div>
+            </div>
           </div>
 
           {/* Step 2 - Two Branches */}
@@ -132,7 +134,7 @@ export default function WhatIsSTL() {
             </Card>
           </div>
 
-          {/* Convergent Lines */}
+          {/* Convergent Lines - Meet in the middle */}
           <div className="flex justify-center mb-8">
             <svg viewBox="0 0 400 40" className="w-full max-w-2xl h-8" preserveAspectRatio="none">
               <path d="M 100 0 L 200 40" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
