@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
-import { ArrowLeft, Package, Grid3X3, Zap, Lock } from "lucide-react";
+import { ArrowLeft, Package, Grid3X3, Zap, Lock, ArrowRight, ArrowDown } from "lucide-react";
 
 export default function WhatIsSTL() {
   const [, setLocation] = useLocation();
@@ -52,55 +52,121 @@ export default function WhatIsSTL() {
 
         {/* How It Works */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">¿Cómo funciona?</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Step 1 */}
-            <Card className="border-2">
-              <CardContent className="pt-8 pb-8">
-                <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-xl font-bold text-primary">1</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Diseñas o descargas tu modelo</h3>
-                <p className="text-muted-foreground mb-4">
-                  Crea tu propio diseño en software 3D o descarga modelos listos de comunidades.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Herramientas: Fusion 360, Blender, FreeCAD, TinkerCAD. Librerías: Thingiverse, Cults3D
-                </p>
-              </CardContent>
-            </Card>
+          <h2 className="text-3xl font-bold mb-12 text-center">¿Cómo funciona?</h2>
+          
+          {/* Flow Diagram */}
+          <div className="space-y-8">
+            {/* Initial Step */}
+            <div className="flex justify-center">
+              <Card className="border-2 w-full md:w-80">
+                <CardContent className="pt-8 pb-8 text-center">
+                  <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-xl font-bold text-primary">1</span>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">Diseña o Descarga tu modelo</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Crea en Fusion 360, Blender, TinkerCAD o descarga de Thingiverse, Cults3D
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Step 2 */}
-            <Card className="border-2">
-              <CardContent className="pt-8 pb-8">
-                <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-xl font-bold text-secondary">2</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Obtén el archivo STL</h3>
-                <p className="text-muted-foreground mb-4">
-                  Si diseñaste: exporta como STL. Si descargaste: ya lo tienes.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  El archivo contiene todos los datos para imprimir tu modelo.
-                </p>
-              </CardContent>
-            </Card>
+            {/* Arrow Down */}
+            <div className="flex justify-center">
+              <ArrowDown className="h-6 w-6 text-primary" />
+            </div>
 
-            {/* Step 3 */}
-            <Card className="border-2">
-              <CardContent className="pt-8 pb-8">
-                <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-xl font-bold text-green-600">3</span>
+            {/* Two Paths */}
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Design Path */}
+              <div className="flex flex-col items-center space-y-6">
+                {/* Design to Export */}
+                <Card className="border-2 w-full">
+                  <CardContent className="pt-8 pb-8 text-center">
+                    <div className="bg-blue-100/50 dark:bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-lg font-bold text-blue-600">Diseñaste</span>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Exporta como STL</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Tu software 3D convierte el diseño a archivo STL
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <ArrowDown className="h-5 w-5 text-primary" />
+
+                {/* Converge Point - Design */}
+                <div className="text-center text-muted-foreground text-sm h-8 flex items-center">
+                  ↓
                 </div>
-                <h3 className="text-xl font-semibold mb-3">Compartes en VoxelHub</h3>
-                <p className="text-muted-foreground mb-4">
-                  Subes el archivo STL a VoxelHub, especificas el material y tamaño.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Los makers lo reciben y pueden enviarte ofertas.
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Download Path */}
+              <div className="flex flex-col items-center space-y-6">
+                {/* Download Ready */}
+                <Card className="border-2 w-full">
+                  <CardContent className="pt-8 pb-8 text-center">
+                    <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-lg font-bold text-green-600">Descargaste</span>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Ya tienes el STL</h3>
+                    <p className="text-muted-foreground text-sm">
+                      El archivo descargado ya está listo para usar
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <ArrowDown className="h-5 w-5 text-primary" />
+
+                {/* Converge Point - Download */}
+                <div className="text-center text-muted-foreground text-sm h-8 flex items-center">
+                  ↓
+                </div>
+              </div>
+            </div>
+
+            {/* Arrow Down to Converge */}
+            <div className="flex justify-center">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-2">Ambos caminos convergen</p>
+                <ArrowDown className="h-6 w-6 text-primary mx-auto" />
+              </div>
+            </div>
+
+            {/* Shared Step - VoxelHub Upload */}
+            <div className="flex justify-center">
+              <Card className="border-2 w-full md:w-80 border-secondary">
+                <CardContent className="pt-8 pb-8 text-center">
+                  <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-xl font-bold text-secondary">2</span>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">Comparte en VoxelHub</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Sube tu archivo STL, especifica material, tamaño y presupuesto
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Arrow Down */}
+            <div className="flex justify-center">
+              <ArrowDown className="h-6 w-6 text-primary" />
+            </div>
+
+            {/* Final Step */}
+            <div className="flex justify-center">
+              <Card className="border-2 w-full md:w-80 bg-green-100/10 dark:bg-green-900/10">
+                <CardContent className="pt-8 pb-8 text-center">
+                  <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-xl font-bold text-green-600">3</span>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">Recibe ofertas de Makers</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Makers profesionales compiten con sus mejores precios y tiempos
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
