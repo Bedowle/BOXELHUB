@@ -292,6 +292,10 @@ export default function WhatIsSTL() {
                 <span className="text-primary font-bold">5.</span>
                 <span>Elijes la mejor, ¡listo!</span>
               </li>
+              <li className="flex items-start gap-3">
+                <span className="text-primary font-bold">6.</span>
+                <span>Recibes tu impresión 3D lista en casa</span>
+              </li>
             </ul>
           </CardContent>
         </Card>
