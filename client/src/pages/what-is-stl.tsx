@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
-import { ArrowLeft, Package, Grid3X3, Zap, Lock, ArrowRight, ArrowDown } from "lucide-react";
+import { ArrowLeft, Package, Grid3X3, Zap, Lock } from "lucide-react";
 
 export default function WhatIsSTL() {
   const [, setLocation] = useLocation();
@@ -52,104 +52,55 @@ export default function WhatIsSTL() {
 
         {/* How It Works */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-12 text-center">¿Cómo funciona?</h2>
-          
-          {/* Flow Diagram - Horizontal */}
-          <div className="overflow-x-auto pb-4">
-            <div className="flex items-center gap-2 min-w-max px-4">
-              {/* Step 1 - Design Path */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-blue-300 dark:border-blue-700">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-blue-600 font-bold">1</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Diseña</h3>
-                    <p className="text-muted-foreground text-xs">Tu modelo</p>
-                  </CardContent>
-                </Card>
-              </div>
+          <h2 className="text-3xl font-bold mb-8 text-center">¿Cómo funciona?</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Step 1 */}
+            <Card className="border-2">
+              <CardContent className="pt-8 pb-8">
+                <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-primary">1</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Diseñas tu modelo</h3>
+                <p className="text-muted-foreground mb-4">
+                  Usas software de diseño 3D (gratuito o de pago) para crear tu modelo.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Ejemplos: Fusion 360, Blender, FreeCAD, TinkerCAD
+                </p>
+              </CardContent>
+            </Card>
 
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
+            {/* Step 2 */}
+            <Card className="border-2">
+              <CardContent className="pt-8 pb-8">
+                <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-secondary">2</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Exportas como STL</h3>
+                <p className="text-muted-foreground mb-4">
+                  El software convierte tu diseño 3D en un archivo STL (la "receta" del objeto).
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  El archivo contiene miles de pequeños triángulos que definen la forma.
+                </p>
+              </CardContent>
+            </Card>
 
-              {/* Export Step */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-blue-300 dark:border-blue-700">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-blue-600 font-bold">→</span>
-                    </div>
-                    <h4 className="font-semibold mb-1">Exporta STL</h4>
-                    <p className="text-muted-foreground text-xs">Archivo 3D</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
-
-              {/* Shared Step - VoxelHub */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-secondary">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="font-bold text-secondary">3</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Comparte</h3>
-                    <p className="text-muted-foreground text-xs">VoxelHub</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
-
-              {/* Final Step */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 bg-green-100/10 dark:bg-green-900/10">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="font-bold text-green-600">4</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Recibe</h3>
-                    <p className="text-muted-foreground text-xs">Ofertas</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Separator Line */}
-              <div className="w-2 h-px bg-border flex-shrink-0"></div>
-
-              {/* Step 2 - Download Path */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-green-300 dark:border-green-700">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-green-600 font-bold">2</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Descarga</h3>
-                    <p className="text-muted-foreground text-xs">STL listo</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
-
-              {/* Share Step (same as above) */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-secondary opacity-60">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="font-bold text-secondary">3</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Comparte</h3>
-                    <p className="text-muted-foreground text-xs">VoxelHub</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            {/* Step 3 */}
+            <Card className="border-2">
+              <CardContent className="pt-8 pb-8">
+                <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-green-600">3</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Compartes en VoxelHub</h3>
+                <p className="text-muted-foreground mb-4">
+                  Subes el archivo STL a VoxelHub, especificas el material y tamaño.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Los makers lo reciben y pueden enviarte ofertas.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
