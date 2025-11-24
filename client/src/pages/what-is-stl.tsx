@@ -50,7 +50,15 @@ export default function WhatIsSTL() {
         </Card>
 
         {/* How It Works - Flow Diagram */}
-        <div className="mb-12">
+        <div className="mb-12" style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          transform: 'rotate(90deg)', 
+          transformOrigin: 'center',
+          width: '100vh',
+          marginLeft: 'calc((100vw - 100vh) / 2)',
+          marginRight: 'calc((100vw - 100vh) / 2)'
+        }}>
           <h2 className="text-2xl font-bold mb-6 text-center">¿Cómo funciona?</h2>
           
           {/* Step 1 - Two Initial Branches */}
