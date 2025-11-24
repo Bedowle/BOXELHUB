@@ -68,11 +68,26 @@ export default function ChatsSplitPage() {
   });
 
   // Get selected conversation details - match by userId + context
-  const selectedConv = selectedConvKey ? allConversations.find((c: Conversation) => 
-    c.userId === selectedConvKey.userId &&
-    c.projectId === selectedConvKey.projectId &&
-    c.marketplaceDesignId === selectedConvKey.marketplaceDesignId
-  ) : undefined;
+  const selectedConv = selectedConvKey ? allConversations.find((c: Conversation) => {
+    const match = 
+      c.userId === selectedConvKey.userId &&
+      c.projectId === selectedConvKey.projectId &&
+      c.marketplaceDesignId === selectedConvKey.marketplaceDesignId;
+    
+    if (!match) {
+      console.log(`[ChatsSplit] Checking conversation:`, {
+        cUserId: c.userId,
+        cProjectId: c.projectId,
+        cDesignId: c.marketplaceDesignId,
+        selectedUserId: selectedConvKey.userId,
+        selectedProjectId: selectedConvKey.projectId,
+        selectedDesignId: selectedConvKey.marketplaceDesignId,
+      });
+    }
+    return match;
+  }) : undefined;
+  
+  console.log(`[ChatsSplit] selectedConvKey:`, selectedConvKey, `selectedConv:`, selectedConv);
 
   // If no conversation selected, select the first one
   useEffect(() => {

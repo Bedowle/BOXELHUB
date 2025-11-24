@@ -996,6 +996,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const { projectId, marketplaceDesignId, otherUserId } = req.query;
       
+      console.log(`[GET /api/messages] userId: ${userId.slice(0, 8)}..., otherUserId: ${otherUserId?.slice(0, 8)}..., projectId: ${projectId}, marketplaceDesignId: ${marketplaceDesignId}`);
+      
       if (!otherUserId) {
         return res.status(400).json({ message: "otherUserId is required" });
       }
@@ -1003,16 +1005,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If projectId is provided, use project-based messages
       if (projectId) {
         const messages = await storage.getMessagesByContext(userId, otherUserId as string, "project", projectId as string);
+        console.log(`[GET /api/messages] Returning ${messages.length} messages for project ${(projectId as string).slice(0, 8)}...`);
         return res.json(messages);
       }
       
       // If marketplaceDesignId is provided, use design-based messages
       if (marketplaceDesignId) {
         const messages = await storage.getMessagesByContext(userId, otherUserId as string, "marketplace_design", marketplaceDesignId as string);
+        console.log(`[GET /api/messages] Returning ${messages.length} messages for design ${(marketplaceDesignId as string).slice(0, 8)}...`);
         return res.json(messages);
       }
       
       // Either projectId or marketplaceDesignId is required
+      console.log(`[GET /api/messages] ERROR: Missing context (projectId and marketplaceDesignId both empty)`);
       return res.status(400).json({ message: "Either projectId or marketplaceDesignId is required" });
     } catch (error) {
       console.error("Error fetching messages:", error);
