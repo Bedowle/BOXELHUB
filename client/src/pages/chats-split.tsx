@@ -167,6 +167,10 @@ export default function ChatsSplitPage() {
                   userId={conv.userId}
                   userName={(conv.user?.username || conv.user?.email) || undefined}
                   userImage={conv.user?.profileImageUrl || undefined}
+                  projectName={conv.project?.name}
+                  designName={conv.design?.title}
+                  projectImage={conv.project?.stlImageUrl}
+                  designImage={conv.design?.imageUrl}
                   lastMessage={conv.lastMessage?.content || undefined}
                   lastMessageTime={conv.lastMessage?.createdAt || undefined}
                   unreadCount={conv.unreadCount || 0}

@@ -406,8 +406,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<Message[]> {
-    console.log(`[TOP OF getMessagesByContext] contextType=${contextType}, contextId=${contextId.slice(0, 8)}`);
-    
     // Get all messages between these users, then filter in memory by context
     const allMessages = await db
       .select()
@@ -423,8 +421,6 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(asc(messages.createdAt));
     
-    console.log(`[DEBUG] allMessages BEFORE filtering (${contextType}):`, allMessages.map(m => ({ id: m.id.slice(0, 8), proj: m.projectId?.slice(0, 8), design: m.marketplaceDesignId?.slice(0, 8) })));
-    
     // Filter in memory based on context
     let results: Message[];
     if (contextType === "project") {
@@ -435,16 +431,11 @@ export class DatabaseStorage implements IStorage {
       results = allMessages.filter(m => m.marketplaceDesignId === contextId && m.projectId === null);
     }
     
-    console.log(`[getMessagesByContext] contextType: ${contextType}, contextId: ${contextId.slice(0, 8)}..., userId: ${userId.slice(0, 8)}..., otherUserId: ${otherUserId.slice(0, 8)}...`);
-    console.log(`[getMessagesByContext] Found ${results.length} messages:`, results.map(m => ({ id: m.id.slice(0, 8), projectId: m.projectId?.slice(0, 8), designId: m.marketplaceDesignId?.slice(0, 8) })));
-    
     return results;
   }
 
   async createMessage(messageData: InsertMessage & { senderId: string }): Promise<Message> {
-    console.log("[createMessage] Input messageData:", { senderId: messageData.senderId, receiverId: messageData.receiverId });
     const [message] = await db.insert(messages).values(messageData).returning();
-    console.log("[createMessage] Returned message:", { id: message.id.slice(0, 8), senderId: message.senderId, receiverId: message.receiverId });
     return message;
   }
 
