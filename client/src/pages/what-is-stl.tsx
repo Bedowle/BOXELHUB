@@ -54,27 +54,47 @@ export default function WhatIsSTL() {
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-12 text-center">¿Cómo funciona?</h2>
           
-          {/* Step 1 - Initial */}
-          <div className="flex justify-center mb-8">
-            <Card className="border-2 w-full max-w-sm">
+          {/* Step 1 - Two Initial Branches */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Left Branch - Design Path */}
+            <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-primary">1</span>
+                  <span className="text-xl font-bold text-primary">1 a</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-center">Diseñas o Descargas</h3>
+                <h3 className="text-xl font-semibold mb-3 text-center">Diseñas</h3>
                 <p className="text-muted-foreground mb-4 text-center">
-                  Crea tu propio diseño con software 3D o descarga modelos listos.
+                  Crea tu propio diseño con software 3D.
                 </p>
                 <p className="text-sm text-muted-foreground text-center">
-                  Diseño: Fusion 360, Blender, FreeCAD, TinkerCAD | Descargas: Thingiverse, Cults3D
+                  Fusion 360, Blender, FreeCAD, TinkerCAD
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Right Branch - Download Path */}
+            <Card className="border-2">
+              <CardContent className="pt-8 pb-8">
+                <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <span className="text-xl font-bold text-secondary">1 b</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-center">Descargas</h3>
+                <p className="text-muted-foreground mb-4 text-center">
+                  Descarga modelos listos de plataformas.
+                </p>
+                <p className="text-sm text-muted-foreground text-center">
+                  Thingiverse, Cults3D
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Connector Line Down */}
+          {/* Connector Lines */}
           <div className="flex justify-center mb-8">
-            <div className="w-1 h-8 bg-gradient-to-b from-primary to-transparent"></div>
+            <svg viewBox="0 0 400 40" className="w-full max-w-2xl h-8" preserveAspectRatio="none">
+              <path d="M 100 0 L 200 40" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
+              <path d="M 300 0 L 200 40" stroke="hsl(var(--secondary))" strokeWidth="2" fill="none"/>
+            </svg>
           </div>
 
           {/* Step 2 - Two Branches */}
@@ -91,7 +111,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-primary">1 a</span>
+                  <span className="text-xl font-bold text-primary">2 a</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Exportas como STL</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -107,7 +127,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-secondary">1 b</span>
+                  <span className="text-xl font-bold text-secondary">2 b</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Ya tienes un STL</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -133,7 +153,7 @@ export default function WhatIsSTL() {
             <Card className="border-2 w-full max-w-sm">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-blue-100/50 dark:bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-blue-600">2</span>
+                  <span className="text-xl font-bold text-blue-600">3</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Compartes en VoxelHub</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -156,7 +176,7 @@ export default function WhatIsSTL() {
             <Card className="border-2 w-full max-w-sm bg-green-50/50 dark:bg-green-900/10">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-green-600">3</span>
+                  <span className="text-xl font-bold text-green-600">4</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Recibes ofertas de Makers</h3>
                 <p className="text-muted-foreground mb-4 text-center">
