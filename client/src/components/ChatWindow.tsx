@@ -18,6 +18,8 @@ interface ChatWindowProps {
   marketplaceDesignId?: string;
   designTitle?: string;
   designPrice?: number;
+  project?: any;
+  design?: any;
 }
 
 export function ChatWindow({
@@ -28,6 +30,8 @@ export function ChatWindow({
   marketplaceDesignId,
   designTitle,
   designPrice,
+  project,
+  design,
 }: ChatWindowProps) {
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -175,20 +179,31 @@ export function ChatWindow({
       {/* Header */}
       <div className="border-b p-4 flex items-center justify-between sticky top-0 z-20 bg-background/95 backdrop-blur">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <Avatar>
-            <AvatarImage src={otherUser?.profileImageUrl || undefined} />
-            <AvatarFallback>{otherUserInitials}</AvatarFallback>
-          </Avatar>
+          {/* Product/Project Context */}
+          {project && (
+            <Avatar className="flex-shrink-0">
+              <AvatarImage src={project.stlImageUrl} />
+              <AvatarFallback className="bg-muted text-xs">
+                {project.name?.[0]?.toUpperCase() || "P"}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          {design && (
+            <Avatar className="flex-shrink-0">
+              <AvatarImage src={design.imageUrl} />
+              <AvatarFallback className="bg-muted text-xs">
+                {design.title?.[0]?.toUpperCase() || "D"}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          
           <div className="flex-1 min-w-0">
             <p className="font-semibold truncate">
               {otherUser?.username || otherUser?.email}
             </p>
-            {designTitle && (
-              <p className="text-xs text-muted-foreground truncate">
-                {designTitle}
-                {designPrice && ` • €${Number(designPrice).toFixed(2)}`}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground truncate">
+              {project?.name || design?.title || "Sin contexto"}
+            </p>
           </div>
         </div>
         <Button variant="ghost" size="icon" className="flex-shrink-0">

@@ -198,6 +198,8 @@ export default function ChatsSplitPage() {
               currentUserId={user?.id || ""}
               projectId={selectedConv.projectId}
               marketplaceDesignId={selectedConv.marketplaceDesignId}
+              project={selectedConv.project}
+              design={selectedConv.design}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
