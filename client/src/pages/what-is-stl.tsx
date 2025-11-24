@@ -75,7 +75,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-secondary">1 b</span>
+                  <span className="text-xl font-bold text-secondary">1</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Descargas</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -104,7 +104,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-primary">2 a</span>
+                  <span className="text-xl font-bold text-primary">2</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Exportas como STL</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -120,7 +120,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-secondary">2 b</span>
+                  <span className="text-xl font-bold text-secondary">2</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Ya tienes un STL</h3>
                 <p className="text-muted-foreground mb-4 text-center">
