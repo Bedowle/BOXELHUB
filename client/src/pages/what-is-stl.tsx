@@ -91,7 +91,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-primary">2a</span>
+                  <span className="text-xl font-bold text-primary">1 a</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Exportas como STL</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -107,7 +107,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-secondary">2b</span>
+                  <span className="text-xl font-bold text-secondary">1 b</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Ya tienes un STL</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -133,7 +133,7 @@ export default function WhatIsSTL() {
             <Card className="border-2 w-full max-w-sm">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-blue-100/50 dark:bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-blue-600">3</span>
+                  <span className="text-xl font-bold text-blue-600">2</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Compartes en VoxelHub</h3>
                 <p className="text-muted-foreground mb-4 text-center">
@@ -156,7 +156,7 @@ export default function WhatIsSTL() {
             <Card className="border-2 w-full max-w-sm bg-green-50/50 dark:bg-green-900/10">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-green-600">4</span>
+                  <span className="text-xl font-bold text-green-600">3</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Recibes ofertas de Makers</h3>
                 <p className="text-muted-foreground mb-4 text-center">
