@@ -56,98 +56,115 @@ export default function WhatIsSTL() {
           
           {/* Flow Diagram - Horizontal */}
           <div className="overflow-x-auto pb-4">
-            <div className="flex items-center gap-2 min-w-max px-4">
-              {/* Step 1 - Design Path */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-blue-300 dark:border-blue-700">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-blue-600 font-bold">1</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Diseña</h3>
-                    <p className="text-muted-foreground text-xs">Tu modelo</p>
-                  </CardContent>
-                </Card>
+            <div className="flex flex-col gap-4 min-w-max px-4">
+              {/* Top Row - Design Path */}
+              <div className="flex items-center gap-2">
+                {/* Diseña */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 border-blue-300 dark:border-blue-700">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-blue-600 font-bold">1</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">Diseña</h3>
+                      <p className="text-muted-foreground text-xs">Tu modelo</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
+
+                {/* Exporta STL */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 border-blue-300 dark:border-blue-700">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-blue-600 font-bold">2</span>
+                      </div>
+                      <h4 className="font-semibold mb-1">Exporta STL</h4>
+                      <p className="text-muted-foreground text-xs">Archivo 3D</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
+
+                {/* Comparte - Top (design path) */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 border-secondary">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="font-bold text-secondary">3</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">Comparte</h3>
+                      <p className="text-muted-foreground text-xs">VoxelHub</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
+
+                {/* Recibe Ofertas */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 bg-green-100/10 dark:bg-green-900/10">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="font-bold text-green-600">4</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">Recibe</h3>
+                      <p className="text-muted-foreground text-xs">Ofertas</p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
 
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              {/* Bottom Row - Download Path */}
+              <div className="flex items-center gap-2">
+                {/* Descarga */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 border-green-300 dark:border-green-700">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-green-600 font-bold">1</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">Descarga</h3>
+                      <p className="text-muted-foreground text-xs">STL listo</p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-              {/* Export Step */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-blue-300 dark:border-blue-700">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-blue-600 font-bold">→</span>
-                    </div>
-                    <h4 className="font-semibold mb-1">Exporta STL</h4>
-                    <p className="text-muted-foreground text-xs">Archivo 3D</p>
-                  </CardContent>
-                </Card>
-              </div>
+                {/* Space for alignment */}
+                <div className="w-40 flex-shrink-0"></div>
 
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
 
-              {/* Shared Step - VoxelHub */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-secondary">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="font-bold text-secondary">3</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Comparte</h3>
-                    <p className="text-muted-foreground text-xs">VoxelHub</p>
-                  </CardContent>
-                </Card>
-              </div>
+                {/* Comparte - Bottom (download path) */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 border-secondary opacity-60">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="font-bold text-secondary">3</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">Comparte</h3>
+                      <p className="text-muted-foreground text-xs">VoxelHub</p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
+                <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
 
-              {/* Final Step */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 bg-green-100/10 dark:bg-green-900/10">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="font-bold text-green-600">4</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Recibe</h3>
-                    <p className="text-muted-foreground text-xs">Ofertas</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Separator Line */}
-              <div className="w-2 h-px bg-border flex-shrink-0"></div>
-
-              {/* Step 2 - Download Path */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-green-300 dark:border-green-700">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-green-600 font-bold">2</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Descarga</h3>
-                    <p className="text-muted-foreground text-xs">STL listo</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Arrow Right */}
-              <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
-
-              {/* Share Step (same as above) */}
-              <div className="flex-shrink-0 w-40">
-                <Card className="border-2 border-secondary opacity-60">
-                  <CardContent className="pt-5 pb-5 text-center text-xs">
-                    <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="font-bold text-secondary">3</span>
-                    </div>
-                    <h3 className="font-semibold mb-1">Comparte</h3>
-                    <p className="text-muted-foreground text-xs">VoxelHub</p>
-                  </CardContent>
-                </Card>
+                {/* Recibe Ofertas - Bottom */}
+                <div className="flex-shrink-0 w-40">
+                  <Card className="border-2 bg-green-100/10 dark:bg-green-900/10 opacity-60">
+                    <CardContent className="pt-5 pb-5 text-center text-xs">
+                      <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="font-bold text-green-600">4</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">Recibe</h3>
+                      <p className="text-muted-foreground text-xs">Ofertas</p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
