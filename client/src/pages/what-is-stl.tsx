@@ -290,7 +290,7 @@ export default function WhatIsSTL() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">5.</span>
-                <span>Elijes la mejor, ¡listo!</span>
+                <span>Elijes la oferta que más te convenga</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">6.</span>
