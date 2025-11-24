@@ -24,6 +24,13 @@ Preferred communication style: Simple, everyday language.
 
 **Real-time Updates**: WebSocket connection for live notifications about new bids, project status changes, and messages. Automatically reconnects on disconnect.
 
+**Chat Interface**: Split-view chat page (Wallapop/Milanuncios style) with conversation list sidebar on left and chat window on right. Features:
+- Conversation list with search filter, user avatars, last message preview, timestamps, unread badges
+- Chat window with message grouping by date, sender/receiver differentiation, message timestamps
+- Auto-scroll to latest messages, mark-as-read functionality
+- Support for both project-based and marketplace design chats
+- Messages refetch every 2 seconds for near real-time updates
+
 ### Backend Architecture
 
 **Runtime**: Node.js with Express.js server framework using TypeScript and ESM modules.
@@ -106,6 +113,25 @@ Preferred communication style: Simple, everyday language.
 - Modal dialogs for forms and confirmations
 
 **Responsive Design**: Mobile-first approach with Tailwind breakpoints (md, lg). Grid layouts collapse to single column on mobile.
+
+## Recent Changes (Nov 24, 2025)
+
+### Bug Fix: Chat Parsing in getConversationsWithUnread()
+- **Issue**: Conversation keys were being split incorrectly when parsing context type and ID, causing marketplace design chats to not appear in conversation list
+- **Root Cause**: Using `split('::')` without limit on keys like `partnerId::design::designId` would return 3 elements, but destructuring only took 2
+- **Solution**: Replaced with `indexOf()` and `substring()` to correctly extract partnerId and full contextKey
+- **Impact**: Makers can now see all conversations for their marketplace designs
+
+### New Chat UI - Wallapop/Milanuncios Style
+- **New Components**:
+  - `ChatListItem.tsx`: Individual conversation item in list with avatar, username, last message preview, timestamp, unread badge
+  - `ChatWindow.tsx`: Improved chat window with message grouping by date, better layout, sender/receiver differentiation
+  - `chats-split.tsx`: New split-view chat page replacing old individual chat page
+- **Features**:
+  - Conversation list with search functionality
+  - Real-time conversation updates (3-second refetch interval)
+  - Better UX for managing multiple conversations
+  - Mobile-friendly responsive design
 
 ## External Dependencies
 

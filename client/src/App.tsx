@@ -27,6 +27,7 @@ import MakerCompletedProjects from "@/pages/maker-completed-projects";
 import ExploreProjects from "@/pages/explore-projects";
 import ChatPage from "@/pages/chat-page";
 import ChatsPage from "@/pages/chats";
+import ChatsSplitPage from "@/pages/chats-split";
 import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
 import WhatIsSTLPage from "@/pages/what-is-stl";
@@ -75,7 +76,8 @@ function Router() {
       ) : (
         <>
           {/* Shared Routes */}
-          <Route path="/chats" component={ChatsPage} />
+          <Route path="/chats" component={ChatsSplitPage} />
+          <Route path="/chats-old" component={ChatsPage} />
 
           {/* Client Routes */}
           {isClient && (
