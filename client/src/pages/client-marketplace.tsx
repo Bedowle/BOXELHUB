@@ -199,7 +199,7 @@ export default function ClientMarketplace() {
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => setLocation(`/chat/${design.makerId}`)}
+                        onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
                         data-testid={`button-contact-maker-${design.id}`}
                       >
                         Contactar

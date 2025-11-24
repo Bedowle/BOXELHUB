@@ -994,16 +994,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      const { projectId, otherUserId } = req.query;
+      const { projectId, marketplaceDesignId, otherUserId } = req.query;
       
       if (!otherUserId) {
         return res.status(400).json({ message: "otherUserId is required" });
       }
 
-      // If projectId is provided, use project-based messages; otherwise use general messages
-      const messages = projectId 
-        ? await storage.getMessagesByProject(userId, projectId as string, otherUserId as string)
-        : await storage.getMessages(userId, otherUserId as string);
+      // If projectId is provided, use project-based messages
+      if (projectId) {
+        const messages = await storage.getMessagesByContext(userId, otherUserId as string, "project", projectId as string);
+        return res.json(messages);
+      }
+      
+      // If marketplaceDesignId is provided, use design-based messages
+      if (marketplaceDesignId) {
+        const messages = await storage.getMessagesByContext(userId, otherUserId as string, "marketplace_design", marketplaceDesignId as string);
+        return res.json(messages);
+      }
+      
+      // Otherwise use general messages
+      const messages = await storage.getMessages(userId, otherUserId as string);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -1019,7 +1029,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const validated = insertMessageSchema.parse(req.body);
       
-      const message = await storage.createMessage({ ...validated, senderId: userId });
+      // Set senderId from authenticated user
+      const messageData = { ...validated, senderId: userId };
+      
+      const message = await storage.createMessage(messageData);
       
       // Notify receiver via WebSocket
       const receiverWs = wsClients.get(validated.receiverId);
@@ -1028,6 +1041,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: 'new_message',
           messageId: message.id,
           senderId: userId,
+          contextType: validated.contextType,
+          projectId: validated.projectId,
+          marketplaceDesignId: validated.marketplaceDesignId,
         }));
       }
 
@@ -1045,18 +1061,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       const { otherUserId } = req.params;
-      const { projectId } = req.query;
+      const { projectId, marketplaceDesignId } = req.query;
       
       if (!otherUserId) {
         return res.status(400).json({ message: "otherUserId is required" });
       }
 
-      // If projectId is provided, mark messages as read by project; otherwise use general mark as read
+      // If projectId is provided, mark messages as read by project context
       if (projectId) {
-        await storage.markMessagesAsReadByProject(userId, projectId as string, otherUserId);
-      } else {
-        await storage.markMessagesAsRead(userId, otherUserId);
+        await storage.markMessagesAsReadByContext(userId, otherUserId, "project", projectId as string);
+        return res.json({ success: true });
       }
+      
+      // If marketplaceDesignId is provided, mark messages as read by design context
+      if (marketplaceDesignId) {
+        await storage.markMessagesAsReadByContext(userId, otherUserId, "marketplace_design", marketplaceDesignId as string);
+        return res.json({ success: true });
+      }
+      
+      // Otherwise use general mark as read
+      await storage.markMessagesAsRead(userId, otherUserId);
       res.json({ success: true });
     } catch (error: any) {
       console.error("Error marking messages as read:", error);
@@ -1086,16 +1110,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const conversations = await storage.getConversationsWithUnread(userId);
       
-      // Enrich with user data and project data
+      // Enrich with user data and project/design data
       const enriched = await Promise.all(
         conversations.map(async (conv) => {
           const user = await storage.getUser(conv.userId);
           const project = conv.projectId ? await storage.getProject(conv.projectId) : null;
+          const design = conv.marketplaceDesignId ? await storage.getMarketplaceDesign(conv.marketplaceDesignId) : null;
           return {
             userId: conv.userId,
             projectId: conv.projectId,
+            marketplaceDesignId: conv.marketplaceDesignId,
             user,
             project,
+            design,
             lastMessage: conv.lastMessage,
             unreadCount: conv.unreadCount,
           };

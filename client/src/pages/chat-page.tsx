@@ -15,6 +15,11 @@ export default function ChatPage() {
   const { toast } = useToast();
 
   const otherUserId = params?.userId;
+  
+  // Get query parameters
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const marketplaceDesignId = searchParams.get('marketplaceDesignId') || undefined;
+  const projectId = searchParams.get('projectId') || undefined;
 
   const { data: otherUser } = useQuery<User>({
     queryKey: ["/api/user", otherUserId],
@@ -69,6 +74,8 @@ export default function ChatPage() {
             otherUserId={otherUserId!}
             otherUser={otherUser}
             currentUserId={user.id}
+            projectId={projectId}
+            marketplaceDesignId={marketplaceDesignId}
           />
         ) : (
           <div className="text-center py-8">

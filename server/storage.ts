@@ -60,11 +60,13 @@ export interface IStorage {
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
   getMessagesByProject(userId: string, projectId: string, otherUserId: string): Promise<Message[]>;
+  getMessagesByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<Message[]>;
   getConversationsForUser(userId: string): Promise<Array<{ userId: string; lastMessage?: Message }>>;
-  getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; projectId?: string | null; lastMessage?: Message; unreadCount: number }>>;
+  getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; projectId?: string | null; marketplaceDesignId?: string | null; lastMessage?: Message; unreadCount: number }>>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(userId: string, senderId: string): Promise<void>;
   markMessagesAsReadByProject(userId: string, projectId: string, otherUserId: string): Promise<void>;
+  markMessagesAsReadByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<void>;
 
   // Review operations
   getReviewsForMaker(makerId: string): Promise<Review[]>;
@@ -403,7 +405,22 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
-  async createMessage(messageData: InsertMessage): Promise<Message> {
+  async getMessagesByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<Message[]> {
+    const contextField = contextType === "project" ? messages.projectId : messages.marketplaceDesignId;
+    const results = await db
+      .select()
+      .from(messages)
+      .where(
+        and(
+          eq(contextField, contextId),
+          sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
+        )
+      )
+      .orderBy(asc(messages.createdAt));
+    return results;
+  }
+
+  async createMessage(messageData: InsertMessage & { senderId: string }): Promise<Message> {
     const [message] = await db.insert(messages).values(messageData).returning();
     return message;
   }
@@ -428,6 +445,21 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(messages.projectId, projectId),
+          eq(messages.receiverId, userId),
+          eq(messages.senderId, otherUserId),
+          eq(messages.isRead, false)
+        )
+      );
+  }
+
+  async markMessagesAsReadByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<void> {
+    const contextField = contextType === "project" ? messages.projectId : messages.marketplaceDesignId;
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(contextField, contextId),
           eq(messages.receiverId, userId),
           eq(messages.senderId, otherUserId),
           eq(messages.isRead, false)
@@ -462,7 +494,7 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; projectId?: string | null; lastMessage?: Message; unreadCount: number }>> {
+  async getConversationsWithUnread(userId: string): Promise<Array<{ userId: string; projectId?: string | null; marketplaceDesignId?: string | null; lastMessage?: Message; unreadCount: number }>> {
     // Get all messages where user is sender or receiver
     const allMessages = await db
       .select()
@@ -474,13 +506,14 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`[getConversationsWithUnread] User ${userId.slice(0, 8)}... has ${allMessages.length} total messages`);
 
-    // Group messages by conversation partner AND project ID (unique key per conversation)
+    // Group messages by conversation partner AND context (project OR marketplace_design)
     const conversationMap = new Map<string, { lastMsg: Message; unreadCount: number }>();
     
     for (const msg of allMessages) {
       const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
-      // Create unique key combining partner ID and project ID (project ID might be null)
-      const conversationKey = `${partnerId}::${msg.projectId || 'no-project'}`;
+      // Create unique key combining partner ID, context type, and context ID
+      const contextKey = msg.projectId ? `project::${msg.projectId}` : (msg.marketplaceDesignId ? `design::${msg.marketplaceDesignId}` : 'no-context');
+      const conversationKey = `${partnerId}::${contextKey}`;
       
       if (!conversationMap.has(conversationKey)) {
         conversationMap.set(conversationKey, { 
@@ -498,18 +531,28 @@ export class DatabaseStorage implements IStorage {
 
     const result = Array.from(conversationMap.entries())
       .map(([key, data]) => {
-        const [partnerId, projectKey] = key.split('::');
+        const [partnerId, contextKey] = key.split('::');
+        let projectId: string | null = null;
+        let marketplaceDesignId: string | null = null;
+        
+        if (contextKey.startsWith('project::')) {
+          projectId = contextKey.substring('project::'.length);
+        } else if (contextKey.startsWith('design::')) {
+          marketplaceDesignId = contextKey.substring('design::'.length);
+        }
+        
         return {
           userId: partnerId,
-          projectId: projectKey === 'no-project' ? null : projectKey,
+          projectId: projectId || undefined,
+          marketplaceDesignId: marketplaceDesignId || undefined,
           lastMessage: data.lastMsg,
           unreadCount: data.unreadCount,
         };
       })
-      // Filter out conversations without a projectId (only show project-based conversations)
-      .filter(conv => conv.projectId !== null);
+      // Filter out conversations without a projectId or marketplaceDesignId
+      .filter(conv => conv.projectId || conv.marketplaceDesignId);
 
-    console.log(`[getConversationsWithUnread] Generated ${result.length} conversations:`, result.map(c => ({ userId: c.userId.slice(0, 8), projectId: c.projectId?.slice(0, 8) })));
+    console.log(`[getConversationsWithUnread] Generated ${result.length} conversations:`, result.map(c => ({ userId: c.userId.slice(0, 8), projectId: c.projectId?.slice(0, 8), designId: c.marketplaceDesignId?.slice(0, 8) })));
 
     return result;
   }

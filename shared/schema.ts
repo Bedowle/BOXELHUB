@@ -21,6 +21,7 @@ export const printerTypeEnum = pgEnum("printer_type", ["Ender3", "BambooLab"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "reserved", "completed"]);
 export const bidStatusEnum = pgEnum("bid_status", ["pending", "accepted", "rejected"]);
 export const designStatusEnum = pgEnum("design_status", ["active", "archived"]);
+export const chatContextTypeEnum = pgEnum("chat_context_type", ["project", "marketplace_design"]);
 
 // Session storage table (mandatory for Replit Auth)
 export const sessions = pgTable(
@@ -130,6 +131,8 @@ export const messages = pgTable("messages", {
   senderId: varchar("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   receiverId: varchar("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   projectId: varchar("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  marketplaceDesignId: varchar("marketplace_design_id").references(() => marketplaceDesigns.id, { onDelete: "cascade" }),
+  contextType: chatContextTypeEnum("context_type"), // 'project' or 'marketplace_design'
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -137,6 +140,8 @@ export const messages = pgTable("messages", {
   index("idx_messages_sender_id").on(table.senderId),
   index("idx_messages_receiver_id").on(table.receiverId),
   index("idx_messages_project_id").on(table.projectId),
+  index("idx_messages_marketplace_design_id").on(table.marketplaceDesignId),
+  index("idx_messages_context_type").on(table.contextType),
 ]);
 
 // Email verification tokens table
@@ -320,9 +325,22 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
   createdAt: true,
   isRead: true,
+  senderId: true,
 }).extend({
   content: z.string().min(1, "Message cannot be empty"),
-});
+  projectId: z.string().optional(),
+  marketplaceDesignId: z.string().optional(),
+  contextType: z.enum(["project", "marketplace_design"]).optional(),
+}).refine(
+  (data) => {
+    // Must have either projectId or marketplaceDesignId
+    return data.projectId || data.marketplaceDesignId;
+  },
+  {
+    message: "Either projectId or marketplaceDesignId is required",
+    path: ["projectId"],
+  }
+);
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,

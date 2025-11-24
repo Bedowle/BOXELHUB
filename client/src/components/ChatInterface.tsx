@@ -16,9 +16,10 @@ interface ChatInterfaceProps {
   otherUser: User | undefined;
   currentUserId: string;
   projectId?: string;
+  marketplaceDesignId?: string;
 }
 
-export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId }: ChatInterfaceProps) {
+export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId, marketplaceDesignId }: ChatInterfaceProps) {
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -26,12 +27,15 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
   const markReadTimeoutRef = useRef<NodeJS.Timeout>();
 
   const { data: messages = [] } = useQuery<Message[]>({
-    queryKey: ["/api/messages", projectId, otherUserId],
+    queryKey: ["/api/messages", projectId, marketplaceDesignId, otherUserId],
     queryFn: async () => {
       try {
-        const url = projectId 
-          ? `/api/messages?projectId=${encodeURIComponent(projectId)}&otherUserId=${encodeURIComponent(otherUserId)}`
-          : `/api/messages?otherUserId=${encodeURIComponent(otherUserId)}`;
+        let url = `/api/messages?otherUserId=${encodeURIComponent(otherUserId)}`;
+        if (projectId) {
+          url += `&projectId=${encodeURIComponent(projectId)}`;
+        } else if (marketplaceDesignId) {
+          url += `&marketplaceDesignId=${encodeURIComponent(marketplaceDesignId)}`;
+        }
         const response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
@@ -51,16 +55,24 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
 
   const sendMutation = useMutation({
     mutationFn: async (content: string) => {
-      await apiRequest("POST", "/api/messages", {
-        senderId: currentUserId,
+      const messageData: any = {
         receiverId: otherUserId,
         content,
-        projectId: projectId || undefined,
-      });
+      };
+      
+      if (projectId) {
+        messageData.projectId = projectId;
+        messageData.contextType = "project";
+      } else if (marketplaceDesignId) {
+        messageData.marketplaceDesignId = marketplaceDesignId;
+        messageData.contextType = "marketplace_design";
+      }
+      
+      await apiRequest("POST", "/api/messages", messageData);
     },
     onSuccess: () => {
       setMessageText("");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages", projectId, otherUserId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", projectId, marketplaceDesignId, otherUserId] });
     },
     onError: (error: Error) => {
       toast({
@@ -81,9 +93,12 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
       
       markReadTimeoutRef.current = setTimeout(async () => {
         try {
-          const url = projectId 
-            ? `/api/messages/mark-read/${otherUserId}?projectId=${encodeURIComponent(projectId)}`
-            : `/api/messages/mark-read/${otherUserId}`;
+          let url = `/api/messages/mark-read/${otherUserId}`;
+          if (projectId) {
+            url += `?projectId=${encodeURIComponent(projectId)}`;
+          } else if (marketplaceDesignId) {
+            url += `?marketplaceDesignId=${encodeURIComponent(marketplaceDesignId)}`;
+          }
           await apiRequest("PUT", url, {});
           // Invalidate conversations to remove unread badges
           queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
@@ -99,7 +114,7 @@ export function ChatInterface({ otherUserId, otherUser, currentUserId, projectId
         clearTimeout(markReadTimeoutRef.current);
       }
     };
-  }, [otherUserId, projectId, queryClient]);
+  }, [otherUserId, projectId, marketplaceDesignId, queryClient]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
