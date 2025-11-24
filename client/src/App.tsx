@@ -29,6 +29,7 @@ import ChatPage from "@/pages/chat-page";
 import ChatsPage from "@/pages/chats";
 import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
+import WhatIsSTLPage from "@/pages/what-is-stl";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -44,6 +45,9 @@ function Router() {
       {/* Reset password route (accessible to all) */}
       <Route path="/reset-password/:token" component={ResetPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
+
+      {/* What is STL route (accessible to all) */}
+      <Route path="/what-is-stl" component={WhatIsSTLPage} />
 
       {/* Auth route (accessible to all) */}
       <Route path="/auth" component={AuthPage} />

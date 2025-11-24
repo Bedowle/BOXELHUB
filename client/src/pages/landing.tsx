@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Upload, Users, CheckCircle, Star, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -68,11 +69,27 @@ export default function Landing() {
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Upload className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3">1. Sube tu STL</h3>
+                <h3 className="text-xl font-semibold mb-3">
+                  1. Sube tu{" "}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setLocation("/what-is-stl")}
+                        className="text-primary hover:text-primary/80 transition underline cursor-pointer"
+                        data-testid="link-what-is-stl"
+                      >
+                        STL
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>¿Qué es un STL?</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </h3>
                 <p className="text-muted-foreground mb-4">
                   Sube tu archivo STL con las especificaciones y material requerido
                 </p>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-row justify-center gap-6">
                   <a 
                     href="https://www.thingiverse.com" 
                     target="_blank" 
@@ -80,7 +97,7 @@ export default function Landing() {
                     className="text-sm text-primary hover:text-primary/80 transition"
                     data-testid="link-thingiverse"
                   >
-                    Explorar en Thingiverse →
+                    Explora STLs en Thingiverse
                   </a>
                   <a 
                     href="https://cults3d.com" 
@@ -89,7 +106,7 @@ export default function Landing() {
                     className="text-sm text-primary hover:text-primary/80 transition"
                     data-testid="link-cults3d"
                   >
-                    Explorar en Cults3D →
+                    Explora STLs en Cults3D
                   </a>
                 </div>
               </CardContent>
