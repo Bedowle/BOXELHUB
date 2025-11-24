@@ -89,7 +89,7 @@ export default function WhatIsSTL() {
 
                 <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
 
-                {/* Comparte - Top (design path) */}
+                {/* Comparte */}
                 <div className="flex-shrink-0 w-40">
                   <Card className="border-2 border-secondary">
                     <CardContent className="pt-5 pb-5 text-center text-xs">
@@ -133,37 +133,11 @@ export default function WhatIsSTL() {
                   </Card>
                 </div>
 
-                {/* Space for alignment */}
-                <div className="w-40 flex-shrink-0"></div>
-
-                <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
-
-                {/* Comparte - Bottom (download path) */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 border-secondary opacity-60">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="font-bold text-secondary">3</span>
-                      </div>
-                      <h3 className="font-semibold mb-1">Comparte</h3>
-                      <p className="text-muted-foreground text-xs">VoxelHub</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
-
-                {/* Recibe Ofertas - Bottom */}
-                <div className="flex-shrink-0 w-40">
-                  <Card className="border-2 bg-green-100/10 dark:bg-green-900/10 opacity-60">
-                    <CardContent className="pt-5 pb-5 text-center text-xs">
-                      <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="font-bold text-green-600">4</span>
-                      </div>
-                      <h3 className="font-semibold mb-1">Recibe</h3>
-                      <p className="text-muted-foreground text-xs">Ofertas</p>
-                    </CardContent>
-                  </Card>
+                {/* Long arrow spanning to Comparte */}
+                <div className="flex items-center gap-0 flex-grow">
+                  <div className="flex-grow h-px border-t-2 border-green-600"></div>
+                  <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <div className="w-20"></div>
                 </div>
               </div>
             </div>
