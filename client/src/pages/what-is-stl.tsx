@@ -59,117 +59,125 @@ export default function WhatIsSTL() {
           marginLeft: 'calc((100vw - 100vh) / 2)',
           marginRight: 'calc((100vw - 100vh) / 2)'
         }}>
-          <h2 className="text-2xl font-bold mb-6 text-center">¿Cómo funciona?</h2>
-          
-          {/* Step 1 - Two Initial Branches */}
-          <div className="grid md:grid-cols-2 gap-3 mb-3">
-            {/* Left Branch - Design Path */}
-            <Card className="border-2">
-              <CardContent className="p-4">
-                <div className="bg-primary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <span className="text-sm font-bold text-primary">1 a</span>
-                </div>
-                <h3 className="text-base font-semibold mb-1 text-center">Diseñas</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Crea tu diseño con software 3D
-                </p>
-              </CardContent>
-            </Card>
+          <div style={{
+            transform: 'rotate(90deg)',
+            transformOrigin: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%'
+          }}>
+            <h2 className="text-2xl font-bold mb-6 text-center">¿Cómo funciona?</h2>
+            
+            {/* Step 1 - Two Initial Branches */}
+            <div className="grid md:grid-cols-2 gap-3 mb-3">
+              {/* Left Branch - Design Path */}
+              <Card className="border-2">
+                <CardContent className="p-4">
+                  <div className="bg-primary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
+                    <span className="text-sm font-bold text-primary">1 a</span>
+                  </div>
+                  <h3 className="text-base font-semibold mb-1 text-center">Diseñas</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Crea tu diseño con software 3D
+                  </p>
+                </CardContent>
+              </Card>
 
-            {/* Right Branch - Download Path */}
-            <Card className="border-2">
-              <CardContent className="p-4">
-                <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <span className="text-sm font-bold text-secondary">1 b</span>
-                </div>
-                <h3 className="text-base font-semibold mb-1 text-center">Descargas</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Descarga modelos listos
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Connector Lines - Straight down */}
-          <div className="grid md:grid-cols-2 gap-3 mb-3">
-            <div className="flex justify-center">
-              <div className="w-1 h-4 bg-gradient-to-b from-primary to-transparent"></div>
+              {/* Right Branch - Download Path */}
+              <Card className="border-2">
+                <CardContent className="p-4">
+                  <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
+                    <span className="text-sm font-bold text-secondary">1 b</span>
+                  </div>
+                  <h3 className="text-base font-semibold mb-1 text-center">Descargas</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Descarga modelos listos
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-            <div className="flex justify-center">
-              <div className="w-1 h-4 bg-gradient-to-b from-secondary to-transparent"></div>
+
+            {/* Connector Lines - Straight down */}
+            <div className="grid md:grid-cols-2 gap-3 mb-3">
+              <div className="flex justify-center">
+                <div className="w-1 h-4 bg-gradient-to-b from-primary to-transparent"></div>
+              </div>
+              <div className="flex justify-center">
+                <div className="w-1 h-4 bg-gradient-to-b from-secondary to-transparent"></div>
+              </div>
             </div>
-          </div>
 
-          {/* Step 2 - Two Branches */}
-          <div className="grid md:grid-cols-2 gap-3 mb-3">
-            {/* Left Branch - Design Path */}
-            <Card className="border-2">
-              <CardContent className="p-4">
-                <div className="bg-primary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <span className="text-sm font-bold text-primary">2 a</span>
-                </div>
-                <h3 className="text-base font-semibold mb-1 text-center">Exportas STL</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Convierte a formato STL
-                </p>
-              </CardContent>
-            </Card>
+            {/* Step 2 - Two Branches */}
+            <div className="grid md:grid-cols-2 gap-3 mb-3">
+              {/* Left Branch - Design Path */}
+              <Card className="border-2">
+                <CardContent className="p-4">
+                  <div className="bg-primary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
+                    <span className="text-sm font-bold text-primary">2 a</span>
+                  </div>
+                  <h3 className="text-base font-semibold mb-1 text-center">Exportas STL</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Convierte a formato STL
+                  </p>
+                </CardContent>
+              </Card>
 
-            {/* Right Branch - Download Path */}
-            <Card className="border-2">
-              <CardContent className="p-4">
-                <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <span className="text-sm font-bold text-secondary">2 b</span>
-                </div>
-                <h3 className="text-base font-semibold mb-1 text-center">Ya tienes STL</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Archivo listo para usar
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              {/* Right Branch - Download Path */}
+              <Card className="border-2">
+                <CardContent className="p-4">
+                  <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
+                    <span className="text-sm font-bold text-secondary">2 b</span>
+                  </div>
+                  <h3 className="text-base font-semibold mb-1 text-center">Ya tienes STL</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Archivo listo para usar
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Convergent Lines - Meet in the middle */}
-          <div className="flex justify-center mb-3">
-            <svg viewBox="0 0 400 30" className="w-full max-w-2xl h-6" preserveAspectRatio="none">
-              <path d="M 100 0 L 200 30" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
-              <path d="M 300 0 L 200 30" stroke="hsl(var(--secondary))" strokeWidth="2" fill="none"/>
-            </svg>
-          </div>
+            {/* Convergent Lines - Meet in the middle */}
+            <div className="flex justify-center mb-3">
+              <svg viewBox="0 0 400 30" className="w-full max-w-2xl h-6" preserveAspectRatio="none">
+                <path d="M 100 0 L 200 30" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
+                <path d="M 300 0 L 200 30" stroke="hsl(var(--secondary))" strokeWidth="2" fill="none"/>
+              </svg>
+            </div>
 
-          {/* Step 3 - Converged */}
-          <div className="flex justify-center mb-3">
-            <Card className="border-2 w-full max-w-sm">
-              <CardContent className="p-4">
-                <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <span className="text-sm font-bold text-blue-600">3</span>
-                </div>
-                <h3 className="text-base font-semibold mb-1 text-center">Compartes en VoxelHub</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Sube el archivo STL
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+            {/* Step 3 - Converged */}
+            <div className="flex justify-center mb-3">
+              <Card className="border-2 w-full max-w-sm">
+                <CardContent className="p-4">
+                  <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
+                    <span className="text-sm font-bold text-blue-600">3</span>
+                  </div>
+                  <h3 className="text-base font-semibold mb-1 text-center">Compartes en VoxelHub</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Sube el archivo STL
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Connector Line Down */}
-          <div className="flex justify-center mb-3">
-            <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-transparent"></div>
-          </div>
+            {/* Connector Line Down */}
+            <div className="flex justify-center mb-3">
+              <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-transparent"></div>
+            </div>
 
-          {/* Step 4 - Final */}
-          <div className="flex justify-center">
-            <Card className="border-2 w-full max-w-sm bg-green-50/50 dark:bg-green-900/10">
-              <CardContent className="p-4">
-                <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                  <span className="text-sm font-bold text-green-600">4</span>
-                </div>
-                <h3 className="text-base font-semibold mb-1 text-center">Recibes ofertas</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Makers compiten por tu proyecto
-                </p>
-              </CardContent>
-            </Card>
+            {/* Step 4 - Final */}
+            <div className="flex justify-center">
+              <Card className="border-2 w-full max-w-sm bg-green-50/50 dark:bg-green-900/10">
+                <CardContent className="p-4">
+                  <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
+                    <span className="text-sm font-bold text-green-600">4</span>
+                  </div>
+                  <h3 className="text-base font-semibold mb-1 text-center">Recibes ofertas</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Makers compiten por tu proyecto
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
