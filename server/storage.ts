@@ -518,8 +518,6 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(messages.createdAt));
 
-    console.log(`[getConversationsWithUnread] User ${userId.slice(0, 8)}... has ${allMessages.length} total messages`);
-
     // Group messages by conversation partner AND context (project OR marketplace_design)
     const conversationMap = new Map<string, { lastMsg: Message; unreadCount: number }>();
     
@@ -568,8 +566,6 @@ export class DatabaseStorage implements IStorage {
       })
       // Filter out conversations without a projectId or marketplaceDesignId
       .filter(conv => conv.projectId || conv.marketplaceDesignId);
-
-    console.log(`[getConversationsWithUnread] Generated ${result.length} conversations:`, result.map(c => ({ userId: c.userId.slice(0, 8), projectId: c.projectId?.slice(0, 8), designId: c.marketplaceDesignId?.slice(0, 8) })));
 
     return result;
   }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export function ChatWindow({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const markReadTimeoutRef = useRef<NodeJS.Timeout>();
+  const [, setLocation] = useLocation();
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", projectId, marketplaceDesignId, otherUserId],
@@ -178,27 +180,51 @@ export function ChatWindow({
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="border-b p-4 flex items-center justify-between sticky top-0 z-20 bg-background/95 backdrop-blur">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer group" onClick={() => {
+          if (otherUser?.id) {
+            setLocation(`/user/${otherUser.id}`);
+          }
+        }}>
           {/* Product/Project Context */}
           {project && (
-            <Avatar className="flex-shrink-0">
-              <AvatarImage src={project.stlImageUrl} />
-              <AvatarFallback className="bg-muted text-xs">
-                {project.name?.[0]?.toUpperCase() || "P"}
-              </AvatarFallback>
-            </Avatar>
+            <div 
+              className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (projectId) {
+                  setLocation(`/project/${projectId}`);
+                }
+              }}
+            >
+              <Avatar className="flex-shrink-0">
+                <AvatarImage src={project.stlImageUrl} />
+                <AvatarFallback className="bg-muted text-xs">
+                  {project.name?.[0]?.toUpperCase() || "P"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           )}
           {design && (
-            <Avatar className="flex-shrink-0">
-              <AvatarImage src={design.imageUrl} />
-              <AvatarFallback className="bg-muted text-xs">
-                {design.title?.[0]?.toUpperCase() || "D"}
-              </AvatarFallback>
-            </Avatar>
+            <div 
+              className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (marketplaceDesignId) {
+                  setLocation(`/marketplace-design/${marketplaceDesignId}`);
+                }
+              }}
+            >
+              <Avatar className="flex-shrink-0">
+                <AvatarImage src={design.imageUrl} />
+                <AvatarFallback className="bg-muted text-xs">
+                  {design.title?.[0]?.toUpperCase() || "D"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           )}
           
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold truncate">
+          <div className="flex-1 min-w-0 hover:opacity-70 transition-opacity">
+            <p className="font-semibold truncate group-hover:underline">
               {otherUser?.username || otherUser?.email}
             </p>
             <p className="text-xs text-muted-foreground truncate">

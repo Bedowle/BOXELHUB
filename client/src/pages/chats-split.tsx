@@ -69,25 +69,12 @@ export default function ChatsSplitPage() {
 
   // Get selected conversation details - match by userId + context
   const selectedConv = selectedConvKey ? allConversations.find((c: Conversation) => {
-    const match = 
+    return (
       c.userId === selectedConvKey.userId &&
       c.projectId === selectedConvKey.projectId &&
-      c.marketplaceDesignId === selectedConvKey.marketplaceDesignId;
-    
-    if (!match) {
-      console.log(`[ChatsSplit] Checking conversation:`, {
-        cUserId: c.userId,
-        cProjectId: c.projectId,
-        cDesignId: c.marketplaceDesignId,
-        selectedUserId: selectedConvKey.userId,
-        selectedProjectId: selectedConvKey.projectId,
-        selectedDesignId: selectedConvKey.marketplaceDesignId,
-      });
-    }
-    return match;
+      c.marketplaceDesignId === selectedConvKey.marketplaceDesignId
+    );
   }) : undefined;
-  
-  console.log(`[ChatsSplit] selectedConvKey:`, selectedConvKey, `selectedConv:`, selectedConv);
 
   // If no conversation selected, select the first one
   useEffect(() => {

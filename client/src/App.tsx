@@ -34,6 +34,8 @@ import WhatIsSTLPage from "@/pages/what-is-stl";
 import MakerMarketplaceUpload from "@/pages/maker-marketplace-upload";
 import MarketplaceDesignChatsPage from "@/pages/marketplace-design-chats";
 import ClientMarketplace from "@/pages/client-marketplace";
+import UserProfilePage from "@/pages/user-profile";
+import MarketplaceDesignDetailPage from "@/pages/marketplace-design-detail";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -78,6 +80,8 @@ function Router() {
           {/* Shared Routes */}
           <Route path="/chats" component={ChatsSplitPage} />
           <Route path="/chats-old" component={ChatsPage} />
+          <Route path="/user/:userId" component={UserProfilePage} />
+          <Route path="/marketplace-design/:designId" component={MarketplaceDesignDetailPage} />
 
           {/* Client Routes */}
           {isClient && (
