@@ -76,12 +76,12 @@ export default function WhatIsSTL() {
                 <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                   <span className="text-xl font-bold text-secondary">2</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-3">Exportas como STL</h3>
+                <h3 className="text-xl font-semibold mb-3">Obtén el archivo STL</h3>
                 <p className="text-muted-foreground mb-4">
-                  El software convierte tu diseño 3D en un archivo STL (la "receta" del objeto).
+                  Si diseñaste: exporta como STL. Si descargaste: ya lo tienes.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  El archivo contiene miles de pequeños triángulos que definen la forma.
+                  El archivo contiene todos los datos para imprimir tu modelo.
                 </p>
               </CardContent>
             </Card>
