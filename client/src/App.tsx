@@ -31,6 +31,7 @@ import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
 import WhatIsSTLPage from "@/pages/what-is-stl";
 import MakerMarketplaceUpload from "@/pages/maker-marketplace-upload";
+import MarketplaceDesignChatsPage from "@/pages/marketplace-design-chats";
 import ClientMarketplace from "@/pages/client-marketplace";
 
 function Router() {
@@ -102,6 +103,7 @@ function Router() {
               <Route path="/maker/won-projects" component={MakerWonProjects} />
               <Route path="/maker/completed-projects" component={MakerCompletedProjects} />
               <Route path="/maker/marketplace" component={MakerMarketplaceUpload} />
+              <Route path="/marketplace-design-chats/:designId" component={MarketplaceDesignChatsPage} />
               <Route path="/maker/project/:id" component={MakerProjectDetails} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />

@@ -12,7 +12,7 @@ import { insertMarketplaceDesignSchema } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, Upload, Edit2, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Upload, Edit2, X, MessageCircle } from "lucide-react";
 
 export default function MakerMarketplaceUpload() {
   const [location, setLocation] = useLocation();
@@ -362,6 +362,14 @@ export default function MakerMarketplaceUpload() {
                               </div>
                             </div>
                             <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setLocation(`/marketplace-design-chats/${design.id}`)}
+                                data-testid="button-view-design-chats"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
