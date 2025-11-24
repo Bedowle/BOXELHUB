@@ -147,36 +147,19 @@ export default function WhatIsSTL() {
               </svg>
             </div>
 
-            {/* Step 3 - Converged */}
-            <div className="flex justify-center mb-2">
-              <Card className="border-2 w-full max-w-sm">
-                <CardContent className="p-4">
-                  <div className="bg-blue-100/50 dark:bg-blue-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <span className="text-sm font-bold text-blue-600">3</span>
-                  </div>
-                  <h3 className="text-base font-semibold mb-1 text-center">Compartes en VoxelHub</h3>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Sube el archivo STL
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Connector Line Down */}
-            <div className="flex justify-center mb-2">
-              <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-transparent"></div>
-            </div>
-
-            {/* Step 4 - Final */}
+            {/* Step 3 - Final */}
             <div className="flex justify-center">
               <Card className="border-2 w-full max-w-sm bg-green-50/50 dark:bg-green-900/10">
                 <CardContent className="p-4">
                   <div className="bg-green-100/50 dark:bg-green-900/20 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <span className="text-sm font-bold text-green-600">4</span>
+                    <span className="text-sm font-bold text-green-600">3</span>
                   </div>
-                  <h3 className="text-base font-semibold mb-1 text-center">Recibes ofertas</h3>
+                  <h3 className="text-base font-semibold mb-1 text-center">Compartes en VoxelHub</h3>
+                  <p className="text-xs text-muted-foreground text-center mb-2">
+                    Sube el archivo STL
+                  </p>
                   <p className="text-xs text-muted-foreground text-center">
-                    Makers compiten por tu proyecto
+                    Recibes ofertas de makers
                   </p>
                 </CardContent>
               </Card>
