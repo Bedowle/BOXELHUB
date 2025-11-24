@@ -74,7 +74,7 @@ export default function WhatIsSTL() {
               <Card className="border-2">
                 <CardContent className="p-4">
                   <div className="bg-primary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <span className="text-sm font-bold text-primary">1 a</span>
+                    <span className="text-sm font-bold text-primary">1</span>
                   </div>
                   <h3 className="text-base font-semibold mb-1 text-center">Diseñas</h3>
                   <p className="text-xs text-muted-foreground text-center">
@@ -87,7 +87,7 @@ export default function WhatIsSTL() {
               <Card className="border-2">
                 <CardContent className="p-4">
                   <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <span className="text-sm font-bold text-secondary">1 b</span>
+                    <span className="text-sm font-bold text-secondary">1</span>
                   </div>
                   <h3 className="text-base font-semibold mb-1 text-center">Descargas</h3>
                   <p className="text-xs text-muted-foreground text-center">
@@ -113,7 +113,7 @@ export default function WhatIsSTL() {
               <Card className="border-2">
                 <CardContent className="p-4">
                   <div className="bg-primary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <span className="text-sm font-bold text-primary">2 a</span>
+                    <span className="text-sm font-bold text-primary">2</span>
                   </div>
                   <h3 className="text-base font-semibold mb-1 text-center">Exportas STL</h3>
                   <p className="text-xs text-muted-foreground text-center">
@@ -126,7 +126,7 @@ export default function WhatIsSTL() {
               <Card className="border-2">
                 <CardContent className="p-4">
                   <div className="bg-secondary/10 w-9 h-9 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <span className="text-sm font-bold text-secondary">2 b</span>
+                    <span className="text-sm font-bold text-secondary">2</span>
                   </div>
                   <h3 className="text-base font-semibold mb-1 text-center">Ya tienes STL</h3>
                   <p className="text-xs text-muted-foreground text-center">
