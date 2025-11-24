@@ -531,7 +531,10 @@ export class DatabaseStorage implements IStorage {
 
     const result = Array.from(conversationMap.entries())
       .map(([key, data]) => {
-        const [partnerId, contextKey] = key.split('::');
+        const separatorIndex = key.indexOf('::');
+        const partnerId = key.substring(0, separatorIndex);
+        const contextKey = key.substring(separatorIndex + 2);
+        
         let projectId: string | null = null;
         let marketplaceDesignId: string | null = null;
         
