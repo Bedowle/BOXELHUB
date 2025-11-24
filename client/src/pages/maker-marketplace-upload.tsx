@@ -6,14 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertMarketplaceDesignSchema, printerTypeEnum } from "@shared/schema";
+import { insertMarketplaceDesignSchema } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
 
 export default function MakerMarketplaceUpload() {
   const [location, setLocation] = useLocation();
@@ -80,11 +79,16 @@ export default function MakerMarketplaceUpload() {
       imageUrl: "",
       price: "10.00",
       material: "PLA",
-      printerType: "Ender3",
-      estimatedPrintTime: undefined,
-      estimatedWeight: "",
     },
   });
+
+  const handleImageUpload = async (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      form.setValue("imageUrl", e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const onSubmit = async (data: any) => {
     uploadMutation.mutate(data);
@@ -161,17 +165,31 @@ export default function MakerMarketplaceUpload() {
                       name="imageUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>URL de Imagen</FormLabel>
+                          <FormLabel>Imagen del Diseño</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="https://ejemplo.com/imagen.jpg"
-                              {...field}
-                              data-testid="input-design-image"
-                            />
+                            <div className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors">
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/jpg,image/webp"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleImageUpload(file);
+                                  }
+                                }}
+                                className="hidden"
+                                id="image-upload"
+                                data-testid="input-design-image"
+                              />
+                              <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center gap-2">
+                                <Upload className="w-6 h-6 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                  {field.value ? "Imagen cargada ✓" : "Haz clic para subir imagen"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">PNG, JPG, WEBP</span>
+                              </label>
+                            </div>
                           </FormControl>
-                          <FormDescription>
-                            Link a una imagen del diseño
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -206,66 +224,6 @@ export default function MakerMarketplaceUpload() {
                               placeholder="PLA"
                               {...field}
                               data-testid="input-design-material"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="printerType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Impresora</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger data-testid="select-printer-type">
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Ender3">Ender3</SelectItem>
-                              <SelectItem value="BambooLab">BambooLab</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="estimatedPrintTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tiempo de Impresión (horas)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Opcional"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                              data-testid="input-design-print-time"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="estimatedWeight"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Peso Estimado (g)</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Opcional"
-                              {...field}
-                              data-testid="input-design-weight"
                             />
                           </FormControl>
                           <FormMessage />
@@ -349,10 +307,6 @@ export default function MakerMarketplaceUpload() {
                                 <div>
                                   <span className="text-muted-foreground">Material: </span>
                                   <span>{design.material}</span>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Impresora: </span>
-                                  <span>{design.printerType}</span>
                                 </div>
                               </div>
                             </div>

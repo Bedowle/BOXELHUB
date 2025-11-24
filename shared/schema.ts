@@ -175,9 +175,6 @@ export const marketplaceDesigns = pgTable("marketplace_designs", {
   imageUrl: varchar("image_url").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   material: varchar("material").notNull(),
-  printerType: printerTypeEnum("printer_type").notNull(),
-  estimatedPrintTime: integer("estimated_print_time"), // in hours
-  estimatedWeight: varchar("estimated_weight"), // in grams, as string for precision
   status: designStatusEnum("status").default("active").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -345,8 +342,6 @@ export const insertMarketplaceDesignSchema = createInsertSchema(marketplaceDesig
   price: z.string()
     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
     .refine(val => parseFloat(val) >= 0.5, "Minimum price is €0.50"),
-  estimatedPrintTime: z.number().int().positive("Estimated print time must be positive").optional(),
-  estimatedWeight: z.string().optional(),
 });
 
 // TypeScript types
