@@ -53,7 +53,7 @@ export default function WhatIsSTL() {
         <div className="mb-12" style={{ 
           display: 'flex', 
           flexDirection: 'column',
-          transform: 'rotate(90deg)', 
+          transform: 'rotate(-90deg)', 
           transformOrigin: 'center',
           width: '100vh',
           marginLeft: 'calc((100vw - 100vh) / 2)',
