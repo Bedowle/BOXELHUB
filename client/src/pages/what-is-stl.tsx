@@ -54,118 +54,96 @@ export default function WhatIsSTL() {
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-12 text-center">¿Cómo funciona?</h2>
           
-          {/* Flow Diagram */}
-          <div className="space-y-8">
-            {/* Initial Step */}
-            <div className="flex justify-center">
-              <Card className="border-2 w-full md:w-80">
-                <CardContent className="pt-8 pb-8 text-center">
-                  <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-primary">1</span>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">Diseña o Descarga tu modelo</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Crea en Fusion 360, Blender, TinkerCAD o descarga de Thingiverse, Cults3D
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Arrow Down */}
-            <div className="flex justify-center">
-              <ArrowDown className="h-6 w-6 text-primary" />
-            </div>
-
-            {/* Two Paths */}
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Design Path */}
-              <div className="flex flex-col items-center space-y-6">
-                {/* Design to Export */}
-                <Card className="border-2 w-full">
-                  <CardContent className="pt-8 pb-8 text-center">
-                    <div className="bg-blue-100/50 dark:bg-blue-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-lg font-bold text-blue-600">Diseñaste</span>
+          {/* Flow Diagram - Horizontal */}
+          <div className="overflow-x-auto pb-4">
+            <div className="flex items-center gap-3 min-w-max px-4">
+              {/* Step 1 */}
+              <div className="flex-shrink-0 w-44">
+                <Card className="border-2 h-full">
+                  <CardContent className="pt-6 pb-6 text-center text-sm">
+                    <div className="bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="font-bold text-primary">1</span>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">Exporta como STL</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Tu software 3D convierte el diseño a archivo STL
+                    <h3 className="font-semibold mb-2">Diseña o Descarga</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Crea o descarga tu modelo STL
                     </p>
                   </CardContent>
                 </Card>
+              </div>
 
-                <ArrowDown className="h-5 w-5 text-primary" />
+              {/* Arrow Right */}
+              <ArrowRight className="h-5 w-5 text-primary flex-shrink-0" />
 
-                {/* Converge Point - Design */}
-                <div className="text-center text-muted-foreground text-sm h-8 flex items-center">
-                  ↓
+              {/* Two Paths Section */}
+              <div className="flex-shrink-0">
+                <div className="flex flex-col gap-3">
+                  {/* Design Path */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-40">
+                      <Card className="border-2 border-blue-300 dark:border-blue-700">
+                        <CardContent className="pt-4 pb-4 text-center text-xs">
+                          <div className="bg-blue-100/50 dark:bg-blue-900/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <span className="text-blue-600 font-bold">D</span>
+                          </div>
+                          <h4 className="font-semibold mb-1">Exporta STL</h4>
+                          <p className="text-muted-foreground text-xs">Software 3D</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  </div>
+
+                  {/* Download Path */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-40">
+                      <Card className="border-2 border-green-300 dark:border-green-700">
+                        <CardContent className="pt-4 pb-4 text-center text-xs">
+                          <div className="bg-green-100/50 dark:bg-green-900/20 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <span className="text-green-600 font-bold">D</span>
+                          </div>
+                          <h4 className="font-semibold mb-1">Ya tienes STL</h4>
+                          <p className="text-muted-foreground text-xs">Listo para usar</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  </div>
                 </div>
               </div>
 
-              {/* Download Path */}
-              <div className="flex flex-col items-center space-y-6">
-                {/* Download Ready */}
-                <Card className="border-2 w-full">
-                  <CardContent className="pt-8 pb-8 text-center">
-                    <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-lg font-bold text-green-600">Descargaste</span>
+              {/* Step 2 - Center convergence point */}
+              <div className="flex-shrink-0 w-44">
+                <Card className="border-2 border-secondary h-full">
+                  <CardContent className="pt-6 pb-6 text-center text-sm">
+                    <div className="bg-secondary/10 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="font-bold text-secondary">2</span>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">Ya tienes el STL</h3>
-                    <p className="text-muted-foreground text-sm">
-                      El archivo descargado ya está listo para usar
+                    <h3 className="font-semibold mb-2">Comparte en VoxelHub</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Sube el archivo
                     </p>
                   </CardContent>
                 </Card>
-
-                <ArrowDown className="h-5 w-5 text-primary" />
-
-                {/* Converge Point - Download */}
-                <div className="text-center text-muted-foreground text-sm h-8 flex items-center">
-                  ↓
-                </div>
               </div>
-            </div>
 
-            {/* Arrow Down to Converge */}
-            <div className="flex justify-center">
-              <div className="text-center">
-                <p className="text-muted-foreground mb-2">Ambos caminos convergen</p>
-                <ArrowDown className="h-6 w-6 text-primary mx-auto" />
+              {/* Arrow Right */}
+              <ArrowRight className="h-5 w-5 text-primary flex-shrink-0" />
+
+              {/* Step 3 */}
+              <div className="flex-shrink-0 w-44">
+                <Card className="border-2 bg-green-100/10 dark:bg-green-900/10 h-full">
+                  <CardContent className="pt-6 pb-6 text-center text-sm">
+                    <div className="bg-green-100/50 dark:bg-green-900/20 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="font-bold text-green-600">3</span>
+                    </div>
+                    <h3 className="font-semibold mb-2">Recibe ofertas</h3>
+                    <p className="text-muted-foreground text-xs">
+                      De makers profesionales
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-
-            {/* Shared Step - VoxelHub Upload */}
-            <div className="flex justify-center">
-              <Card className="border-2 w-full md:w-80 border-secondary">
-                <CardContent className="pt-8 pb-8 text-center">
-                  <div className="bg-secondary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-secondary">2</span>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">Comparte en VoxelHub</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Sube tu archivo STL, especifica material, tamaño y presupuesto
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Arrow Down */}
-            <div className="flex justify-center">
-              <ArrowDown className="h-6 w-6 text-primary" />
-            </div>
-
-            {/* Final Step */}
-            <div className="flex justify-center">
-              <Card className="border-2 w-full md:w-80 bg-green-100/10 dark:bg-green-900/10">
-                <CardContent className="pt-8 pb-8 text-center">
-                  <div className="bg-green-100/50 dark:bg-green-900/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-green-600">3</span>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">Recibe ofertas de Makers</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Makers profesionales compiten con sus mejores precios y tiempos
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>
