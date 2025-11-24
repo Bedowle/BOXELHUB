@@ -58,7 +58,7 @@ export default function ResetPasswordPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/auth")}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2"
             data-testid="button-back-reset-password"
           >
@@ -88,7 +88,7 @@ export default function ResetPasswordPage() {
             <TokenInputForm onTokenSubmit={(inputToken) => {
               setToken(inputToken);
               setIsExpired(false);
-            }} onCancel={() => setLocation("/auth")} />
+            }} onCancel={() => window.history.back()} />
           )}
           </Card>
         </div>

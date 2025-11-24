@@ -59,7 +59,7 @@ export default function VerifyEmailPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/auth")}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2"
             data-testid="button-back-verify-email"
           >
@@ -91,7 +91,7 @@ export default function VerifyEmailPage() {
           <div className="space-y-4">
             <AlertCircle className="h-12 w-12 mx-auto text-red-500" />
             <p className="text-lg font-semibold">{message}</p>
-            <Button onClick={() => setLocation("/auth")} className="w-full">
+            <Button onClick={() => window.history.back()} className="w-full">
               Volver al login
             </Button>
           </div>

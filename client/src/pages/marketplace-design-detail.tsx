@@ -8,7 +8,6 @@ import type { MarketplaceDesign } from "@shared/schema";
 
 export default function MarketplaceDesignDetailPage() {
   const [match, params] = useRoute("/marketplace-design/:designId");
-  const [, setLocation] = useLocation();
   const designId = params?.designId;
 
   const { data: design, isLoading, error } = useQuery<any>({
@@ -47,7 +46,7 @@ export default function MarketplaceDesignDetailPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setLocation("/chats")}
+          onClick={() => window.history.back()}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

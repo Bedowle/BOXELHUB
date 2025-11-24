@@ -9,7 +9,6 @@ import type { User } from "@shared/schema";
 
 export default function UserProfilePage() {
   const [match, params] = useRoute("/user/:userId");
-  const [, setLocation] = useLocation();
   const userId = params?.userId;
 
   const { data: user, isLoading, error } = useQuery<User>({
@@ -36,7 +35,7 @@ export default function UserProfilePage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setLocation("/chats")}
+          onClick={() => window.history.back()}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

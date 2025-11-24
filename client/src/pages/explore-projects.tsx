@@ -110,7 +110,7 @@ export default function ExploreProjects() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/maker")}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2"
             data-testid="button-back-to-maker"
           >

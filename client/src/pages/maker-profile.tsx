@@ -41,7 +41,7 @@ export default function MakerProfile() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => setLocation("/maker")}
+          onClick={() => window.history.back()}
           className="mb-6"
           data-testid="button-back"
         >

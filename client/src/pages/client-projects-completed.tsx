@@ -51,7 +51,7 @@ export default function ClientProjectsCompleted() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/")}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2"
             data-testid="button-back"
           >
