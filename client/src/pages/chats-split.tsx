@@ -18,10 +18,16 @@ interface Conversation {
   user?: User;
 }
 
+interface SelectedConversationKey {
+  userId: string;
+  projectId?: string;
+  marketplaceDesignId?: string;
+}
+
 export default function ChatsSplitPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedConvKey, setSelectedConvKey] = useState<SelectedConversationKey | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch conversations
@@ -40,15 +46,15 @@ export default function ChatsSplitPage() {
 
   // Fetch other user details
   const { data: otherUser } = useQuery<User | null>({
-    queryKey: ["/api/user", selectedConversation],
+    queryKey: ["/api/user", selectedConvKey?.userId],
     queryFn: async () => {
-      const res = await fetch(`/api/user/${selectedConversation}`, {
+      const res = await fetch(`/api/user/${selectedConvKey?.userId}`, {
         credentials: "include",
       });
       if (!res.ok) return null;
       return res.json();
     },
-    enabled: !!selectedConversation,
+    enabled: !!selectedConvKey?.userId,
   });
 
   // Filter conversations based on search
@@ -61,17 +67,27 @@ export default function ChatsSplitPage() {
     );
   });
 
-  // Get selected conversation details
-  const selectedConv = allConversations.find(
-    (c: Conversation) => c.userId === selectedConversation
-  );
+  // Get selected conversation details - match by userId + context
+  const selectedConv = allConversations.find((c: Conversation) => {
+    if (!selectedConvKey) return false;
+    return (
+      c.userId === selectedConvKey.userId &&
+      c.projectId === selectedConvKey.projectId &&
+      c.marketplaceDesignId === selectedConvKey.marketplaceDesignId
+    );
+  });
 
   // If no conversation selected, select the first one
   useEffect(() => {
-    if (!selectedConversation && filteredConversations.length > 0) {
-      setSelectedConversation(filteredConversations[0].userId);
+    if (!selectedConvKey && filteredConversations.length > 0) {
+      const first = filteredConversations[0];
+      setSelectedConvKey({
+        userId: first.userId,
+        projectId: first.projectId,
+        marketplaceDesignId: first.marketplaceDesignId,
+      });
     }
-  }, [filteredConversations, selectedConversation]);
+  }, [filteredConversations, selectedConvKey]);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -131,28 +147,41 @@ export default function ChatsSplitPage() {
                 </p>
               </div>
             ) : (
-              filteredConversations.map((conv: Conversation) => (
+              filteredConversations.map((conv: Conversation) => {
+                const uniqueKey = `${conv.userId}-${conv.projectId || ''}-${conv.marketplaceDesignId || ''}`;
+                return (
                 <ChatListItem
-                  key={conv.userId}
+                  key={uniqueKey}
                   userId={conv.userId}
                   userName={(conv.user?.username || conv.user?.email) || undefined}
                   userImage={conv.user?.profileImageUrl || undefined}
                   lastMessage={conv.lastMessage?.content || undefined}
                   lastMessageTime={conv.lastMessage?.createdAt || undefined}
                   unreadCount={conv.unreadCount || 0}
-                  isActive={selectedConversation === conv.userId}
-                  onClick={() => setSelectedConversation(conv.userId)}
+                  isActive={
+                    selectedConvKey?.userId === conv.userId &&
+                    selectedConvKey?.projectId === conv.projectId &&
+                    selectedConvKey?.marketplaceDesignId === conv.marketplaceDesignId
+                  }
+                  onClick={() =>
+                    setSelectedConvKey({
+                      userId: conv.userId,
+                      projectId: conv.projectId,
+                      marketplaceDesignId: conv.marketplaceDesignId,
+                    })
+                  }
                 />
-              ))
+                );
+              })
             )}
           </div>
         </div>
 
         {/* Chat Window */}
         <div className="flex-1 flex flex-col">
-          {selectedConversation && selectedConv && otherUser ? (
+          {selectedConvKey && selectedConv && otherUser ? (
             <ChatWindow
-              otherUserId={selectedConversation}
+              otherUserId={selectedConvKey.userId}
               otherUser={otherUser}
               currentUserId={user?.id || ""}
               projectId={selectedConv.projectId}

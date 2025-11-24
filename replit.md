@@ -116,22 +116,33 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 24, 2025)
 
-### Bug Fix: Chat Parsing in getConversationsWithUnread()
-- **Issue**: Conversation keys were being split incorrectly when parsing context type and ID, causing marketplace design chats to not appear in conversation list
-- **Root Cause**: Using `split('::')` without limit on keys like `partnerId::design::designId` would return 3 elements, but destructuring only took 2
-- **Solution**: Replaced with `indexOf()` and `substring()` to correctly extract partnerId and full contextKey
-- **Impact**: Makers can now see all conversations for their marketplace designs
+### Bug Fix #1: Chat Parsing in getConversationsWithUnread()
+- **Issue**: Conversation keys with multiple `::` delimiters weren't parsed correctly, breaking marketplace design chats
+- **Root Cause**: Using `split('::')` without limit returned 3 elements for keys like `partnerId::design::designId`, but destructuring only took 2
+- **Solution**: Replaced with `indexOf()` + `substring()` to correctly extract partnerId and full contextKey
+- **Impact**: ✅ Makers now see all conversations for marketplace designs
+
+### Bug Fix #2: React Key Warnings + Selection Issues
+- **Issue**: Two conversations with same user (one project, one marketplace design) caused "two children with the same key" warning and couldn't switch between them
+- **Root Cause**: Keys were only `userId` instead of unique combinations; selection was too coarse-grained
+- **Solution**: 
+  - Changed keys to: `${userId}-${projectId || ''}-${designId || ''}`
+  - Changed state from `selectedUserId` to `selectedConvKey` (object with userId, projectId, designId)
+  - Updated matching logic to compare all three fields
+- **Impact**: ✅ Perfect UI state management for same-user multiple conversations
 
 ### New Chat UI - Wallapop/Milanuncios Style
 - **New Components**:
-  - `ChatListItem.tsx`: Individual conversation item in list with avatar, username, last message preview, timestamp, unread badge
-  - `ChatWindow.tsx`: Improved chat window with message grouping by date, better layout, sender/receiver differentiation
-  - `chats-split.tsx`: New split-view chat page replacing old individual chat page
+  - `ChatListItem.tsx`: Individual conversation item with avatar, username, preview, timestamp, unread badge
+  - `ChatWindow.tsx`: Chat display with date grouping, sender/receiver differentiation, timestamps
+  - `chats-split.tsx`: Split-view page with sidebar (conversations) + main (chat)
 - **Features**:
-  - Conversation list with search functionality
-  - Real-time conversation updates (3-second refetch interval)
-  - Better UX for managing multiple conversations
-  - Mobile-friendly responsive design
+  - Search conversations by username/email/message content
+  - Real-time updates (3-second refetch)
+  - Auto-scroll to latest messages
+  - Mark-as-read functionality
+  - Responsive design for mobile
+  - Works for both project-based and marketplace design chats
 
 ## External Dependencies
 
