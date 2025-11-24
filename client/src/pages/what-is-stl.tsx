@@ -294,7 +294,7 @@ export default function WhatIsSTL() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">6.</span>
-                <span>Recibes tu impresión 3D lista en casa</span>
+                <span>Recibes tu impresión 3D </span>
               </li>
             </ul>
           </CardContent>
