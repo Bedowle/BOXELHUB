@@ -25,7 +25,6 @@ export default function WhatIsSTL() {
           </p>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="container mx-auto max-w-4xl py-16 px-4">
         {/* Visual Explanation */}
@@ -60,7 +59,7 @@ export default function WhatIsSTL() {
             <Card className="border-2">
               <CardContent className="pt-8 pb-8">
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-xl font-bold text-primary">1 a</span>
+                  <span className="text-xl font-bold text-primary">1 </span>
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-center">Diseñas</h3>
                 <p className="text-muted-foreground mb-4 text-center">
