@@ -12,11 +12,12 @@ import { insertMarketplaceDesignSchema } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Upload, Edit2, X } from "lucide-react";
 
 export default function MakerMarketplaceUpload() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Fetch user's designs
   const { data: designs = [], isLoading } = useQuery({
@@ -28,23 +29,27 @@ export default function MakerMarketplaceUpload() {
     },
   });
 
-  // Upload design mutation
+  // Upload/Update design mutation
   const uploadMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (editingId) {
+        return apiRequest('PUT', `/api/marketplace/designs/${editingId}`, data);
+      }
       return apiRequest('POST', '/api/marketplace/designs', data);
     },
     onSuccess: () => {
       toast({
         title: "Éxito",
-        description: "Diseño subido correctamente",
+        description: editingId ? "Diseño actualizado correctamente" : "Diseño subido correctamente",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/my-designs'] });
       form.reset();
+      setEditingId(null);
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "No se pudo subir el diseño",
+        description: error.message || "No se pudo guardar el diseño",
         variant: "destructive",
       });
     },
@@ -94,6 +99,24 @@ export default function MakerMarketplaceUpload() {
     uploadMutation.mutate(data);
   };
 
+  const handleEditDesign = (design: any) => {
+    setEditingId(design.id);
+    form.reset({
+      title: design.title,
+      description: design.description,
+      imageUrl: design.imageUrl,
+      price: String(design.price),
+      material: design.material,
+    });
+    // Scroll to form
+    document.querySelector('.sticky')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    form.reset();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
       {/* Header */}
@@ -120,8 +143,23 @@ export default function MakerMarketplaceUpload() {
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle>Subir Diseño</CardTitle>
-                <CardDescription>Añade un nuevo diseño a tu tienda</CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle>{editingId ? "Editar Diseño" : "Subir Diseño"}</CardTitle>
+                    <CardDescription>
+                      {editingId ? "Actualiza los detalles del diseño" : "Añade un nuevo diseño a tu tienda"}
+                    </CardDescription>
+                  </div>
+                  {editingId && (
+                    <button
+                      onClick={handleCancelEdit}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      data-testid="button-cancel-edit"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
@@ -237,8 +275,21 @@ export default function MakerMarketplaceUpload() {
                       disabled={uploadMutation.isPending}
                       data-testid="button-submit-design"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      {uploadMutation.isPending ? "Subiendo..." : "Subir Diseño"}
+                      {uploadMutation.isPending ? (editingId ? "Actualizando..." : "Subiendo...") : (
+                        <>
+                          {editingId ? (
+                            <>
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Actualizar Diseño
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-4 h-4 mr-2" />
+                              Subir Diseño
+                            </>
+                          )}
+                        </>
+                      )}
                     </Button>
                   </form>
                 </Form>
@@ -310,15 +361,25 @@ export default function MakerMarketplaceUpload() {
                                 </div>
                               </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => deleteMutation.mutate(design.id)}
-                              disabled={deleteMutation.isPending}
-                              data-testid="button-delete-design"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditDesign(design)}
+                                data-testid="button-edit-design"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteMutation.mutate(design.id)}
+                                disabled={deleteMutation.isPending}
+                                data-testid="button-delete-design"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
