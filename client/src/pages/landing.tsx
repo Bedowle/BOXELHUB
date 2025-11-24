@@ -69,9 +69,29 @@ export default function Landing() {
                   <Upload className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">1. Sube tu STL</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   Sube tu archivo STL con las especificaciones y material requerido
                 </p>
+                <div className="flex flex-col gap-2">
+                  <a 
+                    href="https://www.thingiverse.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:text-primary/80 transition"
+                    data-testid="link-thingiverse"
+                  >
+                    Explorar en Thingiverse →
+                  </a>
+                  <a 
+                    href="https://cults3d.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:text-primary/80 transition"
+                    data-testid="link-cults3d"
+                  >
+                    Explorar en Cults3D →
+                  </a>
+                </div>
               </CardContent>
             </Card>
             <Card className="border-2 hover-elevate">
