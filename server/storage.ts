@@ -406,32 +406,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<Message[]> {
-    let results: Message[];
+    console.log(`[TOP OF getMessagesByContext] contextType=${contextType}, contextId=${contextId.slice(0, 8)}`);
     
+    // Get all messages between these users, then filter in memory by context
+    const allMessages = await db
+      .select()
+      .from(messages)
+      .where(
+        sql`
+          (
+            (${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId})
+            OR
+            (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})
+          )
+        `
+      )
+      .orderBy(asc(messages.createdAt));
+    
+    console.log(`[DEBUG] allMessages BEFORE filtering (${contextType}):`, allMessages.map(m => ({ id: m.id.slice(0, 8), proj: m.projectId?.slice(0, 8), design: m.marketplaceDesignId?.slice(0, 8) })));
+    
+    // Filter in memory based on context
+    let results: Message[];
     if (contextType === "project") {
-      results = await db
-        .select()
-        .from(messages)
-        .where(
-          and(
-            eq(messages.projectId, contextId),
-            isNull(messages.marketplaceDesignId),
-            sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
-          )
-        )
-        .orderBy(asc(messages.createdAt));
+      // Only project messages (has projectId, no designId)
+      results = allMessages.filter(m => m.projectId === contextId && m.marketplaceDesignId === null);
     } else {
-      results = await db
-        .select()
-        .from(messages)
-        .where(
-          and(
-            eq(messages.marketplaceDesignId, contextId),
-            isNull(messages.projectId),
-            sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
-          )
-        )
-        .orderBy(asc(messages.createdAt));
+      // Only design messages (has designId, no projectId)
+      results = allMessages.filter(m => m.marketplaceDesignId === contextId && m.projectId === null);
     }
     
     console.log(`[getMessagesByContext] contextType: ${contextType}, contextId: ${contextId.slice(0, 8)}..., userId: ${userId.slice(0, 8)}..., otherUserId: ${otherUserId.slice(0, 8)}...`);

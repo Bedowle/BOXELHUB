@@ -143,8 +143,20 @@ export function ChatWindow({
 
   const otherUserInitials = otherUser?.username?.[0].toUpperCase() || "U";
 
+  // Filter messages to only include those belonging to this conversation context
+  const filteredMessages = messages.filter(msg => {
+    if (projectId) {
+      // Project context: only show messages where projectId matches and designId is null
+      return msg.projectId === projectId && msg.marketplaceDesignId === null;
+    } else if (marketplaceDesignId) {
+      // Design context: only show messages where designId matches and projectId is null
+      return msg.marketplaceDesignId === marketplaceDesignId && msg.projectId === null;
+    }
+    return false;
+  });
+
   // Group messages by date
-  const groupedMessages = messages.reduce(
+  const groupedMessages = filteredMessages.reduce(
     (groups, msg) => {
       const date = format(new Date(msg.createdAt), "d 'de' MMMM", {
         locale: es,
