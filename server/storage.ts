@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, desc, asc, sql, count, ne, avg } from "drizzle-orm";
+import { eq, and, desc, asc, sql, count, ne, avg, isNull } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import {
   users,
@@ -415,7 +415,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(messages.projectId, contextId),
-            sql`${messages.marketplaceDesignId} IS NULL`,
+            isNull(messages.marketplaceDesignId),
             sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
           )
         )
@@ -427,7 +427,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(messages.marketplaceDesignId, contextId),
-            sql`${messages.projectId} IS NULL`,
+            isNull(messages.projectId),
             sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
           )
         )
