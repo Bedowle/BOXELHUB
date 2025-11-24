@@ -131,6 +131,16 @@ Preferred communication style: Simple, everyday language.
   - Updated matching logic to compare all three fields
 - **Impact**: ✅ Perfect UI state management for same-user multiple conversations
 
+### Bug Fix #3: Messages Appearing in All Chats with Same User
+- **Issue**: When two users had multiple conversations (one about a project, one about a marketplace design), messages from one conversation appeared in all conversations with that user
+- **Root Cause**: Backend endpoints `/api/messages` and `/api/messages/mark-read` had fallback logic that allowed requests without projectId or marketplaceDesignId, returning/updating ALL messages between two users regardless of context
+- **Solution**:
+  - Changed GET `/api/messages`: Now returns 400 error if neither projectId nor marketplaceDesignId is provided
+  - Changed PUT `/api/messages/mark-read`: Now returns 400 error if neither projectId nor marketplaceDesignId is provided
+  - Added validation in ChatWindow.tsx to throw error if message is sent without context
+  - Improved selectedConv finding logic in chats-split.tsx to be more defensive
+- **Impact**: ✅ Messages are now strictly isolated by conversation context (project or marketplace design). Same user can have multiple separate conversations without message bleeding
+
 ### New Chat UI - Wallapop/Milanuncios Style
 - **New Components**:
   - `ChatListItem.tsx`: Individual conversation item with avatar, username, preview, timestamp, unread badge

@@ -1012,9 +1012,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(messages);
       }
       
-      // Otherwise use general messages
-      const messages = await storage.getMessages(userId, otherUserId as string);
-      res.json(messages);
+      // Either projectId or marketplaceDesignId is required
+      return res.status(400).json({ message: "Either projectId or marketplaceDesignId is required" });
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
@@ -1079,9 +1078,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ success: true });
       }
       
-      // Otherwise use general mark as read
-      await storage.markMessagesAsRead(userId, otherUserId);
-      res.json({ success: true });
+      // Either projectId or marketplaceDesignId is required
+      return res.status(400).json({ message: "Either projectId or marketplaceDesignId is required" });
     } catch (error: any) {
       console.error("Error marking messages as read:", error);
       res.status(400).json({ message: error.message || "Failed to mark messages as read" });

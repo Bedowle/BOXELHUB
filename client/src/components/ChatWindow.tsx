@@ -72,6 +72,9 @@ export function ChatWindow({
       } else if (marketplaceDesignId) {
         messageData.marketplaceDesignId = marketplaceDesignId;
         messageData.contextType = "marketplace_design";
+      } else {
+        // This should never happen if ChatWindow is used correctly
+        throw new Error("Message must have either projectId or marketplaceDesignId");
       }
 
       await apiRequest("POST", "/api/messages", messageData);

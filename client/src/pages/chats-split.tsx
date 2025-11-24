@@ -68,14 +68,11 @@ export default function ChatsSplitPage() {
   });
 
   // Get selected conversation details - match by userId + context
-  const selectedConv = allConversations.find((c: Conversation) => {
-    if (!selectedConvKey) return false;
-    return (
-      c.userId === selectedConvKey.userId &&
-      c.projectId === selectedConvKey.projectId &&
-      c.marketplaceDesignId === selectedConvKey.marketplaceDesignId
-    );
-  });
+  const selectedConv = selectedConvKey ? allConversations.find((c: Conversation) => 
+    c.userId === selectedConvKey.userId &&
+    c.projectId === selectedConvKey.projectId &&
+    c.marketplaceDesignId === selectedConvKey.marketplaceDesignId
+  ) : undefined;
 
   // If no conversation selected, select the first one
   useEffect(() => {
