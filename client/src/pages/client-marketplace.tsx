@@ -55,7 +55,7 @@ export default function ClientMarketplace() {
       <div className="border-b border-border/50 sticky top-0 z-40 bg-background/80 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <button
-            onClick={() => setLocation("/client")}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
             data-testid="button-back-to-client"
           >

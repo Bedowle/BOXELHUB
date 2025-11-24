@@ -12,7 +12,7 @@ export default function WhatIsSTL() {
       <div className="bg-gradient-to-r from-primary to-secondary py-12 px-4">
         <div className="container mx-auto max-w-4xl">
           <button
-            onClick={() => setLocation("/")}
+            onClick={() => window.history.back()}
             className="flex items-center gap-2 text-white/80 hover:text-white transition mb-6"
             data-testid="button-back-from-stl"
           >
