@@ -406,17 +406,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesByContext(userId: string, otherUserId: string, contextType: "project" | "marketplace_design", contextId: string): Promise<Message[]> {
-    const contextField = contextType === "project" ? messages.projectId : messages.marketplaceDesignId;
-    const results = await db
-      .select()
-      .from(messages)
-      .where(
-        and(
-          eq(contextField, contextId),
-          sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
+    let results: Message[];
+    
+    if (contextType === "project") {
+      results = await db
+        .select()
+        .from(messages)
+        .where(
+          and(
+            eq(messages.projectId, contextId),
+            sql`${messages.marketplaceDesignId} IS NULL`,
+            sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
+          )
         )
-      )
-      .orderBy(asc(messages.createdAt));
+        .orderBy(asc(messages.createdAt));
+    } else {
+      results = await db
+        .select()
+        .from(messages)
+        .where(
+          and(
+            eq(messages.marketplaceDesignId, contextId),
+            sql`${messages.projectId} IS NULL`,
+            sql`(${messages.senderId} = ${userId} AND ${messages.receiverId} = ${otherUserId}) OR (${messages.senderId} = ${otherUserId} AND ${messages.receiverId} = ${userId})`
+          )
+        )
+        .orderBy(asc(messages.createdAt));
+    }
     
     console.log(`[getMessagesByContext] contextType: ${contextType}, contextId: ${contextId.slice(0, 8)}..., userId: ${userId.slice(0, 8)}..., otherUserId: ${otherUserId.slice(0, 8)}...`);
     console.log(`[getMessagesByContext] Found ${results.length} messages:`, results.map(m => ({ id: m.id.slice(0, 8), projectId: m.projectId?.slice(0, 8), designId: m.marketplaceDesignId?.slice(0, 8) })));

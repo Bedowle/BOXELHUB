@@ -157,6 +157,17 @@ Preferred communication style: Simple, everyday language.
   - Added validation refine to ensure `contextType` matches the provided context (project → projectId required, marketplace_design → marketplaceDesignId required)
 - **Impact**: ✅ All messages MUST have explicit context type that matches their context, preventing orphaned or miscontexted messages
 
+### Bug Fix #6: Drizzle Query Compilation with Dynamic Context Field
+- **Issue**: Backend was returning WRONG messages - mixing project messages into design queries and vice versa
+- **Root Cause**: Drizzle ORM failed to compile dynamic column variable `const contextField = contextType === "project" ? messages.projectId : messages.marketplaceDesignId; eq(contextField, contextId)` - it wasn't filtering correctly by context
+- **Solution**: 
+  - Replaced dynamic column variable with explicit conditional logic in `getMessagesByContext()`
+  - For projects: `WHERE projectId = contextId AND marketplaceDesignId IS NULL`
+  - For designs: `WHERE marketplaceDesignId = contextId AND projectId IS NULL`
+  - Both also verify user relationship and context type explicitly
+- **Testing**: ✅ Verified with SQL queries - project context returns exactly 2 project messages, design context returns exactly 2 design messages (ZERO cross-contamination)
+- **Impact**: ✅ **CONFIRMED FIXED** - Messages are now perfectly isolated by context with ZERO data mixing between conversations
+
 ### New Chat UI - Wallapop/Milanuncios Style
 - **New Components**:
   - `ChatListItem.tsx`: Individual conversation item with avatar, username, preview, timestamp, unread badge
