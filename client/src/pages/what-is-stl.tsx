@@ -60,12 +60,12 @@ export default function WhatIsSTL() {
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                   <span className="text-xl font-bold text-primary">1</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-3">Diseñas tu modelo</h3>
+                <h3 className="text-xl font-semibold mb-3">Diseñas o Descargas</h3>
                 <p className="text-muted-foreground mb-4">
-                  Usas software de diseño 3D (gratuito o de pago) para crear tu modelo.
+                  Crea tu propio diseño con software 3D o descarga modelos listos de Thingiverse o Cults3D.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Ejemplos: Fusion 360, Blender, FreeCAD, TinkerCAD
+                  Diseño: Fusion 360, Blender, FreeCAD, TinkerCAD | Descargas: Thingiverse, Cults3D
                 </p>
               </CardContent>
             </Card>
@@ -188,7 +188,7 @@ export default function WhatIsSTL() {
             <ul className="space-y-2 text-muted-foreground mb-6">
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">1.</span>
-                <span>Diseñas en TinkerCAD (es gratis y online)</span>
+                <span>Diseñas o descargas en TinkerCAD o Thingiverse</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">2.</span>
