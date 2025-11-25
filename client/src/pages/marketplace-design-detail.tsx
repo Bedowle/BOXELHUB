@@ -299,7 +299,18 @@ export default function MarketplaceDesignDetailPage() {
                           min={String(design.price)}
                           placeholder={String(design.price)}
                           value={customAmount}
-                          onChange={(e) => setCustomAmount(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "") {
+                              setCustomAmount("");
+                            } else {
+                              const num = parseFloat(value);
+                              if (!isNaN(num)) {
+                                const rounded = Math.round(num * 100) / 100;
+                                setCustomAmount(String(rounded));
+                              }
+                            }
+                          }}
                           data-testid="input-custom-amount"
                         />
                         <Button
