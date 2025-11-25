@@ -45,6 +45,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Maker balance endpoints (MUST be before /api/maker/:id to avoid param matching)
+  app.get('/api/maker/balance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const totalBalance = await storage.getMakerBalance(userId);
+      const availableBalance = await storage.getMakerAvailableBalance(userId);
+
+      res.json({
+        totalBalance,
+        availableBalance,
+        message: "Balance fetched successfully"
+      });
+    } catch (error: any) {
+      console.error("Error fetching balance:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch balance" });
+    }
+  });
+
+  // Update payout method
+  app.post('/api/maker/payout-method', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { method, stripeEmail, paypalEmail, bankAccountIban, bankAccountName } = req.body;
+
+      if (!method || !["stripe", "paypal", "bank"].includes(method)) {
+        return res.status(400).json({ message: "Invalid payout method" });
+      }
+
+      const profile = await storage.updatePayoutMethod(userId, method, {
+        stripeEmail,
+        paypalEmail,
+        bankAccountIban,
+        bankAccountName,
+      });
+
+      res.json({
+        message: "Payout method updated successfully",
+        profile
+      });
+    } catch (error: any) {
+      console.error("Error updating payout method:", error);
+      res.status(500).json({ message: error.message || "Failed to update payout method" });
+    }
+  });
+
+  // Get maker payouts
+  app.get('/api/maker/payouts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const payouts = await storage.getMakerPayouts(userId);
+
+      res.json({
+        payouts
+      });
+    } catch (error: any) {
+      console.error("Error fetching payouts:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch payouts" });
+    }
+  });
+
+  // Request payout
+  app.post('/api/maker/request-payout', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { amount } = req.body;
+
+      if (!amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const profile = await storage.getMakerProfile(userId);
+      if (!profile || !profile.payoutMethod) {
+        return res.status(400).json({ message: "Please configure a payout method first" });
+      }
+
+      // Check minimum for payouts
+      if (profile.payoutMethod === "bank" && parseFloat(amount) < 20) {
+        return res.status(400).json({ message: "Minimum €20.00 required for bank transfers" });
+      }
+      if ((profile.payoutMethod === "stripe" || profile.payoutMethod === "paypal") && parseFloat(amount) < 10) {
+        return res.status(400).json({ message: "Minimum €10.00 required for Stripe/PayPal payouts" });
+      }
+
+      // Check available balance
+      const availableBalance = await storage.getMakerAvailableBalance(userId);
+      if (parseFloat(availableBalance) < parseFloat(amount)) {
+        return res.status(400).json({ 
+          message: `Insufficient balance. Available: €${availableBalance}` 
+        });
+      }
+
+      // Create payout request
+      const payout = await storage.createMakerPayout(userId, amount, profile.payoutMethod);
+
+      res.json({
+        message: "Payout request created successfully",
+        payout
+      });
+    } catch (error: any) {
+      console.error("Error requesting payout:", error);
+      res.status(500).json({ message: error.message || "Failed to request payout" });
+    }
+  });
+
   app.get('/api/maker/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
@@ -2042,126 +2162,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error capturing PayPal order:", error);
       res.status(500).json({ message: error.message || "Failed to capture PayPal order" });
-    }
-  });
-
-  // Maker balance endpoints
-  app.get('/api/maker/balance', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const totalBalance = await storage.getMakerBalance(userId);
-      const availableBalance = await storage.getMakerAvailableBalance(userId);
-
-      res.json({
-        totalBalance,
-        availableBalance,
-        message: "Balance fetched successfully"
-      });
-    } catch (error: any) {
-      console.error("Error fetching balance:", error);
-      res.status(500).json({ message: error.message || "Failed to fetch balance" });
-    }
-  });
-
-  // Update payout method
-  app.post('/api/maker/payout-method', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const { method, stripeEmail, paypalEmail, bankAccountIban, bankAccountName } = req.body;
-
-      if (!method || !["stripe", "paypal", "bank"].includes(method)) {
-        return res.status(400).json({ message: "Invalid payout method" });
-      }
-
-      const profile = await storage.updatePayoutMethod(userId, method, {
-        stripeEmail,
-        paypalEmail,
-        bankAccountIban,
-        bankAccountName,
-      });
-
-      res.json({
-        message: "Payout method updated successfully",
-        profile
-      });
-    } catch (error: any) {
-      console.error("Error updating payout method:", error);
-      res.status(500).json({ message: error.message || "Failed to update payout method" });
-    }
-  });
-
-  // Get maker payouts
-  app.get('/api/maker/payouts', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const payouts = await storage.getMakerPayouts(userId);
-
-      res.json({
-        payouts
-      });
-    } catch (error: any) {
-      console.error("Error fetching payouts:", error);
-      res.status(500).json({ message: error.message || "Failed to fetch payouts" });
-    }
-  });
-
-  // Request payout
-  app.post('/api/maker/request-payout', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const { amount } = req.body;
-
-      if (!amount || parseFloat(amount) <= 0) {
-        return res.status(400).json({ message: "Invalid amount" });
-      }
-
-      const profile = await storage.getMakerProfile(userId);
-      if (!profile || !profile.payoutMethod) {
-        return res.status(400).json({ message: "Please configure a payout method first" });
-      }
-
-      // Check minimum for payouts
-      if (profile.payoutMethod === "bank" && parseFloat(amount) < 20) {
-        return res.status(400).json({ message: "Minimum €20.00 required for bank transfers" });
-      }
-      if ((profile.payoutMethod === "stripe" || profile.payoutMethod === "paypal") && parseFloat(amount) < 10) {
-        return res.status(400).json({ message: "Minimum €10.00 required for Stripe/PayPal payouts" });
-      }
-
-      // Check available balance
-      const availableBalance = await storage.getMakerAvailableBalance(userId);
-      if (parseFloat(availableBalance) < parseFloat(amount)) {
-        return res.status(400).json({ 
-          message: `Insufficient balance. Available: €${availableBalance}` 
-        });
-      }
-
-      // Create payout request
-      const payout = await storage.createMakerPayout(userId, amount, profile.payoutMethod);
-
-      res.json({
-        message: "Payout request created successfully",
-        payout
-      });
-    } catch (error: any) {
-      console.error("Error requesting payout:", error);
-      res.status(500).json({ message: error.message || "Failed to request payout" });
     }
   });
 
