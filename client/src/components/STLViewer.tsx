@@ -145,8 +145,12 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
       renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.domElement.style.display = 'block';
-      renderer.domElement.style.margin = '0';
+      renderer.domElement.style.margin = 'auto';
       renderer.domElement.style.padding = '0';
+      renderer.domElement.style.position = 'absolute';
+      renderer.domElement.style.left = '50%';
+      renderer.domElement.style.top = '50%';
+      renderer.domElement.style.transform = 'translate(-50%, -50%)';
       containerRef.current.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
@@ -259,10 +263,10 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="relative bg-background rounded-lg pointer-events-auto flex items-center justify-center" style={{ overflow: 'hidden', width: `${width}px`, height: `${height}px` }}>
+    <div className="relative bg-background rounded-lg pointer-events-auto" style={{ overflow: 'hidden', width: `${width}px`, height: `${height}px` }}>
       <div
         ref={containerRef}
-        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'block', margin: 0, padding: 0, overflow: 'hidden' }}
+        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'flex', margin: 0, padding: 0, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
