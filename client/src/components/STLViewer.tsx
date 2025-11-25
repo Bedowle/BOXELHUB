@@ -190,11 +190,13 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         }
       );
 
-      // Mouse events
-      const onMouseDown = (e: MouseEvent) => {
+      // Mouse events - rotate on hover without clicking
+      const onMouseEnter = () => {
         mouseRef.current.isDown = true;
-        mouseRef.current.x = e.clientX;
-        mouseRef.current.y = e.clientY;
+      };
+
+      const onMouseLeave = () => {
+        mouseRef.current.isDown = false;
       };
 
       const onMouseMove = (e: MouseEvent) => {
@@ -215,13 +217,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         mouseRef.current.y = e.clientY;
       };
 
-      const onMouseUp = () => {
-        mouseRef.current.isDown = false;
-      };
-
-      renderer.domElement.addEventListener("mousedown", onMouseDown, false);
-      document.addEventListener("mousemove", onMouseMove, false);
-      document.addEventListener("mouseup", onMouseUp, false);
+      renderer.domElement.addEventListener("mouseenter", onMouseEnter, false);
+      renderer.domElement.addEventListener("mouseleave", onMouseLeave, false);
+      renderer.domElement.addEventListener("mousemove", onMouseMove, false);
 
       // Animation loop
       const animate = () => {
@@ -243,9 +241,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
 
       return () => {
         window.removeEventListener("resize", handleResize);
-        renderer.domElement.removeEventListener("mousedown", onMouseDown, false);
-        document.removeEventListener("mousemove", onMouseMove, false);
-        document.removeEventListener("mouseup", onMouseUp, false);
+        renderer.domElement.removeEventListener("mouseenter", onMouseEnter, false);
+        renderer.domElement.removeEventListener("mouseleave", onMouseLeave, false);
+        renderer.domElement.removeEventListener("mousemove", onMouseMove, false);
         if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
           containerRef.current.removeChild(renderer.domElement);
         }
