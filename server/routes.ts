@@ -193,67 +193,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper functions for executing payouts
   async function executeStripePayout(stripeConnectAccountId: string, amount: string, payoutRecord: any) {
     try {
-      const isDevelopment = process.env.NODE_ENV === "development";
-      
-      if (isDevelopment) {
-        // In development, simulate successful payout and mark as completed
-        console.log("✅ [DEVELOPMENT MODE] Stripe payout simulated");
-        console.log("   Amount: $" + parseFloat(amount).toFixed(2));
-        console.log("   Status: succeeded");
-        console.log("   Account: " + (stripeConnectAccountId || "platform"));
-        
-        // Mark payout as completed in database for development
-        try {
-          await storage.updatePayoutStatus(payoutRecord.id, "completed");
-          console.log("   Marked as completed in database");
-        } catch (updateErr: any) {
-          console.error("   Error updating payout status:", updateErr.message);
-        }
-        return;
-      }
-      
-      // Production: Use real Stripe API
       const stripe = await getUncachableStripeClient();
+      
+      console.log("🔄 Initiating Stripe payout...");
+      console.log("   Amount: €" + parseFloat(amount).toFixed(2));
+      console.log("   Payout ID:", payoutRecord.id);
+      
+      // Create payout on the platform account
       const payout = await stripe.payouts.create({
         amount: Math.round(parseFloat(amount) * 100),
-        currency: 'usd',
+        currency: 'eur',
         method: 'standard',
-        description: `VoxelHub payout`
+        description: `VoxelHub maker payout #${payoutRecord.id.substring(0, 8)}`
       });
       
-      console.log("✅ Stripe payout created:", payout.id);
+      console.log("✅ Stripe payout created successfully!");
+      console.log("   Payout ID:", payout.id);
       console.log("   Status:", payout.status);
-      console.log("   Check: https://dashboard.stripe.com/test/payouts/" + payout.id);
-      return;
+      console.log("   Amount:", payout.amount / 100, payout.currency.toUpperCase());
+      console.log("   Dashboard: https://dashboard.stripe.com/payouts/" + payout.id);
+      
+      // Update payout record with Stripe payout ID
+      try {
+        await storage.updatePayoutStatus(payoutRecord.id, payout.status === "paid" ? "completed" : "processing", payout.id);
+        console.log("   Database updated with Stripe payout ID");
+      } catch (updateErr: any) {
+        console.error("   Warning: Could not update database:", updateErr.message);
+      }
+      
+      return payout;
     } catch (error: any) {
-      console.error("❌ Payout error:", error.message);
+      console.error("❌ Stripe payout error:", error.message);
+      
+      // Try to update payout status to failed
+      try {
+        await storage.updatePayoutStatus(payoutRecord.id, "failed");
+      } catch (_) {}
+      
+      throw error;
     }
   }
 
   async function executePayPalPayout(paypalAccountId: string, amount: string, payoutRecord: any) {
     try {
-      const isDevelopment = process.env.NODE_ENV === "development";
-      
-      if (isDevelopment) {
-        // In development, simulate successful PayPal payout
-        console.log("✅ [DEVELOPMENT MODE] PayPal payout simulated");
-        console.log("   Amount: €" + parseFloat(amount).toFixed(2));
-        console.log("   Recipient: " + paypalAccountId);
-        console.log("   Status: processing");
-        
-        // Mark payout as completed in database for development
-        try {
-          await storage.updatePayoutStatus(payoutRecord.id, "completed");
-          console.log("   Marked as completed in database");
-        } catch (updateErr: any) {
-          console.error("   Error updating payout status:", updateErr.message);
-        }
-        return;
-      }
-      
       if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
-        console.error("PayPal credentials not configured");
-        return;
+        throw new Error("PayPal credentials not configured in environment");
       }
       
       // Production: Use real PayPal API
