@@ -249,10 +249,18 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="bg-background rounded-lg pointer-events-auto relative" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="bg-background rounded-lg pointer-events-auto relative" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden' }}>
       <canvas
         ref={containerRef as any}
-        style={{ width: `${width}px`, height: `${height}px`, display: 'block' }}
+        style={{ 
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: `${width}px`, 
+          height: `${height}px`, 
+          display: 'block'
+        }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
