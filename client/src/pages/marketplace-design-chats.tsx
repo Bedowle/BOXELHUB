@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Message } from "@shared/schema";
@@ -54,14 +54,25 @@ export default function MarketplaceDesignChatsPage() {
       {/* Header */}
       <div className="border-b border-border/50 sticky top-0 z-40 bg-background/80 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 py-4">
-          <button
-            onClick={() => setLocation("/maker/marketplace")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-            data-testid="button-back-to-marketplace"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </button>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <button
+              onClick={() => window.history.back()}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="button-back-to-marketplace"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Volver
+            </button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setLocation("/maker/marketplace")}
+              data-testid="button-edit-design"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Editar Diseño
+            </Button>
+          </div>
           <div className="flex items-center gap-3 mb-2">
             <MessageCircle className="w-8 h-8 text-primary" />
             <h1 className="text-3xl font-bold">Conversaciones del Producto</h1>
