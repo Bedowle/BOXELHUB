@@ -99,9 +99,13 @@ export default function AppHeader() {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {isClient ? "Cliente" : isMaker ? "Maker" : ""}
             </span>
-            <span className="text-sm font-medium hidden sm:block">
+            <button
+              onClick={() => setLocation(`/user/${user?.id}`)}
+              className="text-sm font-medium hidden sm:block hover:text-primary transition-colors cursor-pointer"
+              data-testid="button-profile-link"
+            >
               {user?.firstName || user?.email}
-            </span>
+            </button>
             <Button
               variant="outline"
               size="sm"

@@ -79,6 +79,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload profile image
+  app.post('/api/user/:userId/profile-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const authenticatedUserId = getAuthenticatedUserId(req);
+      if (!authenticatedUserId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { userId } = req.params;
+      // Only allow editing your own profile
+      if (authenticatedUserId !== userId) {
+        return res.status(403).json({ message: "Cannot edit another user's profile" });
+      }
+
+      const { profileImageUrl } = req.body;
+      if (!profileImageUrl) {
+        return res.status(400).json({ message: "profileImageUrl is required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      await storage.upsertUser({
+        id: userId,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl,
+        userType: user.userType
+      });
+
+      const updated = await storage.getUser(userId);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      res.status(500).json({ message: "Failed to upload profile image" });
+    }
+  });
+
   // Registration endpoint
   app.post('/api/auth/register', async (req: any, res) => {
     try {
