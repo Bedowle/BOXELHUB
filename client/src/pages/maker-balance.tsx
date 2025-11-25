@@ -105,8 +105,8 @@ export default function MakerBalance() {
     },
     onSuccess: () => {
       toast({
-        title: "Solicitud de payout exitosa",
-        description: "Tu solicitud ha sido procesada.",
+        title: "Solicitud enviada",
+        description: "Tu payout está pendiente. Será procesado en 1-2 días de negocio.",
       });
       payoutForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/maker/balance"] });
