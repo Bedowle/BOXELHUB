@@ -317,6 +317,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  // Endpoint to check Stripe bank account status
+  app.get('/api/maker/stripe-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const accounts = await (stripe.accounts as any).listExternalAccounts('self');
+      
+      const hasBankAccount = accounts.data && accounts.data.length > 0;
+      
+      res.json({
+        hasBankAccount,
+        setupInstructions: !hasBankAccount ? {
+          title: "No hay cuenta bancaria vinculada",
+          steps: [
+            "1. Abre https://dashboard.stripe.com/test/settings/payouts",
+            "2. Haz clic en 'Add external account'",
+            "3. Selecciona 'Bank account'",
+            "4. Ingresa estos datos de prueba:",
+            "   - Routing: 110000000",
+            "   - Account: 000111111116",
+            "5. Guarda y vuelve a intentar el payout"
+          ]
+        } : null
+      });
+    } catch (error: any) {
+      res.json({
+        hasBankAccount: false,
+        error: error.message
+      });
+    }
+  });
+
   app.get('/api/maker/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;

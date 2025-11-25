@@ -78,6 +78,11 @@ export default function MakerBalance() {
     enabled: !!user,
   });
 
+  const { data: stripeStatus } = useQuery<any>({
+    queryKey: ["/api/maker/stripe-status"],
+    enabled: !!user && makerProfile?.payoutMethod === "stripe",
+  });
+
   const payoutForm = useForm<PayoutFormValues>({
     resolver: zodResolver(payoutSchema),
     defaultValues: {
@@ -389,6 +394,31 @@ export default function MakerBalance() {
           </CardContent>
         </Card>
 
+        {/* Stripe Setup Warning */}
+        {makerProfile?.payoutMethod === "stripe" && stripeStatus && !stripeStatus.hasBankAccount && (
+          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+            <CardHeader>
+              <CardTitle className="text-yellow-800 dark:text-yellow-200">Configuración de Stripe necesaria</CardTitle>
+            </CardHeader>
+            <CardContent className="text-yellow-900 dark:text-yellow-100">
+              <p className="mb-4">Para hacer payouts con Stripe, necesitas agregar una cuenta bancaria en tu dashboard:</p>
+              <ol className="list-decimal list-inside space-y-2 text-sm mb-4">
+                {stripeStatus.setupInstructions?.steps.map((step: string, idx: number) => (
+                  <li key={idx}>{step}</li>
+                ))}
+              </ol>
+              <Button 
+                variant="outline" 
+                className="border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900"
+                onClick={() => window.open("https://dashboard.stripe.com/test/settings/payouts", "_blank")}
+                data-testid="button-open-stripe-dashboard"
+              >
+                Abrir Stripe Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Request Payout */}
         {makerProfile?.payoutMethod && (
           <Card className="mb-8">
@@ -399,6 +429,11 @@ export default function MakerBalance() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {makerProfile?.payoutMethod === "stripe" && stripeStatus && !stripeStatus.hasBankAccount && (
+                <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-md text-sm">
+                  ⚠️ Completa la configuración de Stripe arriba antes de hacer un payout
+                </div>
+              )}
               <Form {...payoutForm}>
                 <form onSubmit={payoutForm.handleSubmit(data => requestPayout(data))} className="space-y-4">
                   <FormField
