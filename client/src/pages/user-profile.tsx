@@ -1,4 +1,4 @@
-import { useRoute, useLocation } from "wouter";
+import { useRoute } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,11 +8,30 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import type { User } from "@shared/schema";
 
+const profileEditSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(1, "Username is required"),
+  location: z.string().optional(),
+});
+
+type ProfileEditForm = z.infer<typeof profileEditSchema>;
+
 export default function UserProfilePage() {
-  const [, setLocation] = useLocation();
   const [match, params] = useRoute("/user/:userId");
   const userId = params?.userId;
   const { user: currentUser } = useAuth();
@@ -34,28 +53,82 @@ export default function UserProfilePage() {
 
   const isOwnProfile = currentUser?.id === userId;
 
+  // Form setup
+  const form = useForm<ProfileEditForm>({
+    resolver: zodResolver(profileEditSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      username: "",
+      location: "",
+    },
+  });
+
+  // Update form values when user data loads
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        username: user.username || "",
+        location: user.location || "",
+      });
+    }
+  }, [user, form]);
+
+  // Profile update mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: ProfileEditForm) => {
+      const res = await fetch(`/api/user/${userId}/profile`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Profile updated" });
+      queryClient.invalidateQueries({ queryKey: ["/api/user", userId] });
+      setIsEditing(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Profile image upload mutation
   const uploadProfileImageMutation = useMutation({
     mutationFn: async (file: File) => {
       const reader = new FileReader();
-      
+
       return new Promise((resolve, reject) => {
         reader.onload = async () => {
           try {
             const base64 = reader.result as string;
-            
+
             const res = await fetch(`/api/user/${userId}/profile-image`, {
               method: "POST",
               credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ profileImageUrl: base64 }),
             });
-            
+
             if (!res.ok) {
               const error = await res.json();
               throw new Error(error.message || "Failed to upload image");
             }
-            
+
             resolve(res.json());
           } catch (error) {
             reject(error);
@@ -99,6 +172,10 @@ export default function UserProfilePage() {
       }
       uploadProfileImageMutation.mutate(file);
     }
+  };
+
+  const onSubmit = (data: ProfileEditForm) => {
+    updateProfileMutation.mutate(data);
   };
 
   if (!match) return null;
@@ -166,10 +243,13 @@ export default function UserProfilePage() {
                   ) : (
                     <Button
                       variant="outline"
-                      onClick={() => setIsEditing(false)}
-                      data-testid="button-done-editing"
+                      onClick={() => {
+                        setIsEditing(false);
+                        form.reset();
+                      }}
+                      data-testid="button-cancel-editing"
                     >
-                      Listo
+                      Cancelar
                     </Button>
                   )}
                 </div>
@@ -177,30 +257,96 @@ export default function UserProfilePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {user.location && (
-                <div>
-                  <h3 className="font-semibold text-sm">Ubicación</h3>
-                  <p className="text-sm text-muted-foreground">{user.location}</p>
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold text-sm">Tipo de usuario</h3>
-                <p className="text-sm text-muted-foreground capitalize">
-                  {user.userType === "client" ? "Cliente" : "Maker"}
-                </p>
-              </div>
-              {isEditing && isOwnProfile && (
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Haz click en el ícono de cámara en tu foto de perfil para cambiarla
-                  </p>
+            {isEditing && isOwnProfile ? (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nombre" {...field} data-testid="input-firstName" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Apellido</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Apellido" {...field} data-testid="input-lastName" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Usuario</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Usuario" {...field} data-testid="input-username" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ubicación</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ubicación (opcional)" {...field} data-testid="input-location" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex gap-2 pt-4">
+                    <Button
+                      type="submit"
+                      disabled={updateProfileMutation.isPending}
+                      data-testid="button-save-profile"
+                    >
+                      {updateProfileMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+                    </Button>
+                  </div>
+
                   {uploadProfileImageMutation.isPending && (
                     <p className="text-sm text-muted-foreground">Subiendo imagen...</p>
                   )}
+                </form>
+              </Form>
+            ) : (
+              <div className="space-y-4">
+                {user.location && (
+                  <div>
+                    <h3 className="font-semibold text-sm">Ubicación</h3>
+                    <p className="text-sm text-muted-foreground">{user.location}</p>
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold text-sm">Tipo de usuario</h3>
+                  <p className="text-sm text-muted-foreground capitalize">
+                    {user.userType === "client" ? "Cliente" : "Maker"}
+                  </p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
