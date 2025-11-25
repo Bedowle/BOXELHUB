@@ -312,11 +312,11 @@ export default function MarketplaceDesignDetailPage() {
                       <Button
                         variant="outline"
                         className="w-full"
-                        onClick={() => acquireFreeMutation.mutate()}
-                        disabled={acquireFreeMutation.isPending}
-                        data-testid="button-pay-zero"
+                        onClick={() => checkoutMutation.mutate(String(Number(design.price).toFixed(2)))}
+                        disabled={checkoutMutation.isPending}
+                        data-testid="button-pay-minimum"
                       >
-                        {acquireFreeMutation.isPending ? "Procesando..." : `Pagar €${Number(design.price).toFixed(2)}`}
+                        {checkoutMutation.isPending ? "Procesando..." : `Pagar €${Number(design.price).toFixed(2)}`}
                       </Button>
                       <div className="relative my-3">
                         <div className="absolute inset-0 flex items-center">
