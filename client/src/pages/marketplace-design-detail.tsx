@@ -20,7 +20,7 @@ export default function MarketplaceDesignDetailPage() {
   const [customAmount, setCustomAmount] = useState("");
 
   const { data: design, isLoading, error } = useQuery<any>({
-    queryKey: ["/api/marketplace-design", designId],
+    queryKey: ["/api/marketplace-designs", designId],
     queryFn: async () => {
       const res = await fetch(`/api/marketplace-designs/${designId}`, {
         credentials: "include",
@@ -43,14 +43,22 @@ export default function MarketplaceDesignDetailPage() {
     enabled: !!design?.makerId,
   });
 
-  const { data: accessInfo } = useQuery({
-    queryKey: ["/api/marketplace/designs", designId, "access"],
+  const { data: accessInfo, isLoading: accessLoading } = useQuery({
+    queryKey: ["/api/marketplace-designs", designId, "access"],
     queryFn: async () => {
-      const res = await fetch(`/api/marketplace/designs/${designId}/access`, {
-        credentials: "include",
-      });
-      if (!res.ok) return null;
-      return res.json();
+      try {
+        const res = await fetch(`/api/marketplace-designs/${designId}/access`, {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          console.error("Access check failed:", res.status);
+          return { canAccess: false, reason: "error" };
+        }
+        return res.json();
+      } catch (err) {
+        console.error("Access check error:", err);
+        return { canAccess: false, reason: "error" };
+      }
     },
     enabled: !!designId,
   });
@@ -159,7 +167,7 @@ export default function MarketplaceDesignDetailPage() {
 
   const makerInitial = maker?.username?.[0]?.toUpperCase() || "M";
   const priceDisplay = design.priceType === "free" ? "Gratis" : `€${Number(design.price).toFixed(2)}`;
-  const canAccess = accessInfo?.canAccess;
+  const canAccess = accessInfo?.canAccess ?? false;
 
   return (
     <div className="min-h-screen bg-background">
