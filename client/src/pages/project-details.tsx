@@ -105,6 +105,7 @@ export default function ProjectDetails() {
         description: "El maker ha sido notificado.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "bids"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "my-bid"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
