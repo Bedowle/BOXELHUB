@@ -330,8 +330,8 @@ export default function MarketplaceDesignDetailPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          min={String(design.price)}
-                          placeholder={String(design.price)}
+                          min={Number(design.price) > 0 ? "0.5" : "0"}
+                          placeholder={Number(design.price) > 0 ? "0.50" : "0.00"}
                           value={customAmount}
                           onChange={(e) => {
                             const value = e.target.value;

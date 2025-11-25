@@ -282,24 +282,39 @@ export default function MakerMarketplaceUpload() {
                       <FormField
                         control={form.control}
                         name="price"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              {priceType === "fixed" ? "Precio (€)" : "Precio Mínimo (€)"}
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder={priceType === "fixed" ? "10.00" : "5.00"}
-                                {...field}
-                                data-testid="input-design-price"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        render={({ field }) => {
+                          const priceValue = parseFloat(field.value) || 0;
+                          const isMinimumZero = priceType === "minimum" && priceValue === 0;
+                          
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                {priceType === "fixed" ? "Precio (€)" : "Precio Mínimo (€)"}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  placeholder={priceType === "fixed" ? "10.00" : "5.00"}
+                                  {...field}
+                                  data-testid="input-design-price"
+                                />
+                              </FormControl>
+                              {isMinimumZero && (
+                                <div className="text-xs bg-amber-50 dark:bg-amber-950 text-amber-900 dark:text-amber-100 p-2 rounded border border-amber-200 dark:border-amber-800">
+                                  Los compradores pueden descargar gratis o pagar lo que quieran (mínimo €0.50 si contribuyen)
+                                </div>
+                              )}
+                              {priceType === "minimum" && priceValue > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  Los compradores pueden pagar desde €{priceValue.toFixed(2)} en adelante
+                                </div>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
                       />
                     )}
 

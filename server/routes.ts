@@ -1571,8 +1571,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (design.priceType === "fixed") {
         finalAmount = parseFloat(String(design.price));
       } else if (design.priceType === "minimum") {
-        if (finalAmount < parseFloat(String(design.price))) {
-          return res.status(400).json({ message: `Amount must be at least €${design.price}` });
+        const designPrice = parseFloat(String(design.price));
+        // If minimum price > 0, ensure at least 0.5€ is paid
+        if (designPrice > 0 && finalAmount < 0.5) {
+          return res.status(400).json({ message: `Amount must be at least €0.50` });
+        }
+        // If minimum price is 0, can be free, otherwise must meet minimum
+        if (designPrice > 0 && finalAmount < designPrice) {
+          return res.status(400).json({ message: `Amount must be at least €${designPrice}` });
         }
       }
 
