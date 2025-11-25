@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ChatDialog } from "@/components/ChatDialog";
 import { BidEditDialog } from "@/components/BidEditDialog";
@@ -154,9 +155,15 @@ export default function MakerProjectDetails() {
                   <div className="mb-4">
                     <button
                       onClick={() => setLocation(`/user/${projectOwner.id}`)}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
                       data-testid="button-view-author-profile"
                     >
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={projectOwner.profileImageUrl || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {projectOwner.username?.[0]?.toUpperCase() || projectOwner.email?.[0]?.toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
                       Publicado por:{" "}
                       <span className="font-semibold text-foreground hover:underline">
                         {projectOwner.username || projectOwner.email}
