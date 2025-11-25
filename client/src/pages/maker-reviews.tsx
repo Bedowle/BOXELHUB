@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoute, useLocation } from "wouter";
+import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -81,13 +82,21 @@ export default function MakerReviews() {
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <Card key={review.id} className="overflow-hidden">
+              <Card 
+                key={review.id} 
+                className="overflow-hidden cursor-pointer hover-elevate"
+                onClick={() => review.projectId && setLocation(`/project/${review.projectId}`)}
+                data-testid={`button-view-project-${review.projectId}`}
+              >
                 <CardContent className="pt-6 pb-6">
                   <div className="space-y-4">
                     {/* Review Header */}
                     <div className="flex items-center justify-between">
                       <button
-                        onClick={() => review.fromUser?.id && setLocation(`/user/${review.fromUser.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          review.fromUser?.id && setLocation(`/user/${review.fromUser.id}`);
+                        }}
                         className="flex items-center gap-3 hover-elevate cursor-pointer transition-colors rounded-md p-1"
                         data-testid="button-view-user-profile"
                       >
@@ -105,28 +114,33 @@ export default function MakerReviews() {
                         </div>
                       </button>
 
-                      {/* Rating Stars */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => {
-                            const rating = parseFloat(String(review.rating || 0));
-                            return (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < Math.floor(rating)
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : i < rating
-                                    ? "fill-yellow-400 text-yellow-400 opacity-50"
-                                    : "text-muted-foreground"
-                                }`}
-                              />
-                            );
-                          })}
+                      {/* Rating Stars & Project Link */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => {
+                              const rating = parseFloat(String(review.rating || 0));
+                              return (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < Math.floor(rating)
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : i < rating
+                                      ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                              );
+                            })}
+                          </div>
+                          <Badge variant="outline">
+                            {parseFloat(String(review.rating || 0)).toFixed(1)}
+                          </Badge>
                         </div>
-                        <Badge variant="outline">
-                          {parseFloat(String(review.rating || 0)).toFixed(1)}
-                        </Badge>
+                        {review.projectId && (
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        )}
                       </div>
                     </div>
 
