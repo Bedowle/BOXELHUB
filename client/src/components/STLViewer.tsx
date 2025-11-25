@@ -142,15 +142,13 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
 
       // Renderer setup
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
       renderer.domElement.style.display = 'block';
-      renderer.domElement.style.margin = 'auto';
+      renderer.domElement.style.margin = '0';
       renderer.domElement.style.padding = '0';
-      renderer.domElement.style.position = 'absolute';
-      renderer.domElement.style.left = '50%';
-      renderer.domElement.style.top = '50%';
-      renderer.domElement.style.transform = 'translate(-50%, -50%)';
+      renderer.domElement.style.border = 'none';
+      renderer.domElement.style.verticalAlign = 'middle';
       containerRef.current.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
@@ -263,10 +261,10 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="relative bg-background rounded-lg pointer-events-auto" style={{ overflow: 'hidden', width: `${width}px`, height: `${height}px` }}>
+    <div className="relative bg-background rounded-lg pointer-events-auto" style={{ overflow: 'hidden', width: `${width}px`, height: `${height}px`, fontSize: 0 }}>
       <div
         ref={containerRef}
-        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'flex', margin: 0, padding: 0, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'inline-block', margin: 0, padding: 0, overflow: 'hidden', fontSize: 0 }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
