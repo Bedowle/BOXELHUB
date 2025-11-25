@@ -368,39 +368,48 @@ export default function UserProfilePage() {
               />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <CardTitle className="text-2xl">{user.username}</CardTitle>
-                {/* Show rating for all users - clickable if has reviews */}
-                <button
-                  onClick={() => reviewCount > 0 && setLocation(`/user/${userId}/reviews`)}
-                  className={`flex items-center gap-1 ${reviewCount > 0 ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} transition-opacity`}
-                  data-testid="button-view-rating"
-                  disabled={reviewCount === 0}
-                >
-                  {[...Array(5)].map((_, i) => {
-                    const rating = averageRating;
-                    return (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : i < rating
-                            ? "fill-yellow-400 text-yellow-400 opacity-50"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    );
-                  })}
-                  <span className="text-sm font-medium ml-2">
-                    ({reviewCount})
-                  </span>
-                </button>
-              </div>
+              <CardTitle className="text-2xl">{user.username}</CardTitle>
               <p className="text-muted-foreground">{user.email}</p>
               <p className="text-sm text-muted-foreground mt-2">
                 {user.firstName} {user.lastName}
               </p>
+
+              {/* Rating */}
+              {reviewCount > 0 && (
+                <div className="flex items-center gap-4 flex-wrap mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => {
+                        const rating = averageRating;
+                        return (
+                          <Star
+                            key={i}
+                            className={`h-5 w-5 ${
+                              i < Math.floor(rating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : i < rating
+                                ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <span className="font-semibold text-lg">
+                      {averageRating.toFixed(2)}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLocation(`/user/${userId}/reviews`)}
+                    data-testid="button-view-reviews"
+                  >
+                    {reviewCount} reseña{reviewCount !== 1 ? "s" : ""}
+                  </Button>
+                </div>
+              )}
+
               {isOwnProfile && (
                 <div className="mt-4">
                   {!isEditing ? (
