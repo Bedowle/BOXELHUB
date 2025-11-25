@@ -544,6 +544,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/projects/:id/mark-bids-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id: projectId } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project || project.userId !== userId) {
+        return res.status(403).json({ message: "You can only mark bids as read for your own projects" });
+      }
+
+      await storage.markBidsAsRead(projectId);
+      res.json({ message: "Bids marked as read" });
+    } catch (error) {
+      console.error("Error marking bids as read:", error);
+      res.status(500).json({ message: "Failed to mark bids as read" });
+    }
+  });
+
   app.post('/api/projects/:id/bids', isAuthenticated, async (req: any, res) => {
     try {
       const { id: projectId } = req.params;

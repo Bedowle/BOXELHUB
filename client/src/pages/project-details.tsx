@@ -74,6 +74,8 @@ export default function ProjectDetails() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bids"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "accepted-bid"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "unread-bid-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/total-unread-bids"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -106,6 +108,8 @@ export default function ProjectDetails() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "bids"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "my-bid"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "unread-bid-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/total-unread-bids"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -173,6 +177,25 @@ export default function ProjectDetails() {
       }, 500);
     }
   }, [user, authLoading, toast]);
+
+  // Mark bids as read when client opens project
+  useEffect(() => {
+    if (isClient && projectId && user?.id) {
+      const markAsRead = async () => {
+        try {
+          await fetch(`/api/projects/${projectId}/mark-bids-read`, {
+            method: "PUT",
+            credentials: "include",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "unread-bid-count"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/projects/total-unread-bids"] });
+        } catch (error) {
+          console.error("Error marking bids as read:", error);
+        }
+      };
+      markAsRead();
+    }
+  }, [isClient, projectId, user?.id, queryClient]);
 
   if (!match || authLoading || projectLoading) {
     return (
