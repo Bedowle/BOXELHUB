@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, desc, asc, sql, count, ne, avg, isNull } from "drizzle-orm";
+import { eq, and, desc, asc, sql, count, ne, avg, isNull, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import {
   users,
@@ -396,7 +396,11 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(bids)
       .innerJoin(projects, eq(bids.projectId, projects.id))
-      .where(and(eq(projects.userId, userId), eq(bids.isRead, false)));
+      .where(and(
+        eq(projects.userId, userId),
+        eq(bids.isRead, false),
+        inArray(projects.status, ["active", "reserved"] as any)
+      ));
     return result.count;
   }
 
