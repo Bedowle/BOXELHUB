@@ -607,9 +607,7 @@ export class DatabaseStorage implements IStorage {
           lastMessage: data.lastMsg,
           unreadCount: data.unreadCount,
         };
-      })
-      // Filter out conversations without a projectId or marketplaceDesignId
-      .filter(conv => conv.projectId || conv.marketplaceDesignId);
+      });
 
     return result;
   }

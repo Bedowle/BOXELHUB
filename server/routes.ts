@@ -1328,6 +1328,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
       
+      console.log("[GET /api/my-conversations-full] Enriched conversations:", enriched.map(c => ({
+        userId: c.userId,
+        projectId: c.projectId,
+        projectName: c.project?.name,
+        userName: c.user?.username
+      })));
+      
       res.json(enriched);
     } catch (error) {
       console.error("Error fetching conversations with user data:", error);

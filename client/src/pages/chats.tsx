@@ -66,18 +66,6 @@ export default function ChatsPage() {
     const query = searchQuery.toLowerCase();
     const userName = (conv.user?.username || conv.user?.email || "").toLowerCase();
     const projectName = (conv.project?.name || "").toLowerCase();
-    
-    // Debug: log para verificar qué datos se están filtrando
-    if (searchQuery && query.length > 0) {
-      console.log("Search filter debug:", {
-        query,
-        userName,
-        projectName,
-        projectExists: !!conv.project,
-        project: conv.project,
-      });
-    }
-    
     return userName.includes(query) || projectName.includes(query);
   }) || [];
 
