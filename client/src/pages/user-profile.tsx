@@ -70,7 +70,7 @@ const PRINTER_TYPES = [
 ];
 
 const MATERIALS = [
-  "PLA", "PETG", "ABS", "TPU", "Nylon", "Resin", "Carbon Fiber", "Flexible TPE", "Aluminum Filled", "Wood Filled", "Steel", "Titanium", "Copper", "Polycarbonate", "PEEK", "Polystyrene"
+  "PLA", "PETG", "ABS", "TPU", "Nylon", "Resina", "Fibra de Carbono", "TPE Flexible", "Aluminio Relleno", "Madera Rellena", "Acero", "Titanio", "Cobre", "Policarbonato", "PEEK", "Poliestireno"
 ];
 
 export default function UserProfilePage() {
