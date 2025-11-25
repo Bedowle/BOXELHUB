@@ -395,6 +395,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/total-unread-bids', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      if (user?.userType !== 'client') {
+        return res.status(403).json({ message: "Only clients can check unread bids" });
+      }
+
+      const totalUnread = await storage.getTotalUnreadBidsForClient(userId);
+      res.json({ totalUnread });
+    } catch (error) {
+      console.error("Error fetching total unread bids:", error);
+      res.status(500).json({ message: "Failed to fetch total unread bids" });
+    }
+  });
+
   app.get('/api/projects/:id/unread-bid-count', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
@@ -419,26 +439,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching unread bid count:", error);
       res.status(500).json({ message: "Failed to fetch unread bid count" });
-    }
-  });
-
-  app.get('/api/projects/total-unread-bids', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const user = await storage.getUser(userId);
-      
-      if (user?.userType !== 'client') {
-        return res.status(403).json({ message: "Only clients can check unread bids" });
-      }
-
-      const totalUnread = await storage.getTotalUnreadBidsForClient(userId);
-      res.json({ totalUnread });
-    } catch (error) {
-      console.error("Error fetching total unread bids:", error);
-      res.status(500).json({ message: "Failed to fetch total unread bids" });
     }
   });
 
