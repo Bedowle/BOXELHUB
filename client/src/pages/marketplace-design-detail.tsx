@@ -13,6 +13,16 @@ import { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import type { MarketplaceDesign } from "@shared/schema";
 
+// Load PayPal script
+const loadPayPalScript = async () => {
+  if (document.getElementById("paypal-script")) return;
+  const script = document.createElement("script");
+  script.id = "paypal-script";
+  script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}`;
+  script.async = true;
+  document.body.appendChild(script);
+};
+
 export default function MarketplaceDesignDetailPage() {
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/marketplace-design/:designId");
@@ -161,11 +171,42 @@ export default function MarketplaceDesignDetailPage() {
     },
   });
 
+  // PayPal order creation mutation
+  const paypalOrderMutation = useMutation({
+    mutationFn: async (amount: string) => {
+      const res = await fetch(`/api/marketplace/designs/${designId}/paypal-order`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message);
+      }
+      const { approvalUrl } = await res.json();
+      if (approvalUrl) {
+        window.location.href = approvalUrl;
+      } else {
+        throw new Error("No approval URL received");
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create PayPal order",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handle payment confirmation after redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get("session_id");
     const paymentStatus = params.get("payment");
+    const isPayPal = params.get("paypal") === "true";
+    const orderId = params.get("token");
 
     if (paymentStatus === "canceled") {
       // Payment was canceled
@@ -181,13 +222,40 @@ export default function MarketplaceDesignDetailPage() {
       return;
     }
 
-    if (sessionId && paymentStatus === "success" && designId) {
-      // Record the purchase
+    if (sessionId && paymentStatus === "success" && designId && !isPayPal) {
+      // Record Stripe purchase
       fetch(`/api/marketplace/designs/${designId}/confirm-payment`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          toast({
+            title: "Success",
+            description: "Payment completed! Design acquired. You can now download it.",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/marketplace/designs", designId, "access"] });
+          // Clean up URL
+          window.history.replaceState({}, document.title, `/marketplace-design/${designId}`);
+        })
+        .catch(err => {
+          toast({
+            title: "Error",
+            description: err.message || "Failed to record purchase",
+            variant: "destructive",
+          });
+        });
+    }
+
+    if (orderId && paymentStatus === "success" && designId && isPayPal) {
+      // Record PayPal purchase
+      fetch(`/api/marketplace/designs/${designId}/paypal-capture`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
       })
         .then(res => res.json())
         .then(data => {
@@ -323,15 +391,24 @@ export default function MarketplaceDesignDetailPage() {
                   ) : (
                     <div className="space-y-2">
                       <p className="text-sm font-medium">¿Quieres pagar el mínimo para acceso?</p>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => checkoutMutation.mutate(String(Number(design.price).toFixed(2)))}
-                        disabled={checkoutMutation.isPending}
-                        data-testid="button-pay-minimum"
-                      >
-                        {checkoutMutation.isPending ? "Procesando..." : `Pagar €${Number(design.price).toFixed(2)}`}
-                      </Button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => checkoutMutation.mutate(String(Number(design.price).toFixed(2)))}
+                          disabled={checkoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-pay-minimum-stripe"
+                        >
+                          {checkoutMutation.isPending ? "..." : "Stripe"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => paypalOrderMutation.mutate(String(Number(design.price).toFixed(2)))}
+                          disabled={checkoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-pay-minimum-paypal"
+                        >
+                          {paypalOrderMutation.isPending ? "..." : "PayPal"}
+                        </Button>
+                      </div>
                       <div className="relative my-3">
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full border-t" />
@@ -361,13 +438,21 @@ export default function MarketplaceDesignDetailPage() {
                           }}
                           data-testid="input-custom-amount"
                         />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
                         <Button
-                          className="flex-1"
                           onClick={() => checkoutMutation.mutate(customAmount || String(design.price))}
-                          disabled={checkoutMutation.isPending}
-                          data-testid="button-checkout"
+                          disabled={checkoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-checkout-stripe"
                         >
-                          {checkoutMutation.isPending ? "..." : "Pagar"}
+                          {checkoutMutation.isPending ? "..." : "Stripe"}
+                        </Button>
+                        <Button
+                          onClick={() => paypalOrderMutation.mutate(customAmount || String(design.price))}
+                          disabled={checkoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-checkout-paypal"
+                        >
+                          {paypalOrderMutation.isPending ? "..." : "PayPal"}
                         </Button>
                       </div>
                     </div>
@@ -388,14 +473,22 @@ export default function MarketplaceDesignDetailPage() {
                       {downloadMutation.isPending ? "Descargando..." : "Descargar STL"}
                     </Button>
                   ) : (
-                    <Button
-                      className="w-full"
-                      onClick={() => checkoutMutation.mutate(String(design.price))}
-                      disabled={checkoutMutation.isPending}
-                      data-testid="button-checkout"
-                    >
-                      {checkoutMutation.isPending ? "Procesando..." : `Pagar €${Number(design.price).toFixed(2)}`}
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        onClick={() => checkoutMutation.mutate(String(design.price))}
+                        disabled={checkoutMutation.isPending || paypalOrderMutation.isPending}
+                        data-testid="button-checkout-fixed-stripe"
+                      >
+                        {checkoutMutation.isPending ? "..." : "Stripe"}
+                      </Button>
+                      <Button
+                        onClick={() => paypalOrderMutation.mutate(String(design.price))}
+                        disabled={checkoutMutation.isPending || paypalOrderMutation.isPending}
+                        data-testid="button-checkout-fixed-paypal"
+                      >
+                        {paypalOrderMutation.isPending ? "..." : "PayPal"}
+                      </Button>
+                    </div>
                   )}
                 </div>
               )}

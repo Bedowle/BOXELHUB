@@ -7,6 +7,7 @@ import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfi
 import { getAuthenticatedUserId } from "./replitAuth";
 import { z } from "zod";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { getPayPalClient, getPayPalClientId } from "./paypalClient";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -1706,6 +1707,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error confirming payment:", error);
       res.status(500).json({ message: error.message || "Failed to confirm payment" });
+    }
+  });
+
+  // Create PayPal order for marketplace design
+  app.post('/api/marketplace/designs/:id/paypal-order', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { amount } = req.body;
+
+      const design = await storage.getMarketplaceDesign(id);
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Validate price
+      let finalAmount = parseFloat(amount || String(design.price));
+      
+      if (design.priceType === "fixed") {
+        finalAmount = parseFloat(String(design.price));
+      } else if (design.priceType === "minimum") {
+        const designPrice = parseFloat(String(design.price));
+        if (designPrice > 0 && finalAmount < 0.5) {
+          return res.status(400).json({ message: `Amount must be at least €0.50` });
+        }
+        if (designPrice > 0 && finalAmount < designPrice) {
+          return res.status(400).json({ message: `Amount must be at least €${designPrice}` });
+        }
+      }
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      
+      // Create PayPal order using REST API
+      const clientId = await getPayPalClientId();
+      const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+      
+      const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
+      const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
+      
+      // Get access token
+      const tokenResponse = await fetch(`${apiBase}/v1/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=client_credentials'
+      });
+      
+      const tokenData = await tokenResponse.json() as any;
+      const accessToken = tokenData.access_token;
+
+      // Create order
+      const orderResponse = await fetch(`${apiBase}/v2/checkout/orders`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: 'CAPTURE',
+          purchase_units: [{
+            amount: {
+              currency_code: 'EUR',
+              value: finalAmount.toFixed(2),
+            },
+            description: design.name || 'Design Purchase',
+          }],
+          application_context: {
+            return_url: `${baseUrl}/marketplace-design/${id}?payment=success&paypal=true`,
+            cancel_url: `${baseUrl}/marketplace-design/${id}?payment=canceled`,
+            brand_name: 'VoxelHub',
+            landing_page: 'LOGIN',
+            user_action: 'PAY_NOW',
+          },
+        })
+      });
+
+      const order = await orderResponse.json() as any;
+      
+      if (!order.id) {
+        throw new Error('Failed to create PayPal order');
+      }
+
+      res.json({
+        orderId: order.id,
+        approvalUrl: order.links.find((link: any) => link.rel === 'approve')?.href,
+      });
+    } catch (error: any) {
+      console.error("Error creating PayPal order:", error);
+      res.status(500).json({ message: error.message || "Failed to create PayPal order" });
+    }
+  });
+
+  // Capture PayPal order
+  app.post('/api/marketplace/designs/:id/paypal-capture', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { orderId } = req.body;
+
+      if (!orderId) {
+        return res.status(400).json({ message: "Order ID required" });
+      }
+
+      const design = await storage.getMarketplaceDesign(id);
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Check if purchase already exists
+      const existing = await storage.userHasPurchasedDesign(userId, id);
+      if (existing) {
+        return res.json({ message: "Design already purchased" });
+      }
+
+      const clientId = await getPayPalClientId();
+      const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+      
+      const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
+      const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
+      
+      // Get access token
+      const tokenResponse = await fetch(`${apiBase}/v1/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=client_credentials'
+      });
+      
+      const tokenData = await tokenResponse.json() as any;
+      const accessToken = tokenData.access_token;
+
+      // Capture order
+      const captureResponse = await fetch(`${apiBase}/v2/checkout/orders/${orderId}/capture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const capture = await captureResponse.json() as any;
+      
+      if (capture.status !== 'COMPLETED') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+
+      // Get amount from capture
+      const amountPaid = capture.purchase_units[0].payments.captures[0].amount.value;
+
+      // Create purchase record
+      const purchase = await storage.createDesignPurchase({
+        designId: id,
+        buyerId: userId,
+        makerId: design.makerId,
+        amountPaid: amountPaid,
+        paymentMethod: "paypal",
+        status: "completed",
+      });
+
+      // Create maker earning
+      const earning = await storage.createMakerEarning(design.makerId, purchase.id, amountPaid);
+
+      res.json({ message: "Purchase recorded", purchase, earning });
+    } catch (error: any) {
+      console.error("Error capturing PayPal order:", error);
+      res.status(500).json({ message: error.message || "Failed to capture PayPal order" });
     }
   });
 
