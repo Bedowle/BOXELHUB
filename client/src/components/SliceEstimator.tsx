@@ -14,17 +14,18 @@ interface SliceEstimatorProps {
 }
 
 export function SliceEstimator({ projectId, disabled = false }: SliceEstimatorProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { data: estimates } = useQuery<SliceEstimate[]>({
+    queryKey: [`/api/projects/${projectId}/slice-estimates`],
+    enabled: !!projectId,
+  });
+
+  // Si no hay estimaciones previas, mostrar formulario abierto desde el inicio
+  const [isOpen, setIsOpen] = useState(!estimates || estimates.length === 0);
   const [nozzleTemp, setNozzleTemp] = useState(200);
   const [bedTemp, setBedTemp] = useState(60);
   const [layerHeight, setLayerHeight] = useState(0.2);
   const [infillDensity, setInfillDensity] = useState(20);
   const [printSpeed, setPrintSpeed] = useState(50);
-
-  const { data: estimates } = useQuery<SliceEstimate[]>({
-    queryKey: [`/api/projects/${projectId}/slice-estimates`],
-    enabled: !!projectId,
-  });
 
   const sliceMutation = useMutation({
     mutationFn: async () => {
@@ -52,7 +53,7 @@ export function SliceEstimator({ projectId, disabled = false }: SliceEstimatorPr
 
   return (
     <div className="space-y-4">
-      {lastEstimate && (
+      {lastEstimate && !isOpen && (
         <Card className="border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -80,21 +81,25 @@ export function SliceEstimator({ projectId, disabled = false }: SliceEstimatorPr
               </div>
             </div>
             <div className="flex gap-2 pt-2">
-              <Button size="sm" variant="outline" onClick={() => setIsOpen(true)} data-testid="button-re-estimate">
+              <Button size="sm" variant="default" onClick={() => setIsOpen(true)} data-testid="button-re-estimate">
                 Nueva Estimación
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setIsOpen(!isOpen)} data-testid="button-toggle-params">
-                {isOpen ? "Ocultar" : "Ver"} Parámetros
+              <Button size="sm" variant="ghost" onClick={() => setIsOpen(true)} data-testid="button-toggle-params">
+                Ver Parámetros
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {(isOpen || !lastEstimate) && (
+      {isOpen && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Configurar Parámetros de Laminación</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-500" />
+              Calcular Estimación de Laminación
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">Ajusta los parámetros y haz clic para estimar</p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
@@ -169,21 +174,32 @@ export function SliceEstimator({ projectId, disabled = false }: SliceEstimatorPr
               </p>
             </div>
 
-            <Button
-              onClick={() => sliceMutation.mutate()}
-              disabled={disabled || sliceMutation.isPending}
-              className="w-full"
-              data-testid="button-slice-estimate"
-            >
-              {sliceMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Laminando...
-                </>
-              ) : (
-                "Estimar Laminación"
+            <div className="flex gap-2">
+              <Button
+                onClick={() => sliceMutation.mutate()}
+                disabled={disabled || sliceMutation.isPending}
+                className="flex-1"
+                data-testid="button-slice-estimate"
+              >
+                {sliceMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Estimando...
+                  </>
+                ) : (
+                  "Estimar Laminación"
+                )}
+              </Button>
+              {lastEstimate && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                  data-testid="button-close-params"
+                >
+                  Cerrar
+                </Button>
               )}
-            </Button>
+            </div>
           </CardContent>
         </Card>
       )}

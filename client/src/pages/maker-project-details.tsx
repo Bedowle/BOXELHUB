@@ -233,60 +233,60 @@ export default function MakerProjectDetails() {
 
         {/* My Bid Info */}
         {myBid && (
-          <Card className="mb-8 border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold text-green-900 dark:text-green-100">Tu Oferta</h3>
-                  <p className="text-sm text-green-800 dark:text-green-200 mt-1">
-                    Precio: ${myBid.price} • Entrega: {myBid.deliveryDays} días
-                  </p>
-                  {myBid.status === "accepted" && (
-                    <p className="text-sm text-green-700 dark:text-green-300 font-semibold mt-2">
-                      ✓ Tu oferta ha sido aceptada
+          <div className="space-y-4 mb-8">
+            <Card className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20">
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100">Tu Oferta</h3>
+                    <p className="text-sm text-green-800 dark:text-green-200 mt-1">
+                      Precio: ${myBid.price} • Entrega: {myBid.deliveryDays} días
                     </p>
-                  )}
+                    {myBid.status === "accepted" && (
+                      <p className="text-sm text-green-700 dark:text-green-300 font-semibold mt-2">
+                        ✓ Tu oferta ha sido aceptada
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium text-center ${
+                      myBid.status === 'accepted' 
+                        ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100'
+                        : myBid.status === 'rejected'
+                        ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-100'
+                        : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                    }`}>
+                      {myBid.status === 'accepted' ? 'Aceptada' : myBid.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                    </span>
+                    {myBid.status === 'pending' && (
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditBidDialogOpen(true)}
+                        data-testid="button-edit-bid"
+                      >
+                        <Edit2 className="mr-2 h-4 w-4" />
+                        Editar Oferta
+                      </Button>
+                    )}
+                    {myBid.status === 'rejected' && (
+                      <Button 
+                        size="sm"
+                        onClick={() => setRebidDialogOpen(true)}
+                        data-testid="button-rebid-rejected"
+                      >
+                        Volver a Ofertar
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium text-center ${
-                    myBid.status === 'accepted' 
-                      ? 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100'
-                      : myBid.status === 'rejected'
-                      ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-100'
-                      : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-                  }`}>
-                    {myBid.status === 'accepted' ? 'Aceptada' : myBid.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
-                  </span>
-                  {myBid.status === 'pending' && (
-                    <Button 
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditBidDialogOpen(true)}
-                      data-testid="button-edit-bid"
-                    >
-                      <Edit2 className="mr-2 h-4 w-4" />
-                      Editar Oferta
-                    </Button>
-                  )}
-                  {myBid.status === 'rejected' && (
-                    <Button 
-                      size="sm"
-                      onClick={() => setRebidDialogOpen(true)}
-                      data-testid="button-rebid-rejected"
-                    >
-                      Volver a Ofertar
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
 
-        {/* Slice Estimator */}
-        {myBid && myBid.status === 'pending' && projectId && (
-          <div className="mb-8">
-            <SliceEstimator projectId={projectId} disabled={false} />
+            {/* Slice Estimator */}
+            {myBid.status === 'pending' && projectId && (
+              <SliceEstimator projectId={projectId} disabled={false} />
+            )}
           </div>
         )}
       </main>
