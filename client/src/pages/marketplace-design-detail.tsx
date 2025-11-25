@@ -20,9 +20,9 @@ export default function MarketplaceDesignDetailPage() {
   const [customAmount, setCustomAmount] = useState("");
 
   const { data: design, isLoading, error } = useQuery<any>({
-    queryKey: ["/api/marketplace-designs", designId],
+    queryKey: ["/api/marketplace/designs", designId],
     queryFn: async () => {
-      const res = await fetch(`/api/marketplace-designs/${designId}`, {
+      const res = await fetch(`/api/marketplace/designs/${designId}`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch design");
@@ -44,10 +44,10 @@ export default function MarketplaceDesignDetailPage() {
   });
 
   const { data: accessInfo, isLoading: accessLoading } = useQuery({
-    queryKey: ["/api/marketplace-designs", designId, "access"],
+    queryKey: ["/api/marketplace/designs", designId, "access"],
     queryFn: async () => {
       try {
-        const res = await fetch(`/api/marketplace-designs/${designId}/access`, {
+        const res = await fetch(`/api/marketplace/designs/${designId}/access`, {
           credentials: "include",
         });
         if (!res.ok) {
