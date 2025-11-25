@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import * as THREE from "three";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,9 +147,6 @@ export function AdvancedSlicerInterface({ projectId, disabled = false }: Advance
     mutationFn: async (sliceParams: typeof params) => {
       return apiRequest("POST", `/api/projects/${projectId}/slice-estimate`, sliceParams);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/slice-estimates`] });
-    },
   });
 
   // Cargar STL en Three.js
@@ -252,17 +249,17 @@ export function AdvancedSlicerInterface({ projectId, disabled = false }: Advance
     }
   }, [projectId]);
 
-  const downloadGCode = async () => {
-    const estimates = queryClient.getQueryData<SliceEstimate[]>([
-      `/api/projects/${projectId}/slice-estimates`,
-    ]);
-    const lastEstimate = estimates?.[0];
-    if (!lastEstimate || !lastEstimate.gcode) return;
+  const downloadGCode = () => {
+    // Find last estimate from mutation result
+    const lastEstimate = sliceMutation.data;
+    if (!lastEstimate || !(lastEstimate as any).gcode) {
+      return;
+    }
 
     const element = document.createElement("a");
-    const file = new Blob([lastEstimate.gcode], { type: "text/plain" });
+    const file = new Blob([(lastEstimate as any).gcode], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
-    element.download = `slice_${lastEstimate.id}.gcode`;
+    element.download = `slice_${(lastEstimate as any).id}.gcode`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
