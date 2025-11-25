@@ -194,15 +194,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper functions for executing payouts
   async function executeStripePayout(stripeConnectAccountId: string, amount: string) {
     try {
-      const isDevelopment = process.env.NODE_ENV === "development";
+      const stripe = await getUncachableStripeClient();
       
-      if (isDevelopment || stripeConnectAccountId === "acct_test_development") {
-        // In development, simulate the payout
-        console.log(`[DEV MODE] Simulated Stripe payout: €${amount} to ${stripeConnectAccountId}`);
+      // If no account ID or test account, create payout in platform account (sandbox/test mode)
+      // This works with test API keys and shows in Stripe dashboard
+      if (!stripeConnectAccountId || stripeConnectAccountId === "acct_test_development") {
+        const payout = await stripe.payouts.create({
+          amount: Math.round(parseFloat(amount) * 100),
+          currency: 'eur',
+          method: 'standard',
+        });
+        console.log("✅ Stripe payout created (sandbox):", payout.id);
+        console.log("   Status:", payout.status);
+        console.log("   Amount: €" + (payout.amount / 100));
         return;
       }
       
-      const stripe = await getUncachableStripeClient();
+      // Otherwise, create payout in connected Stripe Connect account
       const payout = await stripe.payouts.create(
         {
           amount: Math.round(parseFloat(amount) * 100),
@@ -213,7 +221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           stripeAccount: stripeConnectAccountId,
         }
       );
-      console.log("Stripe payout created:", payout.id);
+      console.log("✅ Stripe payout created (Connect):", payout.id);
+      console.log("   Status:", payout.status);
     } catch (error) {
       console.error("Stripe payout error:", error);
     }
@@ -221,23 +230,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   async function executePayPalPayout(paypalAccountId: string, amount: string) {
     try {
-      const isDevelopment = process.env.NODE_ENV === "development";
-      
-      if (isDevelopment || paypalAccountId === "test@voxelhub.dev") {
-        // In development, simulate the payout
-        console.log(`[DEV MODE] Simulated PayPal payout: €${amount} to ${paypalAccountId}`);
-        return;
-      }
-      
       if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
         console.error("PayPal credentials not configured");
         return;
       }
       
-      const clientId = process.env.PAYPAL_CLIENT_ID;
-      const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+      // Always use sandbox for development, production for deployed apps
       const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
       const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
+      
+      const clientId = process.env.PAYPAL_CLIENT_ID;
+      const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
       
       // Get access token
       const tokenResponse = await fetch(`${apiBase}/v1/oauth2/token`, {
@@ -249,10 +252,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         body: 'grant_type=client_credentials'
       });
       
+      if (!tokenResponse.ok) {
+        throw new Error(`PayPal auth failed: ${tokenResponse.status}`);
+      }
+      
       const tokenData = await tokenResponse.json() as any;
       const accessToken = tokenData.access_token;
 
-      // Create payout
+      // Create payout to recipient
+      const recipient = paypalAccountId === "test@voxelhub.dev" ? "sb-y6xqp26545360@business.example.com" : paypalAccountId;
+      
       const payoutResponse = await fetch(`${apiBase}/v1/payments/payouts`, {
         method: 'POST',
         headers: {
@@ -272,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 value: parseFloat(amount).toFixed(2),
                 currency: 'EUR'
               },
-              receiver: paypalAccountId,
+              receiver: recipient,
               note: 'VoxelHub Marketplace Earnings'
             }
           ]
@@ -280,7 +289,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const payoutData = await payoutResponse.json() as any;
-      console.log("PayPal payout created:", payoutData.batch_header?.payout_batch_id);
+      
+      if (payoutData.batch_header?.payout_batch_id) {
+        console.log("✅ PayPal payout created (sandbox):", payoutData.batch_header.payout_batch_id);
+        console.log("   Status:", payoutData.batch_header?.batch_status);
+        console.log("   To:", recipient);
+      } else {
+        console.error("PayPal payout response:", payoutData);
+      }
     } catch (error) {
       console.error("PayPal payout error:", error);
     }
