@@ -110,9 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const payouts = await storage.getMakerPayouts(userId);
 
-      res.json({
-        payouts
-      });
+      res.json(payouts);
     } catch (error: any) {
       console.error("Error fetching payouts:", error);
       res.status(500).json({ message: error.message || "Failed to fetch payouts" });

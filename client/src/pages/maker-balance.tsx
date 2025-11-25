@@ -4,15 +4,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Wallet, ArrowDown, Download } from "lucide-react";
+import { ArrowLeft, Wallet, ArrowDown, Download, CheckCircle, AlertCircle, Clock, XCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { validateIBAN, formatIBAN } from "@/lib/iban-validator";
 
 interface MakerBalance {
   totalBalance: string;
@@ -50,9 +51,21 @@ type PayoutFormValues = z.infer<typeof payoutSchema>;
 const payoutMethodSchema = z.object({
   method: z.enum(["stripe", "paypal", "bank"]),
   stripeConnectAccountId: z.string().optional().or(z.literal("")),
-  paypalAccountId: z.string().optional().or(z.literal("")),
-  bankAccountIban: z.string().optional().or(z.literal("")),
-  bankAccountName: z.string().optional().or(z.literal("")),
+  paypalAccountId: z.string().email("Email inválido").optional().or(z.literal("")),
+  bankAccountIban: z.string()
+    .refine(
+      (val) => !val || validateIBAN(val),
+      "IBAN inválido. Verifica que sea correcto"
+    )
+    .optional()
+    .or(z.literal("")),
+  bankAccountName: z.string()
+    .refine(
+      (val) => !val || val.length >= 2,
+      "El nombre debe tener al menos 2 caracteres"
+    )
+    .optional()
+    .or(z.literal("")),
 });
 
 type PayoutMethodFormValues = z.infer<typeof payoutMethodSchema>;
@@ -179,6 +192,21 @@ export default function MakerBalance() {
         return "text-red-600 dark:text-red-400";
       default:
         return "text-gray-600 dark:text-gray-400";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
+      case "processing":
+        return <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-spin" />;
+      case "pending":
+        return <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
+      case "failed":
+        return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
     }
   };
 
@@ -322,7 +350,8 @@ export default function MakerBalance() {
                   />
 
                   {methodForm.watch("method") === "stripe" && (
-                    <>
+                    <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm text-blue-900 dark:text-blue-100">Los payouts se realizarán a través de tu cuenta bancaria conectada a Stripe.</p>
                       <FormField
                         control={methodForm.control}
                         name="bankAccountIban"
@@ -330,8 +359,17 @@ export default function MakerBalance() {
                           <FormItem>
                             <FormLabel>IBAN</FormLabel>
                             <FormControl>
-                              <Input placeholder="ES9121000418450200051332" {...field} data-testid="input-stripe-iban" />
+                              <Input 
+                                placeholder="ES9121000418450200051332" 
+                                {...field}
+                                onChange={(e) => {
+                                  const formatted = e.target.value.toUpperCase();
+                                  field.onChange(formatted);
+                                }}
+                                data-testid="input-stripe-iban" 
+                              />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -342,31 +380,37 @@ export default function MakerBalance() {
                           <FormItem>
                             <FormLabel>Titular de la Cuenta</FormLabel>
                             <FormControl>
-                              <Input placeholder="Tu nombre" {...field} data-testid="input-stripe-account-name" />
+                              <Input placeholder="Tu nombre completo" {...field} data-testid="input-stripe-account-name" />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </>
+                    </div>
                   )}
 
                   {methodForm.watch("method") === "paypal" && (
-                    <FormField
-                      control={methodForm.control}
-                      name="paypalAccountId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>PayPal Account Email/ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="your-paypal@example.com" {...field} data-testid="input-paypal-account-id" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                    <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm text-blue-900 dark:text-blue-100">Los payouts se realizarán a tu cuenta PayPal.</p>
+                      <FormField
+                        control={methodForm.control}
+                        name="paypalAccountId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email de PayPal</FormLabel>
+                            <FormControl>
+                              <Input placeholder="tu-email@example.com" {...field} data-testid="input-paypal-account-id" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   )}
 
                   {methodForm.watch("method") === "bank" && (
-                    <>
+                    <div className="space-y-4 p-4 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <p className="text-sm text-amber-900 dark:text-amber-100">Transferencia SEPA directa a tu cuenta bancaria (mínimo €20).</p>
                       <FormField
                         control={methodForm.control}
                         name="bankAccountIban"
@@ -374,8 +418,17 @@ export default function MakerBalance() {
                           <FormItem>
                             <FormLabel>IBAN</FormLabel>
                             <FormControl>
-                              <Input placeholder="ES9121000418450200051332" {...field} data-testid="input-iban" />
+                              <Input 
+                                placeholder="ES9121000418450200051332" 
+                                {...field}
+                                onChange={(e) => {
+                                  const formatted = e.target.value.toUpperCase();
+                                  field.onChange(formatted);
+                                }}
+                                data-testid="input-iban" 
+                              />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -386,12 +439,13 @@ export default function MakerBalance() {
                           <FormItem>
                             <FormLabel>Titular de la Cuenta</FormLabel>
                             <FormControl>
-                              <Input placeholder="Tu nombre" {...field} data-testid="input-bank-name" />
+                              <Input placeholder="Tu nombre completo" {...field} data-testid="input-bank-name" />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </>
+                    </div>
                   )}
 
                   <div className="flex gap-2">
@@ -481,16 +535,25 @@ export default function MakerBalance() {
                 {payouts.map((payout) => (
                   <div
                     key={payout.id}
-                    className="flex items-center justify-between p-3 border border-border rounded-lg hover-elevate"
+                    className="flex items-center justify-between gap-3 p-4 border border-border rounded-lg hover-elevate transition-all"
                     data-testid={`payout-item-${payout.id}`}
                   >
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(payout.status)}
+                    </div>
                     <div className="flex-1">
-                      <div className="font-semibold">{formatBalance(payout.amount)}</div>
+                      <div className="font-semibold text-base">{formatBalance(payout.amount)}</div>
                       <div className="text-sm text-muted-foreground">
-                        {new Date(payout.createdAt).toLocaleDateString("es-ES")}
+                        {new Date(payout.createdAt).toLocaleDateString("es-ES", { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <div className={`text-sm font-medium ${getStatusColor(payout.status)}`}>
                         {payout.status === "completed" && "Completado"}
                         {payout.status === "processing" && "En proceso"}
@@ -503,7 +566,11 @@ export default function MakerBalance() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-8">Sin historial de payouts aún</p>
+              <div className="text-center py-12">
+                <Wallet className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="text-muted-foreground">Sin historial de payouts aún</p>
+                <p className="text-xs text-muted-foreground/75 mt-1">Cuando hagas un payout, aparecerá aquí</p>
+              </div>
             )}
           </CardContent>
         </Card>
