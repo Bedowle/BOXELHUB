@@ -3,13 +3,11 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema, insertMarketplaceDesignSchema, insertSliceEstimateSchema } from "@shared/schema";
+import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema, insertMarketplaceDesignSchema } from "@shared/schema";
 import { getAuthenticatedUserId } from "./replitAuth";
 import { z } from "zod";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { getPayPalClient, getPayPalClientId } from "./paypalClient";
-import { estimateSlicing } from "./slicingEngine";
-import { sliceSTLToGCode } from "./slicerService";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -471,89 +469,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating project:", error);
       res.status(400).json({ message: error.message || "Failed to create project" });
-    }
-  });
-
-  // Slice estimate endpoint (REAL Slic3r laminador en la nube)
-  app.post('/api/projects/:id/slice-estimate', isAuthenticated, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (user?.userType !== 'maker') {
-        return res.status(403).json({ message: "Only makers can request slice estimates" });
-      }
-
-      const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-
-      // Check if maker has pending bid on this project
-      const existingBid = await storage.getMakerBidForProject(userId, id);
-      if (!existingBid) {
-        return res.status(403).json({ message: "You must have a pending bid to estimate slicing" });
-      }
-
-      const validated = insertSliceEstimateSchema.parse(req.body);
-
-      // Save STL to temporary file for slicing
-      const fs = await import("fs");
-      const path = await import("path");
-      const tmpDir = `/tmp/stl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      if (!fs.existsSync(tmpDir)) {
-        fs.mkdirSync(tmpDir, { recursive: true });
-      }
-      const stlPath = path.join(tmpDir, "model.stl");
-      fs.writeFileSync(stlPath, project.stlFileContent || "", "utf-8");
-
-      // REAL slicing with Slic3r!
-      console.log(`Starting real slicing with Slic3r for project ${id}...`);
-      const slicingResult = await sliceSTLToGCode(stlPath, {
-        layerHeight: validated.layerHeight,
-        infillDensity: validated.infillDensity,
-        nozzleTemp: validated.nozzleTemp,
-        bedTemp: validated.bedTemp,
-        printSpeed: validated.printSpeed,
-      });
-
-      console.log(`Slicing complete! Generated ${slicingResult.gcode.length} bytes of G-code`);
-
-      // Store estimate WITH G-code
-      const estimate = await storage.createSliceEstimate({
-        ...validated,
-        projectId: id,
-        makerId: userId,
-        estimatedWeight: slicingResult.estimatedWeight.toString() as any,
-        estimatedTime: slicingResult.estimatedTime,
-        estimatedLayers: slicingResult.estimatedLayers,
-        materialUsedGrams: slicingResult.materialUsedMm3.toString() as any,
-        gcode: slicingResult.gcode,
-      } as any);
-
-      // Cleanup STL file
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-
-      res.json(estimate);
-    } catch (error: any) {
-      console.error("Error creating slice estimate:", error);
-      res.status(400).json({ message: error.message || "Failed to slice model. Try adjusting parameters." });
-    }
-  });
-
-  // Get slice estimates for a project
-  app.get('/api/projects/:id/slice-estimates', isAuthenticated, async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const estimates = await storage.getSliceEstimatesByProject(id);
-      res.json(estimates);
-    } catch (error) {
-      console.error("Error fetching slice estimates:", error);
-      res.status(500).json({ message: "Failed to fetch slice estimates" });
     }
   });
 
