@@ -188,6 +188,7 @@ export default function ProjectDetails() {
             credentials: "include",
           });
           queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "unread-bid-count"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/projects/unread-bid-counts"] });
           queryClient.invalidateQueries({ queryKey: ["/api/projects/total-unread-bids"] });
         } catch (error) {
           console.error("Error marking bids as read:", error);
