@@ -109,6 +109,20 @@ export default function MakerBalance() {
     },
   });
 
+  // Update form when profile changes
+  useEffect(() => {
+    if (makerProfile && !editingMethod) {
+      console.log("🔍 Maker profile updated:", makerProfile);
+      methodForm.reset({
+        method: (makerProfile.payoutMethod as any) || "stripe",
+        stripeConnectAccountId: (makerProfile as any)?.stripeConnectAccountId || "",
+        paypalAccountId: (makerProfile as any)?.paypalAccountId || "",
+        bankAccountIban: makerProfile.bankAccountIban || "",
+        bankAccountName: makerProfile.bankAccountName || "",
+      });
+    }
+  }, [makerProfile, editingMethod, methodForm]);
+
   const { mutate: requestPayout, isPending: isPayoutPending } = useMutation({
     mutationFn: async (data: PayoutFormValues) => {
       const res = await apiRequest("POST", "/api/maker/request-payout", {
@@ -136,18 +150,26 @@ export default function MakerBalance() {
 
   const { mutate: updatePayoutMethod, isPending: isMethodPending } = useMutation({
     mutationFn: async (data: PayoutMethodFormValues) => {
+      console.log("📤 Sending payout method:", data);
       const res = await apiRequest("POST", "/api/maker/payout-method", data);
-      return res.json();
+      const result = await res.json();
+      console.log("✅ Response:", result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("✅ Payout method saved successfully, profile:", data.profile);
       toast({
         title: "Método de pago actualizado",
         description: "Tu método de pago ha sido guardado.",
       });
-      setEditingMethod(false);
+      // Force refresh from server
       queryClient.invalidateQueries({ queryKey: ["/api/maker-profile"] });
+      queryClient.refetchQueries({ queryKey: ["/api/maker-profile"] }).then(() => {
+        setEditingMethod(false);
+      });
     },
     onError: (error: any) => {
+      console.error("❌ Error updating payout method:", error);
       toast({
         title: "Error al actualizar método de pago",
         description: error.message || "Por favor, intenta de nuevo.",
