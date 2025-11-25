@@ -1380,6 +1380,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const validated = insertMarketplaceDesignSchema.parse(req.body);
+      
+      // Validate price for minimum type
+      if (validated.priceType === "minimum") {
+        const price = parseFloat(String(validated.price)) || 0;
+        // If minimum price > 0, it must be at least 0.5
+        if (price > 0 && price < 0.5) {
+          return res.status(400).json({ message: "Minimum price must be €0.00 (free) or at least €0.50" });
+        }
+      }
+      
       const design = await storage.createMarketplaceDesign({ ...validated, makerId: userId });
       res.json(design);
     } catch (error: any) {
@@ -1407,6 +1417,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const validated = insertMarketplaceDesignSchema.partial().parse(req.body);
+      
+      // Validate price for minimum type
+      const priceType = validated.priceType || design.priceType;
+      if (priceType === "minimum") {
+        const price = parseFloat(String(validated.price ?? design.price)) || 0;
+        // If minimum price > 0, it must be at least 0.5
+        if (price > 0 && price < 0.5) {
+          return res.status(400).json({ message: "Minimum price must be €0.00 (free) or at least €0.50" });
+        }
+      }
+      
       await storage.updateMarketplaceDesign(id, validated);
       const updated = await storage.getMarketplaceDesign(id);
       res.json(updated);

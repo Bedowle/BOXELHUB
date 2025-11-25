@@ -112,6 +112,21 @@ export default function MakerMarketplaceUpload() {
     if (data.priceType === "free") {
       data.price = "0.00";
     }
+    
+    // Validate price for minimum type
+    if (data.priceType === "minimum") {
+      const price = parseFloat(data.price) || 0;
+      // If minimum price > 0, it must be at least 0.5
+      if (price > 0 && price < 0.5) {
+        toast({
+          title: "Precio inválido",
+          description: "El precio mínimo debe ser 0€ (gratis) o al menos €0.50",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     uploadMutation.mutate(data);
   };
 
@@ -295,7 +310,7 @@ export default function MakerMarketplaceUpload() {
                                 <Input
                                   type="number"
                                   step="0.01"
-                                  min="0"
+                                  min={priceType === "minimum" && priceValue > 0 ? "0.5" : "0"}
                                   placeholder={priceType === "fixed" ? "10.00" : "5.00"}
                                   {...field}
                                   data-testid="input-design-price"
