@@ -81,9 +81,10 @@ export default function MakerBalance() {
     enabled: !!user,
   });
 
-  const { data: makerProfile } = useQuery<MakerProfile>({
+  const { data: makerProfile, refetch: refetchProfile } = useQuery<MakerProfile>({
     queryKey: ["/api/maker-profile"],
     enabled: !!user,
+    staleTime: 0, // Always refetch when invalidated
   });
 
   const { data: payouts } = useQuery<Payout[]>({
@@ -162,11 +163,11 @@ export default function MakerBalance() {
         title: "Método de pago actualizado",
         description: "Tu método de pago ha sido guardado.",
       });
-      // Force refresh from server
-      queryClient.invalidateQueries({ queryKey: ["/api/maker-profile"] });
-      queryClient.refetchQueries({ queryKey: ["/api/maker-profile"] }).then(() => {
-        setEditingMethod(false);
-      });
+      // Force refresh from server immediately
+      setEditingMethod(false);
+      setTimeout(() => {
+        refetchProfile();
+      }, 100);
     },
     onError: (error: any) => {
       console.error("❌ Error updating payout method:", error);
@@ -519,6 +520,26 @@ export default function MakerBalance() {
           </CardContent>
         </Card>
 
+
+        {/* Development Mode Warning */}
+        {process.env.NODE_ENV === "development" && (
+          <Card className="mb-8 border-amber-400 bg-amber-50 dark:bg-amber-950">
+            <CardContent className="pt-6">
+              <div className="flex gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">⚠️ Modo Desarrollo Activo</h3>
+                  <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                    Los payouts se simulan y se marcan como "Completados" en esta versión. <strong>No se envía dinero real a Stripe o PayPal.</strong>
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Cuando publiques la app (producción), los payouts se enviarán de verdad a tu cuenta bancaria/Stripe/PayPal.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Request Payout */}
         {makerProfile?.payoutMethod && (
