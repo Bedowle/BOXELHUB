@@ -94,9 +94,9 @@ export default function ClientProjectsActive() {
               <ArrowLeft className="h-4 w-4" />
               Volver
             </Button>
-            {totalUnread > 0 && (
+            {totalUnreadBids && totalUnreadBids.totalUnread > 0 && (
               <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-lg" data-testid="badge-total-unread">
-                {totalUnread > 9 ? '9+' : totalUnread}
+                {totalUnreadBids.totalUnread > 9 ? '9+' : totalUnreadBids.totalUnread}
               </div>
             )}
           </div>
