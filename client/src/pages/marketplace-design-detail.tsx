@@ -304,10 +304,10 @@ export default function MarketplaceDesignDetailPage() {
                             if (value === "") {
                               setCustomAmount("");
                             } else {
-                              const num = parseFloat(value);
-                              if (!isNaN(num)) {
-                                const rounded = Math.round(num * 100) / 100;
-                                setCustomAmount(String(rounded));
+                              // Only allow up to 2 decimal places
+                              const regex = /^\d*\.?\d{0,2}$/;
+                              if (regex.test(value)) {
+                                setCustomAmount(value);
                               }
                             }
                           }}
