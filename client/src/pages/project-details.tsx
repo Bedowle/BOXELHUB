@@ -334,6 +334,16 @@ export default function ProjectDetails() {
                   setEditBidDialogOpen(true);
                 }}
               />
+              {myBid.status === "rejected" && (
+                <Button 
+                  size="lg"
+                  className="mt-4"
+                  onClick={() => setBidDialogOpen(true)}
+                  data-testid="button-rebid"
+                >
+                  Volver a Ofertar
+                </Button>
+              )}
             </div>
           ) : bids && bids.length > 0 ? (
             <div className="space-y-4">
