@@ -56,11 +56,11 @@ type ProfileEditForm = z.infer<typeof profileEditSchema>;
 type MakerProfileEditForm = z.infer<typeof makerProfileEditSchema>;
 
 const PRINTER_TYPES = [
-  "FDM", "SLA", "SLS", "Binder Jetting", "PolyJet", "Other"
+  "Ender 3", "Ender 5", "Prusa MK3S+", "Bambulab X1", "Bambulab P1", "Creality CR-10", "Ultimaker S5", "Formlabs Form 3", "Anycubic i3 Mega", "Artillery Genius", "Other"
 ];
 
 const MATERIALS = [
-  "PLA", "PETG", "ABS", "TPU", "Nylon", "Resin", "Titanium", "Steel", "Copper", "Aluminum"
+  "PLA", "PETG", "ABS", "TPU", "Nylon", "Resin", "Carbon Fiber", "Flexible TPE", "Aluminum Filled", "Wood Filled", "Metal (Steel)", "Titanium"
 ];
 
 export default function UserProfilePage() {
@@ -70,7 +70,6 @@ export default function UserProfilePage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [materialInput, setMaterialInput] = useState("");
 
   const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/user", userId],
@@ -276,13 +275,10 @@ export default function UserProfilePage() {
     updateMakerProfileMutation.mutate(data);
   };
 
-  const handleAddMaterial = () => {
-    if (materialInput.trim()) {
-      const current = makerForm.getValues("materials");
-      if (!current.includes(materialInput.trim())) {
-        makerForm.setValue("materials", [...current, materialInput.trim()]);
-        setMaterialInput("");
-      }
+  const handleAddMaterial = (material: string) => {
+    const current = makerForm.getValues("materials");
+    if (!current.includes(material)) {
+      makerForm.setValue("materials", [...current, material]);
     }
   };
 
@@ -415,47 +411,43 @@ export default function UserProfilePage() {
 
                   <div className="space-y-2">
                     <FormLabel>Materiales</FormLabel>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Agregar material"
-                        value={materialInput}
-                        onChange={(e) => setMaterialInput(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAddMaterial();
-                          }
-                        }}
-                        data-testid="input-material"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleAddMaterial}
-                        data-testid="button-add-material"
-                      >
-                        Agregar
-                      </Button>
+                    <div>
+                      <Select onValueChange={(value) => {
+                        if (value) {
+                          handleAddMaterial(value);
+                        }
+                      }}>
+                        <SelectTrigger data-testid="select-materials">
+                          <SelectValue placeholder="Selecciona un material" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MATERIALS.filter(m => !makerForm.watch("materials").includes(m)).map(material => (
+                            <SelectItem key={material} value={material}>{material}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {makerForm.watch("materials").map((material, idx) => (
-                        <div
-                          key={idx}
-                          className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-2 text-sm"
-                          data-testid={`badge-material-${idx}`}
-                        >
-                          {material}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMaterial(material)}
-                            className="ml-1"
-                            data-testid={`button-remove-material-${idx}`}
+                    {makerForm.watch("materials").length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {makerForm.watch("materials").map((material, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-2 text-sm"
+                            data-testid={`badge-material-${idx}`}
                           >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                            {material}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMaterial(material)}
+                              className="ml-1"
+                              data-testid={`button-remove-material-${idx}`}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
@@ -722,7 +714,7 @@ export default function UserProfilePage() {
                       <div>
                         <p className="text-sm font-medium">Calificación</p>
                         <p className="text-sm text-muted-foreground">
-                          {makerProfile.rating.toFixed(1)} ⭐ ({makerProfile.totalReviews} reseñas)
+                          {Number(makerProfile.rating).toFixed(1)} ⭐ ({makerProfile.totalReviews} reseñas)
                         </p>
                       </div>
                     )}
