@@ -13,6 +13,7 @@ import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Trash2, Upload, Edit2, X, MessageCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MakerMarketplaceUpload() {
   const [location, setLocation] = useLocation();
@@ -82,10 +83,13 @@ export default function MakerMarketplaceUpload() {
       title: "",
       description: "",
       imageUrl: "",
-      price: "10.00",
+      price: "0.00",
       material: "PLA",
+      priceType: "fixed",
     },
   });
+
+  const priceType = form.watch("priceType");
 
   const handleImageUpload = async (file: File) => {
     const reader = new FileReader();
@@ -96,6 +100,10 @@ export default function MakerMarketplaceUpload() {
   };
 
   const onSubmit = async (data: any) => {
+    // If free, set price to 0
+    if (data.priceType === "free") {
+      data.price = "0.00";
+    }
     uploadMutation.mutate(data);
   };
 
@@ -107,6 +115,7 @@ export default function MakerMarketplaceUpload() {
       imageUrl: design.imageUrl,
       price: String(design.price),
       material: design.material,
+      priceType: design.priceType || "fixed",
     });
     // Scroll to form
     document.querySelector('.sticky')?.scrollIntoView({ behavior: 'smooth' });
@@ -235,21 +244,56 @@ export default function MakerMarketplaceUpload() {
 
                     <FormField
                       control={form.control}
-                      name="price"
+                      name="priceType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Precio (€)</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="10.00"
-                              {...field}
-                              data-testid="input-design-price"
-                            />
-                          </FormControl>
+                          <FormLabel>Tipo de Precio</FormLabel>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-price-type">
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="free">Gratis</SelectItem>
+                              <SelectItem value="fixed">Precio Fijo</SelectItem>
+                              <SelectItem value="minimum">Precio Mínimo</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            {priceType === "free" && "El diseño estará disponible sin costo"}
+                            {priceType === "fixed" && "Los compradores pagan exactamente el precio que estableces"}
+                            {priceType === "minimum" && "Los compradores pueden pagar igual o más del precio mínimo"}
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    {priceType !== "free" && (
+                      <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {priceType === "fixed" ? "Precio (€)" : "Precio Mínimo (€)"}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder={priceType === "fixed" ? "10.00" : "5.00"}
+                                {...field}
+                                data-testid="input-design-price"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     <FormField
                       control={form.control}
@@ -350,9 +394,11 @@ export default function MakerMarketplaceUpload() {
                               </p>
                               <div className="flex flex-wrap gap-3 text-sm">
                                 <div>
-                                  <span className="text-muted-foreground">Precio: </span>
+                                  <span className="text-muted-foreground">
+                                    {design.priceType === "free" ? "Precio: " : design.priceType === "fixed" ? "Precio Fijo: " : "Precio Mínimo: "}
+                                  </span>
                                   <span className="font-semibold text-primary">
-                                    €{parseFloat(String(design.price)).toFixed(2)}
+                                    {design.priceType === "free" ? "Gratis" : `€${parseFloat(String(design.price)).toFixed(2)}`}
                                   </span>
                                 </div>
                                 <div>

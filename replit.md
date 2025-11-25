@@ -114,6 +114,29 @@ Preferred communication style: Simple, everyday language.
 
 **Responsive Design**: Mobile-first approach with Tailwind breakpoints (md, lg). Grid layouts collapse to single column on mobile.
 
+## Recent Changes (Nov 25, 2025)
+
+### Marketplace Design Pricing System
+- **Feature**: Makers can now choose 3 pricing models when uploading designs:
+  - **Free**: Design available without cost (price = 0.00)
+  - **Fixed**: Buyers pay exact price set by maker
+  - **Minimum**: Buyers must pay equal or more than minimum price
+- **Implementation**:
+  - Added `designPriceTypeEnum` (free, fixed, minimum) to schema
+  - Added `priceType` field to `marketplaceDesigns` table
+  - Updated upload form with dynamic price field visibility based on type
+  - Tarjetas show pricing type and price/minimum appropriately
+- **Impact**: ✅ Makers have flexible pricing control over marketplace designs
+
+### Unread Bids Badge System (Nov 24, 2025)
+- **Fixed**: Badge at top shows ONLY offers from active/reserved projects (excludes completed)
+- **Fixed**: Badge updates instantly when new offer received via WebSocket
+- **Fixed**: Badge disappears when client opens project (marks as read)
+- **Changes**:
+  - Backend: `getTotalUnreadBidsForClient()` filters by project status
+  - WebSocket: Invalidates both total and per-project badge queries
+  - Frontend: Properly invalidates cache when marking bids as read
+
 ## Recent Changes (Nov 24, 2025)
 
 ### Bug Fix #1: Chat Parsing in getConversationsWithUnread()

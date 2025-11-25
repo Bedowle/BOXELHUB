@@ -21,6 +21,7 @@ export const printerTypeEnum = pgEnum("printer_type", ["Ender3", "BambooLab"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "reserved", "completed"]);
 export const bidStatusEnum = pgEnum("bid_status", ["pending", "accepted", "rejected"]);
 export const designStatusEnum = pgEnum("design_status", ["active", "archived"]);
+export const designPriceTypeEnum = pgEnum("design_price_type", ["free", "fixed", "minimum"]);
 export const chatContextTypeEnum = pgEnum("chat_context_type", ["project", "marketplace_design"]);
 
 // Session storage table (mandatory for Replit Auth)
@@ -181,6 +182,7 @@ export const marketplaceDesigns = pgTable("marketplace_designs", {
   description: text("description").notNull(),
   imageUrl: varchar("image_url").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  priceType: designPriceTypeEnum("price_type").default("fixed").notNull(), // free, fixed, minimum
   material: varchar("material").notNull(),
   status: designStatusEnum("status").default("active").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -375,9 +377,10 @@ export const insertMarketplaceDesignSchema = createInsertSchema(marketplaceDesig
   status: true,
   makerId: true,
 }).extend({
+  priceType: z.enum(["free", "fixed", "minimum"]).default("fixed"),
   price: z.string()
     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
-    .refine(val => parseFloat(val) >= 0.5, "Minimum price is €0.50"),
+    .refine(val => parseFloat(val) >= 0, "Price must be >= €0.00"),
 });
 
 // TypeScript types
