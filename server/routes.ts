@@ -192,64 +192,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper functions for executing payouts
   async function executeStripePayout(stripeConnectAccountId: string, amount: string, payoutRecord: any) {
+    const isDevelopment = process.env.NODE_ENV === "development";
+    
     try {
-      const isDevelopment = process.env.NODE_ENV === "development";
+      console.log("\n=== PAYOUT EXECUTION START ===");
+      console.log("🔄 Initiating Stripe payout...");
+      console.log("   Environment:", isDevelopment ? "DEVELOPMENT" : "PRODUCTION");
+      console.log("   Amount: $" + parseFloat(amount).toFixed(2));
+      console.log("   Payout ID:", payoutRecord.id);
       
       if (isDevelopment) {
-        // In development, simulate successful payout (Stripe sandbox limitations)
-        console.log("✅ [DEVELOPMENT] Stripe payout simulated");
-        console.log("   Amount: €" + parseFloat(amount).toFixed(2));
-        console.log("   Status: completed");
-        console.log("   Note: In production, payouts will be sent REAL to Stripe");
-        
-        // Mark payout as completed in database for development
-        try {
-          await storage.updatePayoutStatus(payoutRecord.id, "completed");
-          console.log("   ✓ Database updated");
-        } catch (updateErr: any) {
-          console.error("   Error updating payout status:", updateErr.message);
-        }
+        // In development, simulate with fake ID
+        console.log("   ℹ Dev mode: Creating simulated payout");
+        const fakePayoutId = "py_test_" + Date.now();
+        await storage.updatePayoutStatus(payoutRecord.id, "completed", fakePayoutId);
+        console.log("✅ [DEV] Simulated payout completed!");
+        console.log("   Fake Payout ID:", fakePayoutId);
+        console.log("=== PAYOUT EXECUTION END ===\n");
         return;
       }
       
-      // PRODUCTION: Use real Stripe API
+      // PRODUCTION: Real Stripe API
       const stripe = await getUncachableStripeClient();
+      console.log("   ✓ Stripe client initialized");
       
-      console.log("🔄 [PRODUCTION] Initiating REAL Stripe payout...");
-      console.log("   Amount: €" + parseFloat(amount).toFixed(2));
-      console.log("   Payout ID:", payoutRecord.id);
-      
-      // Create payout on the platform account
       const payout = await stripe.payouts.create({
         amount: Math.round(parseFloat(amount) * 100),
-        currency: 'eur',
-        method: 'standard',
+        currency: 'usd',
+        method: 'instant',
         description: `VoxelHub maker payout #${payoutRecord.id.substring(0, 8)}`
       });
       
-      console.log("✅ [PRODUCTION] Stripe payout created successfully!");
+      console.log("✅ Stripe payout created successfully!");
       console.log("   Payout ID:", payout.id);
       console.log("   Status:", payout.status);
-      console.log("   Amount:", payout.amount / 100, payout.currency.toUpperCase());
+      console.log("   Amount: $" + (payout.amount / 100).toFixed(2));
       console.log("   Dashboard: https://dashboard.stripe.com/payouts/" + payout.id);
       
       // Update payout record with Stripe payout ID
-      try {
-        await storage.updatePayoutStatus(payoutRecord.id, payout.status === "paid" ? "completed" : "processing", payout.id);
-        console.log("   Database updated with Stripe payout ID");
-      } catch (updateErr: any) {
-        console.error("   Warning: Could not update database:", updateErr.message);
-      }
+      await storage.updatePayoutStatus(payoutRecord.id, payout.status === "paid" ? "completed" : "processing", payout.id);
+      console.log("   ✓ Database updated with Stripe ID");
+      console.log("=== PAYOUT EXECUTION END ===\n");
       
       return payout;
     } catch (error: any) {
-      console.error("❌ Stripe payout error:", error.message);
+      console.error("\n❌ PAYOUT ERROR:");
+      console.error("   Message:", error.message);
+      console.error("   Type:", error.type);
+      console.error("   Code:", error.code);
       
       // Try to update payout status to failed
       try {
         await storage.updatePayoutStatus(payoutRecord.id, "failed");
+        console.log("   ✓ Marked as failed in database");
       } catch (_) {}
       
+      console.error("=== PAYOUT EXECUTION END (ERROR) ===\n");
       throw error;
     }
   }
