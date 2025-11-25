@@ -31,9 +31,9 @@ export default function MarketplaceDesignChatsPage() {
     enabled: !!user,
   });
 
-  // Filter conversations for this design
+  // Filter conversations for this design and exclude conversations with yourself
   const designConversations = allConversations.filter(
-    (conv: any) => conv.marketplaceDesignId === designId
+    (conv: any) => conv.marketplaceDesignId === designId && conv.userId !== user?.id
   );
 
   // Fetch design details
