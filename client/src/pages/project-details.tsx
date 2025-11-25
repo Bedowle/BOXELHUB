@@ -200,7 +200,7 @@ export default function ProjectDetails() {
             <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
-                onClick={() => window.history.back()}
+                onClick={() => setLocation(isClient ? "/projects" : "/maker/projects")}
                 data-testid="button-back"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />

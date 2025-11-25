@@ -113,7 +113,7 @@ export default function MakerProjectDetails() {
           <div className="flex items-center justify-between">
             <Button 
               variant="ghost" 
-              onClick={() => window.history.back()}
+              onClick={() => setLocation("/maker/projects")}
               data-testid="button-back"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
