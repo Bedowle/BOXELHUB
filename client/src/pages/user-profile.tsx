@@ -363,32 +363,32 @@ export default function UserProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <CardTitle className="text-2xl">{user.username}</CardTitle>
-                {isMaker && makerProfile && (
-                  <button
-                    onClick={() => setLocation(`/user/${userId}/reviews`)}
-                    className="flex items-center gap-1 hover:opacity-80 cursor-pointer transition-opacity"
-                    data-testid="button-view-rating"
-                  >
-                    {[...Array(5)].map((_, i) => {
-                      const rating = parseFloat(String(makerProfile.rating || 0));
-                      return (
-                        <Star
-                          key={i}
-                          className={`h-5 w-5 ${
-                            i < Math.floor(rating)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : i < rating
-                              ? "fill-yellow-400 text-yellow-400 opacity-50"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      );
-                    })}
-                    <span className="text-sm font-medium ml-2">
-                      ({makerProfile.totalReviews || 0})
-                    </span>
-                  </button>
-                )}
+                {/* Show rating for makers, grayed out for clients */}
+                <button
+                  onClick={() => isMaker && setLocation(`/user/${userId}/reviews`)}
+                  className={`flex items-center gap-1 ${isMaker ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} transition-opacity`}
+                  data-testid="button-view-rating"
+                  disabled={!isMaker}
+                >
+                  {[...Array(5)].map((_, i) => {
+                    const rating = isMaker && makerProfile ? parseFloat(String(makerProfile.rating || 0)) : 0;
+                    return (
+                      <Star
+                        key={i}
+                        className={`h-5 w-5 ${
+                          i < Math.floor(rating)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : i < rating
+                            ? "fill-yellow-400 text-yellow-400 opacity-50"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    );
+                  })}
+                  <span className="text-sm font-medium ml-2">
+                    ({isMaker && makerProfile ? makerProfile.totalReviews || 0 : 0})
+                  </span>
+                </button>
               </div>
               <p className="text-muted-foreground">{user.email}</p>
               <p className="text-sm text-muted-foreground mt-2">
