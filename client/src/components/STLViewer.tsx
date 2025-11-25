@@ -112,12 +112,12 @@ class STLLoader {
 }
 
 interface STLViewerProps {
-  stlFileName: string;
+  projectId: string;
   width?: number;
   height?: number;
 }
 
-export function STLViewer({ stlFileName, width = 400, height = 250 }: STLViewerProps) {
+export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -157,7 +157,7 @@ export function STLViewer({ stlFileName, width = 400, height = 250 }: STLViewerP
 
       // Load STL
       const loader = new STLLoader();
-      const fileUrl = `/api/projects/${stlFileName}/stl-content`;
+      const fileUrl = `/api/projects/${projectId}/stl-content`;
 
       loader.load(
         fileUrl,
@@ -255,7 +255,7 @@ export function STLViewer({ stlFileName, width = 400, height = 250 }: STLViewerP
       setError("Error inicializando el visor 3D");
       setIsLoading(false);
     }
-  }, [stlFileName, width, height]);
+  }, [projectId, width, height]);
 
   return (
     <div className="relative bg-background rounded-lg overflow-hidden">

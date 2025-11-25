@@ -30,7 +30,7 @@ export function ProjectCard({ project, onClick, showBidCount = true }: ProjectCa
       </CardHeader>
       <CardContent className="py-3 px-0">
         <div className="px-6 py-3">
-          <STLViewer stlFileName={project.stlFileName} width={280} height={160} />
+          <STLViewer projectId={project.id} width={280} height={160} />
         </div>
       </CardContent>
       <CardContent className="space-y-3 pt-3">
