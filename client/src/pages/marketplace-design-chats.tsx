@@ -134,19 +134,6 @@ export default function MarketplaceDesignChatsPage() {
                         {conv.unreadCount}
                       </div>
                     )}
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="ml-4 flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLocation(`/chat/${conv.userId}?marketplaceDesignId=${designId}`);
-                      }}
-                      data-testid={`button-open-chat-${conv.userId}`}
-                    >
-                      Abrir Chat
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
