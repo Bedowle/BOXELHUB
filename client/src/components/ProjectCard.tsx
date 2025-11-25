@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadge";
 import { STLViewer } from "./STLViewer";
-import { Calendar, MessageSquare } from "lucide-react";
+import { Calendar, MessageSquare, Bell } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project } from "@shared/schema";
@@ -11,15 +11,23 @@ interface ProjectCardProps {
   project: Project & { bidCount?: number };
   onClick?: () => void;
   showBidCount?: boolean;
+  unreadBidCount?: number;
 }
 
-export function ProjectCard({ project, onClick, showBidCount = true }: ProjectCardProps) {
+export function ProjectCard({ project, onClick, showBidCount = true, unreadBidCount = 0 }: ProjectCardProps) {
   return (
     <Card 
-      className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300" 
+      className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
       onClick={onClick}
       data-testid={`card-project-${project.id}`}
     >
+      {unreadBidCount > 0 && (
+        <div className="absolute -top-2 -right-2 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold" data-testid={`badge-unread-${project.id}`}>
+            {unreadBidCount > 9 ? '9+' : unreadBidCount}
+          </div>
+        </div>
+      )}
       <CardHeader className="space-y-0 pb-0">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-lg font-semibold line-clamp-2" data-testid={`text-project-name-${project.id}`}>

@@ -56,6 +56,8 @@ export interface IStorage {
   createBid(bid: InsertBid): Promise<Bid>;
   updateBidStatus(id: string, status: Bid["status"]): Promise<void>;
   confirmBidDelivery(id: string): Promise<void>;
+  markBidsAsRead(projectId: string): Promise<void>;
+  getUnreadBidCount(projectId: string): Promise<number>;
 
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
@@ -371,6 +373,21 @@ export class DatabaseStorage implements IStorage {
       .update(bids)
       .set({ deliveryConfirmedAt: new Date(), updatedAt: new Date() })
       .where(eq(bids.id, id));
+  }
+
+  async markBidsAsRead(projectId: string): Promise<void> {
+    await db
+      .update(bids)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(and(eq(bids.projectId, projectId), eq(bids.isRead, false)));
+  }
+
+  async getUnreadBidCount(projectId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(bids)
+      .where(and(eq(bids.projectId, projectId), eq(bids.isRead, false)));
+    return result.count;
   }
 
   // Message operations

@@ -47,6 +47,11 @@ export default function ProjectDetails() {
     enabled: !!projectId && !!user,
   });
 
+  const { data: unreadBidCount } = useQuery<{ unreadCount: number }>({
+    queryKey: ["/api/projects", projectId, "unread-bid-count"],
+    enabled: !!projectId && !!user && isClient,
+  });
+
   const { data: myBid } = useQuery<Bid | null>({
     queryKey: ["/api/projects", projectId, "my-bid"],
     enabled: !!projectId && !!user && isMaker,
@@ -192,14 +197,21 @@ export default function ProjectDetails() {
       <header className="bg-card border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              onClick={() => window.history.back()}
-              data-testid="button-back"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => window.history.back()}
+                data-testid="button-back"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Volver
+              </Button>
+              {isClient && unreadBidCount && unreadBidCount.unreadCount > 0 && (
+                <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold" data-testid="badge-unread-header">
+                  {unreadBidCount.unreadCount > 9 ? '9+' : unreadBidCount.unreadCount}
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground">
                 {user.firstName || user.email}

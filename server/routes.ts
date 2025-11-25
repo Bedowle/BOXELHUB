@@ -369,6 +369,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only see bids for your own projects" });
       }
 
+      // Mark bids as read if client is viewing their project
+      if (user?.userType === 'client' && project.userId === userId) {
+        await storage.markBidsAsRead(id);
+      }
+
       const bids = await storage.getBidsByProject(id);
       
       // Populate maker information
@@ -387,6 +392,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching bids:", error);
       res.status(500).json({ message: "Failed to fetch bids" });
+    }
+  });
+
+  app.get('/api/projects/:id/unread-bid-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Only project owner can check unread bids count
+      if (user?.userType !== 'client' || project.userId !== userId) {
+        return res.status(403).json({ message: "You can only check bids for your own projects" });
+      }
+
+      const unreadCount = await storage.getUnreadBidCount(id);
+      res.json({ unreadCount });
+    } catch (error) {
+      console.error("Error fetching unread bid count:", error);
+      res.status(500).json({ message: "Failed to fetch unread bid count" });
     }
   });
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,27 @@ export default function ClientProjectsActive() {
   const { data: projects, isLoading: projectsLoading } = useQuery<(Project & { bidCount: number })[]>({
     queryKey: ["/api/projects/my-projects"],
     enabled: !!user,
+  });
+
+  const { data: unreadCounts } = useQuery<Record<string, number>>({
+    queryKey: ["/api/projects/unread-bid-counts"],
+    enabled: !!user && !!projects?.length,
+    queryFn: async () => {
+      if (!projects?.length) return {};
+      const counts: Record<string, number> = {};
+      for (const project of projects) {
+        try {
+          const res = await fetch(`/api/projects/${project.id}/unread-bid-count`);
+          if (res.ok) {
+            const data = await res.json();
+            counts[project.id] = data.unreadCount || 0;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch unread count for project ${project.id}:`, error);
+        }
+      }
+      return counts;
+    },
   });
 
   if (!authLoading && !user) {
@@ -101,6 +122,7 @@ export default function ClientProjectsActive() {
                       key={project.id}
                       project={project}
                       onClick={() => setLocation(`/project/${project.id}`)}
+                      unreadBidCount={unreadCounts?.[project.id] || 0}
                     />
                   ))}
                 </div>
@@ -117,6 +139,7 @@ export default function ClientProjectsActive() {
                       key={project.id}
                       project={project}
                       onClick={() => setLocation(`/project/${project.id}`)}
+                      unreadBidCount={unreadCounts?.[project.id] || 0}
                     />
                   ))}
                 </div>
