@@ -206,9 +206,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         const deltaY = e.clientY - mouseRef.current.y;
 
         // Rotación en eje Y por movimiento horizontal
-        rotationRef.current.y += deltaX * 0.005;
+        rotationRef.current.y += deltaX * 0.025;
         // Rotación en eje X por movimiento vertical
-        rotationRef.current.x += deltaY * 0.005;
+        rotationRef.current.x += deltaY * 0.025;
 
         meshRef.current.rotation.y = rotationRef.current.y;
         meshRef.current.rotation.x = rotationRef.current.x;
