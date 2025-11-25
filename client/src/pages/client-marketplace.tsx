@@ -54,7 +54,11 @@ function DesignCard({ design, setLocation, user }: DesignCardProps) {
 
       <CardContent className="pt-4 flex-1 flex flex-col">
         {/* Maker Info */}
-        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
+        <button
+          onClick={() => design.makerId && setLocation(`/user/${design.makerId}`)}
+          className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50 hover-elevate rounded p-1 transition-colors w-full text-left"
+          data-testid={`button-view-maker-${design.id}`}
+        >
           {design.maker?.profileImageUrl && (
             <img
               src={design.maker.profileImageUrl}
@@ -74,7 +78,7 @@ function DesignCard({ design, setLocation, user }: DesignCardProps) {
               ⭐ {parseFloat(String(design.makerProfile.rating)).toFixed(1)}
             </Badge>
           )}
-        </div>
+        </button>
 
         {/* Title & Description */}
         <h3 className="font-semibold text-lg mb-1 line-clamp-2" data-testid={`text-design-title-${design.id}`}>
