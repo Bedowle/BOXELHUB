@@ -407,14 +407,24 @@ export default function MakerBalance() {
                   <li key={idx}>{step}</li>
                 ))}
               </ol>
-              <Button 
-                variant="outline" 
-                className="border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900"
-                onClick={() => window.open("https://dashboard.stripe.com/test/settings/payouts", "_blank")}
-                data-testid="button-open-stripe-dashboard"
-              >
-                Abrir Stripe Dashboard
-              </Button>
+              <div className="flex gap-2 flex-wrap">
+                <Button 
+                  variant="outline" 
+                  className="border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900"
+                  onClick={() => window.open("https://dashboard.stripe.com/test/settings/payouts", "_blank")}
+                  data-testid="button-open-stripe-payouts"
+                >
+                  Payouts
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900"
+                  onClick={() => window.open("https://dashboard.stripe.com/test/settings/bank_accounts", "_blank")}
+                  data-testid="button-open-stripe-bank"
+                >
+                  Bank Accounts
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
