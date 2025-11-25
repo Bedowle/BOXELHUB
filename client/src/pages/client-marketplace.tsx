@@ -228,7 +228,7 @@ export default function ClientMarketplace() {
                             onClick={() => setLocation(`/marketplace-design/${design.id}`)}
                             data-testid={`button-buy-design-${design.id}`}
                           >
-                            Comprar/Descargar
+                            Comprar
                           </Button>
                           <Button
                             size="sm"
