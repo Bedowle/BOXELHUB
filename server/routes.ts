@@ -197,50 +197,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stripe = await getUncachableStripeClient();
       
-      console.log("🔄 Processing Stripe payout...");
-      console.log("   Amount: $" + parseFloat(amount).toFixed(2));
-      console.log("   Currency: USD");
+      // Attempt to create payout
+      const payout = await stripe.payouts.create({
+        amount: Math.round(parseFloat(amount) * 100),
+        currency: 'usd',
+        method: 'standard',
+        description: `VoxelHub payout`
+      });
       
-      try {
-        // Try to create payout directly
-        const payout = await stripe.payouts.create({
-          amount: Math.round(parseFloat(amount) * 100),
-          currency: 'usd',
-          method: 'standard',
-          description: `VoxelHub payout`
-        });
-        
-        console.log("✅ Stripe payout SENT");
-        console.log("   Payout ID:", payout.id);
-        console.log("   Status:", payout.status);
-        console.log("   Amount: $" + (payout.amount / 100).toFixed(2));
-        console.log("   To: Stripe account " + (stripeConnectAccountId || "platform"));
-        console.log("   Check: https://dashboard.stripe.com/test/payouts/" + payout.id);
-        return;
-      } catch (bankError: any) {
-        // If no bank account, try using test bank details
-        if (bankError.message?.includes("external accounts")) {
-          console.log("ℹ️  No bank account in sandbox. Setting up test bank details...");
-          
-          // For sandbox testing, we'd normally need to add external account
-          // But we can demonstrate the complete flow
-          console.log("✅ Stripe payout flow would execute with:");
-          console.log("   Amount: $" + parseFloat(amount).toFixed(2));
-          console.log("   To: Connected account or external bank");
-          console.log("   Status: Would be 'in_transit' → 'paid'");
-          console.log("");
-          console.log("📝 To complete testing in Stripe dashboard:");
-          console.log("   1. Go to https://dashboard.stripe.com/test/settings/payouts");
-          console.log("   2. Click 'Add External Account'");
-          console.log("   3. Use test bank: 110000000 (routing) / 000111111116 (account)");
-          console.log("   4. Then payouts will show in your dashboard");
-          return;
-        }
-        
-        throw bankError;
-      }
+      // Success - payout was created and will show in dashboard
+      console.log("✅ Payout created:", payout.id);
+      return;
     } catch (error: any) {
-      console.error("❌ Stripe payout error:", error.message);
+      if (error.message?.includes("external accounts")) {
+        // Bank account not linked - this is expected in fresh sandbox
+        console.error("❌ Error: No bank account linked in Stripe");
+        console.error("Action: Add a test bank account to https://dashboard.stripe.com/test/settings/payouts");
+      } else {
+        console.error("❌ Payout error:", error.message);
+      }
     }
   }
 
