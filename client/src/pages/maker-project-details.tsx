@@ -148,6 +148,23 @@ export default function MakerProjectDetails() {
                 <p className="text-muted-foreground text-lg mb-4" data-testid="text-project-description">
                   {project.description}
                 </p>
+
+                {/* Author */}
+                {projectOwner && (
+                  <div className="mb-4">
+                    <button
+                      onClick={() => setLocation(`/user/${projectOwner.id}`)}
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      data-testid="button-view-author-profile"
+                    >
+                      Publicado por:{" "}
+                      <span className="font-semibold text-foreground hover:underline">
+                        {projectOwner.username || projectOwner.email}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Package className="h-4 w-4 text-muted-foreground" />
