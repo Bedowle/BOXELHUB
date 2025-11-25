@@ -26,7 +26,6 @@ export default function ChatsPage() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -35,18 +34,6 @@ export default function ChatsPage() {
     queryKey: ["/api/my-conversations-full"],
     enabled: !!user,
   });
-
-  useEffect(() => {
-    if (conversations) {
-      console.log("Conversations received:", conversations.map(c => ({
-        userId: c.userId,
-        userName: c.user?.username,
-        projectId: c.projectId,
-        projectName: c.project?.name,
-        project: c.project,
-      })));
-    }
-  }, [conversations]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -73,13 +60,6 @@ export default function ChatsPage() {
   }
 
   if (!user) return null;
-
-  const filteredConversations = conversations?.filter(conv => {
-    const query = searchQuery.toLowerCase();
-    const userName = (conv.user?.username || conv.user?.email || "").toLowerCase();
-    const projectName = (conv.project?.name || "").toLowerCase();
-    return userName.includes(query) || projectName.includes(query);
-  }) || [];
 
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
 
@@ -124,36 +104,16 @@ export default function ChatsPage() {
         </p>
         </div>
 
-        {/* Search Bar */}
-        {(conversations?.length || 0) > 0 && (
-          <div className="mb-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Busca por usuario o producto..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11"
-                data-testid="input-search-chats"
-              />
-            </div>
-          </div>
-        )}
-
         {/* Conversations List */}
-        {filteredConversations.length === 0 ? (
+        {!conversations || conversations.length === 0 ? (
           <EmptyState
             icon={MessageCircle}
             title="Sin conversaciones"
-            description={
-              searchQuery
-                ? "No hay conversaciones que coincidan con tu búsqueda"
-                : "No tienes conversaciones aún. Comienza a contactar makers o clientes"
-            }
+            description="No tienes conversaciones aún. Comienza a contactar makers o clientes"
           />
         ) : (
           <div className="space-y-4">
-            {filteredConversations.map((conv) => (
+            {conversations.map((conv) => (
               <Card
                 key={`${conv.userId}-${conv.projectId}`}
                 className="hover-elevate cursor-pointer transition-all"
