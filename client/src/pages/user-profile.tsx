@@ -108,16 +108,18 @@ export default function UserProfilePage() {
     enabled: !!userId && user?.userType === "maker",
   });
 
-  const { data: reviews = [] } = useQuery<Review[]>({
-    queryKey: ["/api/makers", userId, "reviews"],
+  // Load review count for any user (makers and clients can have reviews)
+  const { data: reviewCount = 0 } = useQuery<number>({
+    queryKey: ["/api/users", userId, "review-count"],
     queryFn: async () => {
-      const res = await fetch(`/api/makers/${userId}/reviews`, {
+      const res = await fetch(`/api/users/${userId}/review-count`, {
         credentials: "include",
       });
-      if (!res.ok) return [];
-      return res.json();
+      if (!res.ok) return 0;
+      const data = await res.json();
+      return data.count;
     },
-    enabled: !!userId && user?.userType === "maker",
+    enabled: !!userId,
   });
 
   const isOwnProfile = currentUser?.id === userId;
@@ -363,12 +365,12 @@ export default function UserProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <CardTitle className="text-2xl">{user.username}</CardTitle>
-                {/* Show rating for makers, grayed out for clients */}
+                {/* Show rating for all users - clickable if has reviews */}
                 <button
-                  onClick={() => isMaker && setLocation(`/user/${userId}/reviews`)}
-                  className={`flex items-center gap-1 ${isMaker ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} transition-opacity`}
+                  onClick={() => reviewCount > 0 && setLocation(`/user/${userId}/reviews`)}
+                  className={`flex items-center gap-1 ${reviewCount > 0 ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} transition-opacity`}
                   data-testid="button-view-rating"
-                  disabled={!isMaker}
+                  disabled={reviewCount === 0}
                 >
                   {[...Array(5)].map((_, i) => {
                     const rating = isMaker && makerProfile ? parseFloat(String(makerProfile.rating || 0)) : 0;
@@ -386,7 +388,7 @@ export default function UserProfilePage() {
                     );
                   })}
                   <span className="text-sm font-medium ml-2">
-                    ({isMaker && makerProfile ? makerProfile.totalReviews || 0 : 0})
+                    ({reviewCount})
                   </span>
                 </button>
               </div>

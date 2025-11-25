@@ -1336,6 +1336,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Review routes
+  // Get review count for any user
+  app.get('/api/users/:id/review-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const reviews = await storage.getReviewsForMaker(id);
+      res.json({ count: reviews.length });
+    } catch (error) {
+      console.error("Error fetching review count:", error);
+      res.status(500).json({ message: "Failed to fetch review count" });
+    }
+  });
+
   app.get('/api/makers/:id/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
