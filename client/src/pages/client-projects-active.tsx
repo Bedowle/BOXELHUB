@@ -8,7 +8,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
 import { UploadProjectDialog } from "@/components/UploadProjectDialog";
-import { ArrowLeft, Package, Upload } from "lucide-react";
+import { ArrowLeft, Package, Upload, Bell } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 export default function ClientProjectsActive() {
@@ -43,6 +43,15 @@ export default function ClientProjectsActive() {
     },
   });
 
+  const { data: totalUnreadBids } = useQuery<{ totalUnread: number }>({
+    queryKey: ["/api/projects/total-unread-bids"],
+    enabled: !!user,
+  });
+
+  const totalUnread = useMemo(() => {
+    return Object.values(unreadCounts || {}).reduce((sum, count) => sum + count, 0);
+  }, [unreadCounts]);
+
   if (!authLoading && !user) {
     toast({
       title: "No autorizado",
@@ -74,16 +83,23 @@ export default function ClientProjectsActive() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
+              className="flex items-center gap-2"
+              data-testid="button-back"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver
+            </Button>
+            {totalUnread > 0 && (
+              <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-lg" data-testid="badge-total-unread">
+                {totalUnread > 9 ? '9+' : totalUnread}
+              </div>
+            )}
+          </div>
           <Button
             size="sm"
             onClick={() => setUploadDialogOpen(true)}

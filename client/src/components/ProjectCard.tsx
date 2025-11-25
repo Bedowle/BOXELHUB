@@ -22,8 +22,8 @@ export function ProjectCard({ project, onClick, showBidCount = true, unreadBidCo
       data-testid={`card-project-${project.id}`}
     >
       {unreadBidCount > 0 && (
-        <div className="absolute -top-2 -right-2 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold" data-testid={`badge-unread-${project.id}`}>
+        <div className="absolute -top-2 -right-2 z-50 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-lg" data-testid={`badge-unread-${project.id}`}>
             {unreadBidCount > 9 ? '9+' : unreadBidCount}
           </div>
         </div>

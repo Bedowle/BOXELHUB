@@ -58,6 +58,7 @@ export interface IStorage {
   confirmBidDelivery(id: string): Promise<void>;
   markBidsAsRead(projectId: string): Promise<void>;
   getUnreadBidCount(projectId: string): Promise<number>;
+  getTotalUnreadBidsForClient(userId: string): Promise<number>;
 
   // Message operations
   getMessages(userId: string, otherUserId?: string): Promise<Message[]>;
@@ -387,6 +388,15 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(bids)
       .where(and(eq(bids.projectId, projectId), eq(bids.isRead, false)));
+    return result.count;
+  }
+
+  async getTotalUnreadBidsForClient(userId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(bids)
+      .innerJoin(projects, eq(bids.projectId, projects.id))
+      .where(and(eq(projects.userId, userId), eq(bids.isRead, false)));
     return result.count;
   }
 
