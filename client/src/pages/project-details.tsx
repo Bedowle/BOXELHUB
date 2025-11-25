@@ -189,7 +189,7 @@ export default function ProjectDetails() {
   }
 
   const isOwner = isClient && project.userId === user.id;
-  const canBid = isMaker && project.status === "active" && !myBid;
+  const canBid = isMaker && project.status === "active" && (!myBid || myBid.status === "rejected");
 
   return (
     <div className="min-h-screen bg-background">
