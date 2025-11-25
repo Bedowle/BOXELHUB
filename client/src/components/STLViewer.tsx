@@ -204,9 +204,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         const deltaY = e.clientY - mouseRef.current.y;
 
         // Rotación en eje Y por movimiento horizontal
-        rotationRef.current.y += deltaX * 0.01;
+        rotationRef.current.y += deltaX * 0.005;
         // Rotación en eje X por movimiento vertical
-        rotationRef.current.x += deltaY * 0.01;
+        rotationRef.current.x += deltaY * 0.005;
 
         meshRef.current.rotation.y = rotationRef.current.y;
         meshRef.current.rotation.x = rotationRef.current.x;
@@ -219,9 +219,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         mouseRef.current.isDown = false;
       };
 
-      renderer.domElement.addEventListener("mousedown", onMouseDown);
-      renderer.domElement.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
+      renderer.domElement.addEventListener("mousedown", onMouseDown, false);
+      document.addEventListener("mousemove", onMouseMove, false);
+      document.addEventListener("mouseup", onMouseUp, false);
 
       // Animation loop
       const animate = () => {
@@ -243,9 +243,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
 
       return () => {
         window.removeEventListener("resize", handleResize);
-        renderer.domElement.removeEventListener("mousedown", onMouseDown);
-        renderer.domElement.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
+        renderer.domElement.removeEventListener("mousedown", onMouseDown, false);
+        document.removeEventListener("mousemove", onMouseMove, false);
+        document.removeEventListener("mouseup", onMouseUp, false);
         if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
           containerRef.current.removeChild(renderer.domElement);
         }
@@ -258,10 +258,10 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="relative bg-background rounded-lg overflow-hidden">
+    <div className="relative bg-background rounded-lg overflow-hidden pointer-events-auto">
       <div
         ref={containerRef}
-        style={{ width: `${width}px`, height: `${height}px` }}
+        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto" }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
