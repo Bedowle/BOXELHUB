@@ -361,7 +361,35 @@ export default function UserProfilePage() {
               />
             </div>
             <div className="flex-1">
-              <CardTitle className="text-2xl">{user.username}</CardTitle>
+              <div className="flex items-center gap-2 mb-2">
+                <CardTitle className="text-2xl">{user.username}</CardTitle>
+                {isMaker && makerProfile?.rating && (
+                  <button
+                    onClick={() => setLocation(`/user/${userId}/reviews`)}
+                    className="flex items-center gap-1 hover:opacity-80 cursor-pointer transition-opacity"
+                    data-testid="button-view-rating"
+                  >
+                    {[...Array(5)].map((_, i) => {
+                      const rating = parseFloat(String(makerProfile.rating || 0));
+                      return (
+                        <Star
+                          key={i}
+                          className={`h-5 w-5 ${
+                            i < Math.floor(rating)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : i < rating
+                              ? "fill-yellow-400 text-yellow-400 opacity-50"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      );
+                    })}
+                    <span className="text-sm font-medium ml-2">
+                      ({makerProfile.totalReviews})
+                    </span>
+                  </button>
+                )}
+              </div>
               <p className="text-muted-foreground">{user.email}</p>
               <p className="text-sm text-muted-foreground mt-2">
                 {user.firstName} {user.lastName}
@@ -735,18 +763,6 @@ export default function UserProfilePage() {
                       </div>
                     )}
 
-                    {makerProfile.rating && (
-                      <div>
-                        <p className="text-sm font-medium">Calificación</p>
-                        <button
-                          onClick={() => setLocation(`/user/${userId}/reviews`)}
-                          className="text-sm text-muted-foreground hover:text-primary cursor-pointer hover-elevate transition-colors"
-                          data-testid="button-view-reviews"
-                        >
-                          {Number(makerProfile.rating).toFixed(1)} ⭐ ({makerProfile.totalReviews} reseñas)
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -754,74 +770,6 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Reviews Section */}
-        {isMaker && reviews.length > 0 && (
-          <Card className="mt-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Reseñas Recientes</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation(`/user/${userId}/reviews`)}
-                  data-testid="button-view-all-reviews"
-                >
-                  Ver todas ({reviews.length})
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {reviews.slice(0, 3).map((review) => (
-                  <div key={review.id} className="pb-4 border-b last:border-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={review.fromUser?.profileImageUrl || ""} />
-                          <AvatarFallback>
-                            {(review.fromUser?.username || review.fromUser?.email || "U").charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <button
-                            onClick={() => review.fromUser?.id && setLocation(`/user/${review.fromUser.id}`)}
-                            className="font-medium text-sm hover:text-primary cursor-pointer hover-elevate transition-colors text-left"
-                            data-testid="button-view-reviewer-profile"
-                          >
-                            {review.fromUser?.username || review.fromUser?.email || "Usuario"}
-                          </button>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(review.createdAt), { locale: es, addSuffix: true })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {[...Array(5)].map((_, i) => {
-                          const rating = parseFloat(String(review.rating || 0));
-                          return (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 ${
-                                i < Math.floor(rating)
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : i < rating
-                                  ? "fill-yellow-400 text-yellow-400 opacity-50"
-                                  : "text-muted-foreground"
-                              }`}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {review.comment && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{review.comment}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
