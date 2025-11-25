@@ -37,6 +37,18 @@ export default function ChatsPage() {
   });
 
   useEffect(() => {
+    if (conversations) {
+      console.log("Conversations received:", conversations.map(c => ({
+        userId: c.userId,
+        userName: c.user?.username,
+        projectId: c.projectId,
+        projectName: c.project?.name,
+        project: c.project,
+      })));
+    }
+  }, [conversations]);
+
+  useEffect(() => {
     if (!authLoading && !user) {
       toast({
         title: "No autorizado",
