@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Euro, Download, Lock, X } from "lucide-react";
+import { ArrowLeft, Euro, Download, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
@@ -20,8 +20,6 @@ export default function MarketplaceDesignDetailPage() {
   const { toast } = useToast();
   const [customAmount, setCustomAmount] = useState("");
   const [paypalAvailable, setPaypalAvailable] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState("");
 
   const { data: design, isLoading, error } = useQuery<any>({
     queryKey: ["/api/marketplace/designs", designId],
@@ -277,11 +275,6 @@ export default function MarketplaceDesignDetailPage() {
   const priceDisplay = design.priceType === "free" ? "Gratis" : `€${Number(design.price).toFixed(2)}`;
   const canAccess = accessInfo?.canAccess ?? false;
 
-  const openPaymentModal = (amount: string) => {
-    setPaymentAmount(amount);
-    setPaymentModalOpen(true);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto p-4">
@@ -388,14 +381,26 @@ export default function MarketplaceDesignDetailPage() {
                   ) : (
                     <div className="space-y-2">
                       <p className="text-sm font-medium">¿Quieres pagar el mínimo para acceso?</p>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => openPaymentModal(String(Number(design.price).toFixed(2)))}
-                        data-testid="button-pay-minimum"
-                      >
-                        Comprar por €{Number(design.price).toFixed(2)}
-                      </Button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => stripeCheckoutMutation.mutate(String(Number(design.price).toFixed(2)))}
+                          disabled={stripeCheckoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-pay-minimum-stripe"
+                        >
+                          {stripeCheckoutMutation.isPending ? "..." : "Stripe"}
+                        </Button>
+                        {paypalAvailable && (
+                          <Button
+                            variant="outline"
+                            onClick={() => paypalOrderMutation.mutate(String(Number(design.price).toFixed(2)))}
+                            disabled={stripeCheckoutMutation.isPending || paypalOrderMutation.isPending}
+                            data-testid="button-pay-minimum-paypal"
+                          >
+                            {paypalOrderMutation.isPending ? "..." : "PayPal"}
+                          </Button>
+                        )}
+                      </div>
                       <div className="relative my-3">
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full border-t" />
@@ -424,13 +429,24 @@ export default function MarketplaceDesignDetailPage() {
                           }}
                           data-testid="input-custom-amount"
                         />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
                         <Button
-                          className="flex-1"
-                          onClick={() => openPaymentModal(customAmount || String(design.price))}
-                          data-testid="button-custom-checkout"
+                          onClick={() => stripeCheckoutMutation.mutate(customAmount || String(design.price))}
+                          disabled={stripeCheckoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-checkout-stripe"
                         >
-                          Comprar
+                          {stripeCheckoutMutation.isPending ? "..." : "Stripe"}
                         </Button>
+                        {paypalAvailable && (
+                          <Button
+                            onClick={() => paypalOrderMutation.mutate(customAmount || String(design.price))}
+                            disabled={stripeCheckoutMutation.isPending || paypalOrderMutation.isPending}
+                            data-testid="button-checkout-paypal"
+                          >
+                            {paypalOrderMutation.isPending ? "..." : "PayPal"}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -450,13 +466,24 @@ export default function MarketplaceDesignDetailPage() {
                       {downloadMutation.isPending ? "Descargando..." : "Descargar STL"}
                     </Button>
                   ) : (
-                    <Button
-                      className="w-full"
-                      onClick={() => openPaymentModal(String(design.price))}
-                      data-testid="button-checkout-fixed"
-                    >
-                      Comprar por €{Number(design.price).toFixed(2)}
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        onClick={() => stripeCheckoutMutation.mutate(String(design.price))}
+                        disabled={stripeCheckoutMutation.isPending || paypalOrderMutation.isPending}
+                        data-testid="button-checkout-fixed-stripe"
+                      >
+                        {stripeCheckoutMutation.isPending ? "..." : "Stripe"}
+                      </Button>
+                      {paypalAvailable && (
+                        <Button
+                          onClick={() => paypalOrderMutation.mutate(String(design.price))}
+                          disabled={stripeCheckoutMutation.isPending || paypalOrderMutation.isPending}
+                          data-testid="button-checkout-fixed-paypal"
+                        >
+                          {paypalOrderMutation.isPending ? "..." : "PayPal"}
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -485,58 +512,6 @@ export default function MarketplaceDesignDetailPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Payment Method Modal */}
-      {paymentModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle>Selecciona tu método de pago</CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setPaymentModalOpen(false)}
-                data-testid="button-close-payment-modal"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground mb-4">
-                Pagar €{Number(paymentAmount).toFixed(2)}
-              </p>
-              
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  setPaymentModalOpen(false);
-                  stripeCheckoutMutation.mutate(paymentAmount);
-                }}
-                disabled={stripeCheckoutMutation.isPending}
-                data-testid="button-payment-stripe"
-              >
-                {stripeCheckoutMutation.isPending ? "Procesando..." : "💳 Tarjeta de Crédito (Stripe)"}
-              </Button>
-
-              {paypalAvailable && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setPaymentModalOpen(false);
-                    paypalOrderMutation.mutate(paymentAmount);
-                  }}
-                  disabled={paypalOrderMutation.isPending}
-                  data-testid="button-payment-paypal"
-                >
-                  {paypalOrderMutation.isPending ? "Procesando..." : "🅿️ PayPal"}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
