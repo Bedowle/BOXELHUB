@@ -1,6 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadge";
+import { STLViewer } from "./STLViewer";
 import { Calendar, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -19,7 +20,7 @@ export function ProjectCard({ project, onClick, showBidCount = true }: ProjectCa
       onClick={onClick}
       data-testid={`card-project-${project.id}`}
     >
-      <CardHeader className="space-y-0 pb-4">
+      <CardHeader className="space-y-0 pb-0">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-lg font-semibold line-clamp-2" data-testid={`text-project-name-${project.id}`}>
             {project.name}
@@ -27,7 +28,12 @@ export function ProjectCard({ project, onClick, showBidCount = true }: ProjectCa
           <StatusBadge status={project.status} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="py-3 px-0">
+        <div className="px-6 py-3">
+          <STLViewer stlFileName={project.stlFileName} width={280} height={160} />
+        </div>
+      </CardContent>
+      <CardContent className="space-y-3 pt-3">
         <p className="text-sm text-muted-foreground line-clamp-2" data-testid={`text-project-description-${project.id}`}>
           {project.description}
         </p>
