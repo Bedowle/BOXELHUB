@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { method, stripeEmail, paypalEmail, bankAccountIban, bankAccountName } = req.body;
+      const { method, stripeEmail, paypalEmail, bankAccountIban, bankAccountName, stripeConnectAccountId, paypalAccountId } = req.body;
 
       if (!method || !["stripe", "paypal", "bank"].includes(method)) {
         return res.status(400).json({ message: "Invalid payout method" });
@@ -86,6 +86,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paypalEmail,
         bankAccountIban,
         bankAccountName,
+        stripeConnectAccountId,
+        paypalAccountId,
       });
 
       res.json({
@@ -136,6 +138,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please configure a payout method first" });
       }
 
+      // Verify connected account for Stripe/PayPal
+      if (profile.payoutMethod === "stripe" && !profile.stripeConnectAccountId) {
+        return res.status(400).json({ message: "Please connect your Stripe account first" });
+      }
+      if (profile.payoutMethod === "paypal" && !profile.paypalAccountId) {
+        return res.status(400).json({ message: "Please connect your PayPal account first" });
+      }
+
       // Check minimum for payouts
       if (profile.payoutMethod === "bank" && parseFloat(amount) < 20) {
         return res.status(400).json({ message: "Minimum €20.00 required for bank transfers" });
@@ -155,8 +165,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create payout request
       const payout = await storage.createMakerPayout(userId, amount, profile.payoutMethod);
 
+      // Execute payout in background based on method
+      if (profile.payoutMethod === "stripe" && profile.stripeConnectAccountId) {
+        executeStripePayout(profile.stripeConnectAccountId, amount).catch(err => {
+          console.error("Error executing Stripe payout:", err);
+        });
+      } else if (profile.payoutMethod === "paypal" && profile.paypalAccountId) {
+        executePayPalPayout(profile.paypalAccountId, amount).catch(err => {
+          console.error("Error executing PayPal payout:", err);
+        });
+      }
+
       res.json({
-        message: "Payout request created successfully",
+        message: "Payout request created successfully. Processing...",
         payout
       });
     } catch (error: any) {
@@ -164,6 +185,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: error.message || "Failed to request payout" });
     }
   });
+
+  // Helper functions for executing payouts
+  async function executeStripePayout(stripeConnectAccountId: string, amount: string) {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const payout = await stripe.payouts.create(
+        {
+          amount: Math.round(parseFloat(amount) * 100),
+          currency: 'eur',
+          method: 'instant',
+        },
+        {
+          stripeAccount: stripeConnectAccountId,
+        }
+      );
+      console.log("Stripe payout created:", payout.id);
+    } catch (error) {
+      console.error("Stripe payout error:", error);
+    }
+  }
+
+  async function executePayPalPayout(paypalAccountId: string, amount: string) {
+    try {
+      if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+        console.error("PayPal credentials not configured");
+        return;
+      }
+      
+      const clientId = process.env.PAYPAL_CLIENT_ID;
+      const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+      const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
+      const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
+      
+      // Get access token
+      const tokenResponse = await fetch(`${apiBase}/v1/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=client_credentials'
+      });
+      
+      const tokenData = await tokenResponse.json() as any;
+      const accessToken = tokenData.access_token;
+
+      // Create payout
+      const payoutResponse = await fetch(`${apiBase}/v1/payments/payouts`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender_batch_header: {
+            sender_batch_id: `payout_${Date.now()}`,
+            email_subject: 'VoxelHub Payout',
+            email_message: 'Your payout from VoxelHub'
+          },
+          items: [
+            {
+              recipient_type: 'EMAIL',
+              amount: {
+                value: parseFloat(amount).toFixed(2),
+                currency: 'EUR'
+              },
+              receiver: paypalAccountId,
+              note: 'VoxelHub Marketplace Earnings'
+            }
+          ]
+        })
+      });
+
+      const payoutData = await payoutResponse.json() as any;
+      console.log("PayPal payout created:", payoutData.batch_header?.payout_batch_id);
+    } catch (error) {
+      console.error("PayPal payout error:", error);
+    }
+  }
 
   app.get('/api/maker/:id', isAuthenticated, async (req: any, res) => {
     try {

@@ -49,8 +49,8 @@ type PayoutFormValues = z.infer<typeof payoutSchema>;
 
 const payoutMethodSchema = z.object({
   method: z.enum(["stripe", "paypal", "bank"]),
-  stripeEmail: z.string().email().optional().or(z.literal("")),
-  paypalEmail: z.string().email().optional().or(z.literal("")),
+  stripeConnectAccountId: z.string().optional().or(z.literal("")),
+  paypalAccountId: z.string().optional().or(z.literal("")),
   bankAccountIban: z.string().optional().or(z.literal("")),
   bankAccountName: z.string().optional().or(z.literal("")),
 });
@@ -89,8 +89,8 @@ export default function MakerBalance() {
     resolver: zodResolver(payoutMethodSchema),
     defaultValues: {
       method: (makerProfile?.payoutMethod as any) || "stripe",
-      stripeEmail: makerProfile?.stripeEmail || "",
-      paypalEmail: makerProfile?.paypalEmail || "",
+      stripeConnectAccountId: (makerProfile as any)?.stripeConnectAccountId || "",
+      paypalAccountId: (makerProfile as any)?.paypalAccountId || "",
       bankAccountIban: makerProfile?.bankAccountIban || "",
       bankAccountName: makerProfile?.bankAccountName || "",
     },
@@ -273,11 +273,11 @@ export default function MakerBalance() {
                 <p className="font-semibold mb-2">
                   {makerProfile?.payoutMethod ? getPayoutMethodLabel(makerProfile.payoutMethod) : "No configurado"}
                 </p>
-                {makerProfile?.payoutMethod === "stripe" && makerProfile?.stripeEmail && (
-                  <p className="text-sm text-muted-foreground">{makerProfile.stripeEmail}</p>
+                {makerProfile?.payoutMethod === "stripe" && (makerProfile as any)?.stripeConnectAccountId && (
+                  <p className="text-sm text-muted-foreground">Account: {(makerProfile as any).stripeConnectAccountId.substring(0, 20)}...</p>
                 )}
-                {makerProfile?.payoutMethod === "paypal" && makerProfile?.paypalEmail && (
-                  <p className="text-sm text-muted-foreground">{makerProfile.paypalEmail}</p>
+                {makerProfile?.payoutMethod === "paypal" && (makerProfile as any)?.paypalAccountId && (
+                  <p className="text-sm text-muted-foreground">Account: {(makerProfile as any).paypalAccountId}</p>
                 )}
                 {makerProfile?.payoutMethod === "bank" && (
                   <>
@@ -314,12 +314,12 @@ export default function MakerBalance() {
                   {methodForm.watch("method") === "stripe" && (
                     <FormField
                       control={methodForm.control}
-                      name="stripeEmail"
+                      name="stripeConnectAccountId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email para Stripe</FormLabel>
+                          <FormLabel>Stripe Connect Account ID</FormLabel>
                           <FormControl>
-                            <Input placeholder="email@example.com" {...field} data-testid="input-stripe-email" />
+                            <Input placeholder="acct_1234567890" {...field} data-testid="input-stripe-account-id" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -329,12 +329,12 @@ export default function MakerBalance() {
                   {methodForm.watch("method") === "paypal" && (
                     <FormField
                       control={methodForm.control}
-                      name="paypalEmail"
+                      name="paypalAccountId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email para PayPal</FormLabel>
+                          <FormLabel>PayPal Account Email/ID</FormLabel>
                           <FormControl>
-                            <Input placeholder="email@example.com" {...field} data-testid="input-paypal-email" />
+                            <Input placeholder="your-paypal@example.com" {...field} data-testid="input-paypal-account-id" />
                           </FormControl>
                         </FormItem>
                       )}

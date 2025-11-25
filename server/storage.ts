@@ -902,6 +902,8 @@ export class DatabaseStorage implements IStorage {
     paypalEmail?: string;
     bankAccountIban?: string;
     bankAccountName?: string;
+    stripeConnectAccountId?: string;
+    paypalAccountId?: string;
   }): Promise<MakerProfile | undefined> {
     const [profile] = await db.update(makerProfiles)
       .set({

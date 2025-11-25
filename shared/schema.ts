@@ -91,10 +91,13 @@ export const makerProfiles = pgTable("maker_profiles", {
   totalReviews: integer("total_reviews").default(0).notNull(),
   // Payout configuration
   payoutMethod: payoutMethodEnum("payout_method"), // stripe, paypal, bank
-  stripeEmail: varchar("stripe_email"), // Email for Stripe payouts
-  paypalEmail: varchar("paypal_email"), // Email for PayPal payouts
+  stripeEmail: varchar("stripe_email"), // Email for Stripe payouts (legacy, for display)
+  paypalEmail: varchar("paypal_email"), // Email for PayPal payouts (legacy, for display)
   bankAccountIban: varchar("bank_account_iban"), // IBAN for bank transfers
   bankAccountName: varchar("bank_account_name"), // Account holder name
+  // OAuth connected accounts
+  stripeConnectAccountId: varchar("stripe_connect_account_id"), // Stripe Connect account ID for payouts
+  paypalAccountId: varchar("paypal_account_id"), // PayPal merchant account ID for payouts
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
