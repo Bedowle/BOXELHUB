@@ -1800,9 +1800,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please configure a payout method first" });
       }
 
-      // Check minimum for bank transfers
-      if (profile.payoutMethod === "bank" && parseFloat(amount) < 10) {
-        return res.status(400).json({ message: "Minimum €10.00 required for bank transfers" });
+      // Check minimum for payouts
+      if (profile.payoutMethod === "bank" && parseFloat(amount) < 20) {
+        return res.status(400).json({ message: "Minimum €20.00 required for bank transfers" });
+      }
+      if ((profile.payoutMethod === "stripe" || profile.payoutMethod === "paypal") && parseFloat(amount) < 10) {
+        return res.status(400).json({ message: "Minimum €10.00 required for Stripe/PayPal payouts" });
       }
 
       // Check available balance

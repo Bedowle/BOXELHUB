@@ -363,9 +363,9 @@ export default function MakerProfile() {
                         data-testid="select-payout-method"
                       >
                         <option value="">Selecciona un método...</option>
-                        <option value="stripe">Stripe (7 días de retención)</option>
-                        <option value="paypal">PayPal (7 días de retención)</option>
-                        <option value="bank">Transferencia Bancaria (15 días, mín. €10)</option>
+                        <option value="stripe">Stripe (7 días de retención, mín. €10)</option>
+                        <option value="paypal">PayPal (7 días de retención, mín. €10)</option>
+                        <option value="bank">Transferencia Bancaria (15 días, mín. €20)</option>
                       </select>
                     </div>
 
