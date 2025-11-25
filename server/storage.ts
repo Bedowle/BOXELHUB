@@ -10,6 +10,7 @@ import {
   reviews,
   emailTokens,
   marketplaceDesigns,
+  designPurchases,
   type User,
   type UpsertUser,
   type MakerProfile,
@@ -24,6 +25,8 @@ import {
   type InsertReview,
   type MarketplaceDesign,
   type InsertMarketplaceDesign,
+  type DesignPurchase,
+  type InsertDesignPurchase,
 } from "@shared/schema";
 
 export interface IStorage {
