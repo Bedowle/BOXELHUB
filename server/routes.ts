@@ -1521,9 +1521,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Design not found" });
       }
 
-      // Can only "purchase" free designs
-      if (design.priceType !== "free") {
-        return res.status(400).json({ message: "Only free designs can use this endpoint" });
+      // Can "purchase" free designs OR minimum price designs with €0 payment
+      if (design.priceType !== "free" && design.priceType !== "minimum") {
+        return res.status(400).json({ message: "This design cannot be acquired for free" });
       }
 
       // Create purchase record (free)
