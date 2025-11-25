@@ -28,8 +28,8 @@ export function ProjectCard({ project, onClick, showBidCount = true }: ProjectCa
           <StatusBadge status={project.status} />
         </div>
       </CardHeader>
-      <CardContent className="py-3 px-0">
-        <div className="py-3">
+      <CardContent className="py-3 px-0 flex items-center justify-center">
+        <div>
           <STLViewer projectId={project.id} width={280} height={160} />
         </div>
       </CardContent>
