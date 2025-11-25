@@ -4,6 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { LogOut, MessageCircle, Sparkles, Package, Briefcase } from "lucide-react";
 
+interface MakerBalance {
+  totalBalance: string;
+  availableBalance: string;
+}
+
 export default function AppHeader() {
   const [, setLocation] = useLocation();
   const { user, isClient, isMaker } = useAuth();
@@ -18,7 +23,23 @@ export default function AppHeader() {
     enabled: !!user && isClient,
   });
 
+  const { data: makerBalance } = useQuery<MakerBalance>({
+    queryKey: ["/api/maker/balance"],
+    enabled: !!user && isMaker,
+  });
+
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
+
+  const formatBalance = (balance: string | undefined): string => {
+    if (!balance) return "€0.00";
+    const num = parseFloat(balance);
+    return new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -99,6 +120,13 @@ export default function AppHeader() {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {isClient ? "Cliente" : isMaker ? "Maker" : ""}
             </span>
+            {isMaker && makerBalance && (
+              <div className="hidden sm:flex items-center gap-1 px-3 py-1 bg-muted rounded-md">
+                <span className="text-sm font-semibold text-foreground" data-testid="text-maker-balance">
+                  {formatBalance(makerBalance.availableBalance)}
+                </span>
+              </div>
+            )}
             <button
               onClick={() => setLocation(`/user/${user?.id}`)}
               className="text-sm font-medium hidden sm:block hover:text-primary transition-colors cursor-pointer"
