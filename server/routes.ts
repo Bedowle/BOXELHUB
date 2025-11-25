@@ -45,6 +45,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/maker/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const makerProfile = await storage.getMakerProfile(id);
+      if (!makerProfile) {
+        return res.status(404).json({ message: "Maker profile not found" });
+      }
+      // Normalize rating to number
+      const normalizedProfile = {
+        ...makerProfile,
+        rating: makerProfile.rating ? parseFloat(String(makerProfile.rating)) : 0,
+      };
+      res.json(normalizedProfile);
+    } catch (error) {
+      console.error("Error fetching maker profile:", error);
+      res.status(500).json({ message: "Failed to fetch maker profile" });
+    }
+  });
+
   app.put('/api/user/type', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
