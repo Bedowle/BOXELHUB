@@ -13,6 +13,7 @@ import {
   designPurchases,
   makerEarnings,
   makerPayouts,
+  sliceEstimates,
   type User,
   type UpsertUser,
   type MakerProfile,
@@ -29,6 +30,8 @@ import {
   type InsertMarketplaceDesign,
   type DesignPurchase,
   type InsertDesignPurchase,
+  type SliceEstimate,
+  type InsertSliceEstimate,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -116,6 +119,12 @@ export interface IStorage {
   getDesignPurchasesByDesign(designId: string): Promise<DesignPurchase[]>;
   userHasPurchasedDesign(userId: string, designId: string): Promise<boolean>;
   updateDesignPurchase(id: string, data: Partial<DesignPurchase>): Promise<void>;
+
+  // Slice estimate operations
+  createSliceEstimate(estimate: InsertSliceEstimate & { projectId: string; makerId: string }): Promise<SliceEstimate>;
+  getSliceEstimate(id: string): Promise<SliceEstimate | undefined>;
+  getSliceEstimatesByProject(projectId: string): Promise<SliceEstimate[]>;
+  getSliceEstimatesByMaker(makerId: string, projectId: string): Promise<SliceEstimate[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -934,6 +943,25 @@ export class DatabaseStorage implements IStorage {
       updates.stripePayoutId = transactionId;
     }
     await db.update(makerPayouts).set(updates).where(eq(makerPayouts.id, payoutId));
+  }
+
+  // Slice estimate operations
+  async createSliceEstimate(estimate: InsertSliceEstimate & { projectId: string; makerId: string }): Promise<SliceEstimate> {
+    const [record] = await db.insert(sliceEstimates).values(estimate as any).returning();
+    return record;
+  }
+
+  async getSliceEstimate(id: string): Promise<SliceEstimate | undefined> {
+    const [estimate] = await db.select().from(sliceEstimates).where(eq(sliceEstimates.id, id));
+    return estimate;
+  }
+
+  async getSliceEstimatesByProject(projectId: string): Promise<SliceEstimate[]> {
+    return db.select().from(sliceEstimates).where(eq(sliceEstimates.projectId, projectId)).orderBy(desc(sliceEstimates.createdAt));
+  }
+
+  async getSliceEstimatesByMaker(makerId: string, projectId: string): Promise<SliceEstimate[]> {
+    return db.select().from(sliceEstimates).where(and(eq(sliceEstimates.makerId, makerId), eq(sliceEstimates.projectId, projectId))).orderBy(desc(sliceEstimates.createdAt));
   }
 }
 

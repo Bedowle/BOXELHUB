@@ -3,11 +3,12 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema, insertMarketplaceDesignSchema } from "@shared/schema";
+import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema, insertMarketplaceDesignSchema, insertSliceEstimateSchema } from "@shared/schema";
 import { getAuthenticatedUserId } from "./replitAuth";
 import { z } from "zod";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { getPayPalClient, getPayPalClientId } from "./paypalClient";
+import { estimateSlicing } from "./slicingEngine";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -469,6 +470,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating project:", error);
       res.status(400).json({ message: error.message || "Failed to create project" });
+    }
+  });
+
+  // Slice estimate endpoint (for makers to estimate pricing without STL access)
+  app.post('/api/projects/:id/slice-estimate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (user?.userType !== 'maker') {
+        return res.status(403).json({ message: "Only makers can request slice estimates" });
+      }
+
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Check if maker has pending bid on this project
+      const existingBid = await storage.getMakerBidForProject(userId, id);
+      if (!existingBid) {
+        return res.status(403).json({ message: "You must have a pending bid to estimate slicing" });
+      }
+
+      const validated = insertSliceEstimateSchema.parse(req.body);
+
+      // Perform slicing estimation (safe - no G-code exposed)
+      const slicingResult = estimateSlicing(project.stlFileContent || "", validated);
+
+      // Store estimate
+      const estimate = await storage.createSliceEstimate({
+        ...validated,
+        projectId: id,
+        makerId: userId,
+        estimatedWeight: slicingResult.estimatedWeight.toString() as any,
+        estimatedTime: slicingResult.estimatedTime,
+        estimatedLayers: slicingResult.estimatedLayers,
+        materialUsedGrams: slicingResult.materialUsedGrams.toString() as any,
+      });
+
+      res.json(estimate);
+    } catch (error: any) {
+      console.error("Error creating slice estimate:", error);
+      res.status(400).json({ message: error.message || "Failed to create slice estimate" });
+    }
+  });
+
+  // Get slice estimates for a project
+  app.get('/api/projects/:id/slice-estimates', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const estimates = await storage.getSliceEstimatesByProject(id);
+      res.json(estimates);
+    } catch (error) {
+      console.error("Error fetching slice estimates:", error);
+      res.status(500).json({ message: "Failed to fetch slice estimates" });
     }
   });
 

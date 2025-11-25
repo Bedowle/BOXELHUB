@@ -252,6 +252,28 @@ export const makerPayouts = pgTable("maker_payouts", {
   index("idx_maker_payouts_status").on(table.status),
 ]);
 
+// Slice estimates table (temporary previews for makers to estimate pricing)
+export const sliceEstimates = pgTable("slice_estimates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  makerId: varchar("maker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Slicing parameters
+  nozzleTemp: integer("nozzle_temp").notNull(), // °C
+  bedTemp: integer("bed_temp").notNull(), // °C
+  layerHeight: decimal("layer_height", { precision: 3, scale: 2 }).notNull(), // mm
+  infillDensity: integer("infill_density").notNull(), // 0-100 %
+  printSpeed: integer("print_speed").notNull(), // mm/s
+  // Results (never expose G-code, only stats)
+  estimatedWeight: decimal("estimated_weight", { precision: 8, scale: 2 }), // grams
+  estimatedTime: integer("estimated_time"), // minutes
+  estimatedLayers: integer("estimated_layers"), // number of layers
+  materialUsedGrams: decimal("material_used_grams", { precision: 8, scale: 2 }), // material length in grams
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_slice_estimates_project_id").on(table.projectId),
+  index("idx_slice_estimates_maker_id").on(table.makerId),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   makerProfile: one(makerProfiles, {
@@ -454,6 +476,23 @@ export const insertDesignPurchaseSchema = createInsertSchema(designPurchases).om
     .refine(val => parseFloat(val) >= 0, "Amount must be >= €0.00"),
 });
 
+export const insertSliceEstimateSchema = createInsertSchema(sliceEstimates).omit({
+  id: true,
+  createdAt: true,
+  projectId: true,
+  makerId: true,
+  estimatedWeight: true,
+  estimatedTime: true,
+  estimatedLayers: true,
+  materialUsedGrams: true,
+}).extend({
+  nozzleTemp: z.number().int().min(0).max(300),
+  bedTemp: z.number().int().min(0).max(150),
+  layerHeight: z.number().min(0.1).max(0.4),
+  infillDensity: z.number().int().min(0).max(100),
+  printSpeed: z.number().int().min(10).max(150),
+});
+
 // TypeScript types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -479,5 +518,5 @@ export type DesignPurchase = typeof designPurchases.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
 
-export type InsertMarketplaceDesign = z.infer<typeof insertMarketplaceDesignSchema>;
-export type MarketplaceDesign = typeof marketplaceDesigns.$inferSelect;
+export type InsertSliceEstimate = z.infer<typeof insertSliceEstimateSchema>;
+export type SliceEstimate = typeof sliceEstimates.$inferSelect;
