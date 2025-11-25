@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState, useMemo } from "react";
 import { ArrowLeft, Search, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Design {
   id: string;
@@ -25,6 +26,7 @@ interface Design {
 export default function ClientMarketplace() {
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
 
   // Fetch marketplace designs
   const { data: designs = [], isLoading } = useQuery({
@@ -36,9 +38,14 @@ export default function ClientMarketplace() {
     },
   });
 
-  // Filter designs based on search
+  // Filter designs based on search and exclude user's own designs
   const filteredDesigns = useMemo(() => {
     return designs.filter((design: Design) => {
+      // Exclude user's own designs
+      if (user?.id === design.makerId) {
+        return false;
+      }
+
       const query = searchQuery.toLowerCase();
       return (
         design.title.toLowerCase().includes(query) ||
@@ -47,7 +54,7 @@ export default function ClientMarketplace() {
         design.maker?.username?.toLowerCase().includes(query)
       );
     });
-  }, [designs, searchQuery]);
+  }, [designs, searchQuery, user?.id]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
