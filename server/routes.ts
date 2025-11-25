@@ -194,6 +194,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper functions for executing payouts
   async function executeStripePayout(stripeConnectAccountId: string, amount: string) {
     try {
+      const isDevelopment = process.env.NODE_ENV === "development";
+      
+      if (isDevelopment || stripeConnectAccountId === "acct_test_development") {
+        // In development, simulate the payout
+        console.log(`[DEV MODE] Simulated Stripe payout: €${amount} to ${stripeConnectAccountId}`);
+        return;
+      }
+      
       const stripe = await getUncachableStripeClient();
       const payout = await stripe.payouts.create(
         {
@@ -213,6 +221,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   async function executePayPalPayout(paypalAccountId: string, amount: string) {
     try {
+      const isDevelopment = process.env.NODE_ENV === "development";
+      
+      if (isDevelopment || paypalAccountId === "test@voxelhub.dev") {
+        // In development, simulate the payout
+        console.log(`[DEV MODE] Simulated PayPal payout: €${amount} to ${paypalAccountId}`);
+        return;
+      }
+      
       if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
         console.error("PayPal credentials not configured");
         return;
