@@ -62,9 +62,12 @@ export default function ChatsPage() {
 
   if (!user) return null;
 
-  const filteredConversations = conversations?.filter(conv =>
-    ((conv.user?.username || conv.user?.email) || "").toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredConversations = conversations?.filter(conv => {
+    const query = searchQuery.toLowerCase();
+    const userName = (conv.user?.username || conv.user?.email || "").toLowerCase();
+    const projectName = (conv.project?.name || "").toLowerCase();
+    return userName.includes(query) || projectName.includes(query);
+  }) || [];
 
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
 
@@ -115,7 +118,7 @@ export default function ChatsPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Busca por nombre..."
+                placeholder="Busca por usuario o producto..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-11"
