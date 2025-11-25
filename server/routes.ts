@@ -175,8 +175,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error executing Stripe payout:", err);
         });
       } else if (profile.payoutMethod === "paypal") {
-        const accountId = profile.paypalAccountId || "test@voxelhub.dev";
-        executePayPalPayout(accountId, amount).catch(err => {
+        // Use PayPal account ID from profile, fallback to stripeEmail or paypalEmail if configured
+        let paypalRecipient = profile.paypalAccountId || (profile as any)?.paypalEmail || (profile as any)?.stripeEmail || "test@voxelhub.dev";
+        executePayPalPayout(paypalRecipient, amount).catch(err => {
           console.error("Error executing PayPal payout:", err);
         });
       }
@@ -230,31 +231,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   async function executePayPalPayout(paypalAccountId: string, amount: string) {
     try {
-      const isDevelopment = process.env.NODE_ENV === "development";
-      
-      if (isDevelopment) {
-        const simulatedPayoutId = `PAYID-${Date.now()}`;
-        console.log("✅ [SIMULATION] PayPal payout processed");
-        console.log("   Payout ID:", simulatedPayoutId);
-        console.log("   Status: PROCESSING");
-        console.log("   Amount: €" + parseFloat(amount).toFixed(2));
-        console.log("   Recipient:", paypalAccountId);
-        console.log("   Timestamp:", new Date().toISOString());
-        console.log("   Note: In production, would send real funds to PayPal account");
-        return;
-      }
-      
       if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
         console.error("PayPal credentials not configured");
         return;
       }
       
-      // Production: Use real PayPal API
-      const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+      // Always use sandbox for development, production for deployed apps
+      const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
       const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
       
       const clientId = process.env.PAYPAL_CLIENT_ID;
       const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+      
+      console.log("🔄 Processing PayPal payout...");
+      console.log("   Recipient:", paypalAccountId);
+      console.log("   Amount: €" + parseFloat(amount).toFixed(2));
+      console.log("   Environment:", isProduction ? "production" : "sandbox");
       
       const tokenResponse = await fetch(`${apiBase}/v1/oauth2/token`, {
         method: 'POST',
@@ -264,6 +256,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         body: 'grant_type=client_credentials'
       });
+      
+      if (!tokenResponse.ok) {
+        throw new Error(`PayPal auth failed: ${tokenResponse.status}`);
+      }
       
       const tokenData = await tokenResponse.json() as any;
       const accessToken = tokenData.access_token;
@@ -295,9 +291,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const payoutData = await payoutResponse.json() as any;
-      console.log("✅ PayPal payout created:", payoutData.batch_header?.payout_batch_id);
-    } catch (error) {
-      console.error("PayPal payout error:", error);
+      
+      if (payoutData.batch_header?.payout_batch_id) {
+        console.log("✅ PayPal payout SENT");
+        console.log("   Batch ID:", payoutData.batch_header.payout_batch_id);
+        console.log("   Status:", payoutData.batch_header.batch_status);
+        console.log("   To: " + paypalAccountId);
+        console.log("   Amount: €" + parseFloat(amount).toFixed(2));
+        console.log("   Should appear in your PayPal " + (isProduction ? "account" : "sandbox") + " shortly");
+      } else {
+        console.error("❌ PayPal payout failed:", payoutData);
+      }
+    } catch (error: any) {
+      console.error("❌ PayPal payout error:", error.message);
     }
   }
 
