@@ -102,6 +102,14 @@ export default function AppHeader() {
               </Button>
             )}
 
+            {isMaker && makerBalance && (
+              <div className="hidden sm:flex items-center gap-1 px-3 py-1 bg-muted rounded-md">
+                <span className="text-sm font-semibold text-foreground" data-testid="text-maker-balance">
+                  {formatBalance(makerBalance.availableBalance)}
+                </span>
+              </div>
+            )}
+
             <Button
               variant="ghost"
               size="icon"
@@ -120,13 +128,6 @@ export default function AppHeader() {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {isClient ? "Cliente" : isMaker ? "Maker" : ""}
             </span>
-            {isMaker && makerBalance && (
-              <div className="hidden sm:flex items-center gap-1 px-3 py-1 bg-muted rounded-md">
-                <span className="text-sm font-semibold text-foreground" data-testid="text-maker-balance">
-                  {formatBalance(makerBalance.availableBalance)}
-                </span>
-              </div>
-            )}
             <button
               onClick={() => setLocation(`/user/${user?.id}`)}
               className="text-sm font-medium hidden sm:block hover:text-primary transition-colors cursor-pointer"
