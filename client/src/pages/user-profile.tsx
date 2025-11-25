@@ -5,13 +5,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   Form,
   FormControl,
@@ -28,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { User, MakerProfile } from "@shared/schema";
+import type { User, MakerProfile, Review } from "@shared/schema";
 
 const profileEditSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -101,6 +103,18 @@ export default function UserProfilePage() {
         credentials: "include",
       });
       if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!userId && user?.userType === "maker",
+  });
+
+  const { data: reviews = [] } = useQuery<Review[]>({
+    queryKey: ["/api/makers", userId, "reviews"],
+    queryFn: async () => {
+      const res = await fetch(`/api/makers/${userId}/reviews`, {
+        credentials: "include",
+      });
+      if (!res.ok) return [];
       return res.json();
     },
     enabled: !!userId && user?.userType === "maker",
@@ -739,6 +753,75 @@ export default function UserProfilePage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Reviews Section */}
+        {isMaker && reviews.length > 0 && (
+          <Card className="mt-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Reseñas Recientes</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation(`/user/${userId}/reviews`)}
+                  data-testid="button-view-all-reviews"
+                >
+                  Ver todas ({reviews.length})
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {reviews.slice(0, 3).map((review) => (
+                  <div key={review.id} className="pb-4 border-b last:border-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={review.fromUser?.profileImageUrl || ""} />
+                          <AvatarFallback>
+                            {(review.fromUser?.username || review.fromUser?.email || "U").charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <button
+                            onClick={() => review.fromUser?.id && setLocation(`/user/${review.fromUser.id}`)}
+                            className="font-medium text-sm hover:text-primary cursor-pointer hover-elevate transition-colors text-left"
+                            data-testid="button-view-reviewer-profile"
+                          >
+                            {review.fromUser?.username || review.fromUser?.email || "Usuario"}
+                          </button>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(review.createdAt), { locale: es, addSuffix: true })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {[...Array(5)].map((_, i) => {
+                          const rating = parseFloat(String(review.rating || 0));
+                          return (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${
+                                i < Math.floor(rating)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : i < rating
+                                  ? "fill-yellow-400 text-yellow-400 opacity-50"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{review.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
