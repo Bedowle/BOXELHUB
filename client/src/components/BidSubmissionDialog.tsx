@@ -58,6 +58,8 @@ export function BidSubmissionDialog({ open, onOpenChange, projectId }: BidSubmis
         description: "El cliente ha sido notificado de tu oferta",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "my-bid"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "bids"] });
       queryClient.invalidateQueries({ queryKey: ["/api/bids"] });
       form.reset();
       onOpenChange(false);
