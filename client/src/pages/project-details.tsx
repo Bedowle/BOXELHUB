@@ -321,20 +321,9 @@ export default function ProjectDetails() {
               <BidCardSkeleton />
               <BidCardSkeleton />
             </div>
-          ) : myBid && isMaker ? (
-            <div className="mb-8 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Tu oferta para este proyecto:</p>
-                {myBid.status === "rejected" && (
-                  <Button 
-                    size="sm"
-                    onClick={() => setBidDialogOpen(true)}
-                    data-testid="button-rebid-after-rejection"
-                  >
-                    Volver a Ofertar
-                  </Button>
-                )}
-              </div>
+          ) : (myBid && isMaker && myBid.status !== "rejected") ? (
+            <div className="mb-8">
+              <p className="text-sm text-muted-foreground mb-4">Tu oferta para este proyecto:</p>
               <BidCard 
                 bid={myBid} 
                 isClient={false}
@@ -345,6 +334,7 @@ export default function ProjectDetails() {
                   setSelectedBidForEdit(bid);
                   setEditBidDialogOpen(true);
                 }}
+                onRebid={() => setBidDialogOpen(true)}
               />
             </div>
           ) : bids && bids.length > 0 ? (
@@ -366,6 +356,7 @@ export default function ProjectDetails() {
                     setSelectedBidForEdit(bid);
                     setEditBidDialogOpen(true);
                   }}
+                  onRebid={() => setBidDialogOpen(true)}
                   onContact={(makerId, projectId) => {
                     const makerUser = bid.maker;
                     if (makerUser) {

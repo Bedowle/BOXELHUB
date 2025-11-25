@@ -14,13 +14,14 @@ interface BidCardProps {
   onContact?: (makerId: string, projectId: string) => void;
   onConfirmDelivery?: (bidId: string) => void;
   onEdit?: (bidId: string) => void;
+  onRebid?: () => void;
   isClient?: boolean;
   isMyBid?: boolean;
   currentUserId?: string;
   isPending?: boolean;
 }
 
-export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, isClient, isMyBid, currentUserId, isPending }: BidCardProps) {
+export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, onRebid, isClient, isMyBid, currentUserId, isPending }: BidCardProps) {
   const profile = bid.maker?.makerProfile;
   const initials = (bid.maker?.username || bid.maker?.email)?.[0].toUpperCase() || "M";
   
@@ -176,9 +177,20 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
 
               {/* Rejected bid status */}
               {bid.status === "rejected" && (
-                <Badge variant="secondary">
-                  Rechazada
-                </Badge>
+                <>
+                  <Badge variant="secondary">
+                    Rechazada
+                  </Badge>
+                  {isMyBid && onRebid && (
+                    <Button
+                      size="sm"
+                      onClick={onRebid}
+                      data-testid={`button-rebid-${bid.id}`}
+                    >
+                      Volver a Ofertar
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>
