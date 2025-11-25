@@ -132,15 +132,18 @@ export default function MakerBalance() {
       return res.json();
     },
     onSuccess: () => {
+      console.log("✅ Payout created successfully!");
       toast({
-        title: "Solicitud enviada",
-        description: "Tu payout está pendiente. Será procesado en 1-2 días de negocio.",
+        title: "Payout procesado",
+        description: "Tu solicitud ha sido creada.",
       });
       payoutForm.reset();
-      queryClient.invalidateQueries({ queryKey: ["/api/maker/balance"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/maker/payouts"] });
+      // Refetch IMMEDIATELY to show the new payout
+      queryClient.refetchQueries({ queryKey: ["/api/maker/payouts"] });
+      queryClient.refetchQueries({ queryKey: ["/api/maker/balance"] });
     },
     onError: (error: any) => {
+      console.error("❌ Error requesting payout:", error);
       toast({
         title: "Error al solicitar payout",
         description: error.message || "Por favor, intenta de nuevo.",
