@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { ChatDialog } from "@/components/ChatDialog";
 import { BidEditDialog } from "@/components/BidEditDialog";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
-import { SliceEstimator } from "@/components/SliceEstimator";
+import { AdvancedSlicerInterface } from "@/components/AdvancedSlicerInterface";
 import { ArrowLeft, Calendar, FileText, Package, Download, MessageCircle, Edit2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -283,9 +283,9 @@ export default function MakerProjectDetails() {
               </CardContent>
             </Card>
 
-            {/* Slice Estimator */}
+            {/* Advanced Slicer Interface */}
             {myBid.status === 'pending' && projectId && (
-              <SliceEstimator projectId={projectId} disabled={false} />
+              <AdvancedSlicerInterface projectId={projectId} disabled={false} />
             )}
           </div>
         )}
