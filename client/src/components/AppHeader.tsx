@@ -13,6 +13,11 @@ export default function AppHeader() {
     enabled: !!user,
   });
 
+  const { data: totalUnreadBids } = useQuery<{ totalUnread: number }>({
+    queryKey: ["/api/projects/total-unread-bids"],
+    enabled: !!user && isClient,
+  });
+
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
 
   return (
@@ -51,10 +56,16 @@ export default function AppHeader() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/client/projects-active")}
+                className="relative"
                 data-testid="button-my-projects"
               >
                 <Briefcase className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Mis Proyectos</span>
+                {totalUnreadBids && totalUnreadBids.totalUnread > 0 && (
+                  <div className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold">
+                    {totalUnreadBids.totalUnread > 9 ? "9+" : totalUnreadBids.totalUnread}
+                  </div>
+                )}
               </Button>
             )}
             

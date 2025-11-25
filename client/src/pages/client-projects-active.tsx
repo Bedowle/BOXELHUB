@@ -93,11 +93,6 @@ export default function ClientProjectsActive() {
             <ArrowLeft className="h-4 w-4" />
             Volver
           </Button>
-          {totalUnreadBids && totalUnreadBids.totalUnread > 0 && (
-            <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-lg" data-testid="badge-total-unread">
-              {totalUnreadBids.totalUnread > 9 ? '9+' : totalUnreadBids.totalUnread}
-            </div>
-          )}
           <Button
             size="sm"
             onClick={() => setUploadDialogOpen(true)}
