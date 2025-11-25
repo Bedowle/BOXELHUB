@@ -106,15 +106,15 @@ export default function MakerWonProjects() {
     );
   }
 
-  // Filter: Show projects that have accepted bids and are not completed
+  // Filter: Show projects that have accepted bids (regardless of completion status)
   const wonProjects = myBidProjects?.filter(p => {
     // While allBids is loading, show all non-completed projects
-    // Once allBids loads, only show projects with accepted bids that aren't completed
+    // Once allBids loads, only show projects with accepted bids
     if (!allBids) {
       return p.status !== "completed";
     }
     const hasAcceptedBid = allBids.some(b => b.projectId === p.id && b.status === "accepted");
-    return hasAcceptedBid && p.status !== "completed";
+    return hasAcceptedBid;
   }) || [];
 
   return (
