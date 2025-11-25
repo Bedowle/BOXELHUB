@@ -17,7 +17,7 @@ import { z } from "zod";
 
 // Enums
 export const userTypeEnum = pgEnum("user_type", ["client", "maker"]);
-export const printerTypeEnum = pgEnum("printer_type", ["Ender3", "BambooLab"]);
+export const printerTypeEnum = pgEnum("printer_type", ["Ender3", "Ender5", "PrusaMK3S", "BamboolabX1", "BamboolabP1", "CrealityCR10", "Ultimaker", "Formlabs", "AnyubicMega", "ArtilleryGenius", "Other", "BambooLab"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "reserved", "completed"]);
 export const bidStatusEnum = pgEnum("bid_status", ["pending", "accepted", "rejected"]);
 export const designStatusEnum = pgEnum("design_status", ["active", "archived"]);

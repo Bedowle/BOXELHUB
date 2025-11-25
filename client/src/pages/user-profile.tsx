@@ -56,7 +56,17 @@ type ProfileEditForm = z.infer<typeof profileEditSchema>;
 type MakerProfileEditForm = z.infer<typeof makerProfileEditSchema>;
 
 const PRINTER_TYPES = [
-  "Ender 3", "Ender 5", "Prusa MK3S+", "Bambulab X1", "Bambulab P1", "Creality CR-10", "Ultimaker S5", "Formlabs Form 3", "Anycubic i3 Mega", "Artillery Genius", "Other"
+  { label: "Ender 3", value: "Ender3" },
+  { label: "Ender 5", value: "Ender5" },
+  { label: "Prusa MK3S+", value: "PrusaMK3S" },
+  { label: "Bambulab X1", value: "BamboolabX1" },
+  { label: "Bambulab P1", value: "BamboolabP1" },
+  { label: "Creality CR-10", value: "CrealityCR10" },
+  { label: "Ultimaker S5", value: "Ultimaker" },
+  { label: "Formlabs Form 3", value: "Formlabs" },
+  { label: "Anycubic i3 Mega", value: "AnyubicMega" },
+  { label: "Artillery Genius", value: "ArtilleryGenius" },
+  { label: "Other", value: "Other" },
 ];
 
 const MATERIALS = [
@@ -386,7 +396,7 @@ export default function UserProfilePage() {
                           </FormControl>
                           <SelectContent>
                             {PRINTER_TYPES.map(type => (
-                              <SelectItem key={type} value={type}>{type}</SelectItem>
+                              <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
