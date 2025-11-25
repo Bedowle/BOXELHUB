@@ -78,11 +78,6 @@ export default function MakerBalance() {
     enabled: !!user,
   });
 
-  const { data: stripeStatus } = useQuery<any>({
-    queryKey: ["/api/maker/stripe-status"],
-    enabled: !!user && makerProfile?.payoutMethod === "stripe",
-  });
-
   const payoutForm = useForm<PayoutFormValues>({
     resolver: zodResolver(payoutSchema),
     defaultValues: {
@@ -300,16 +295,26 @@ export default function MakerBalance() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Selecciona método</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
+                        <Select value={field.value} onValueChange={(value) => {
+                          field.onChange(value);
+                          // Reset fields when method changes
+                          methodForm.reset({
+                            method: value as any,
+                            bankAccountIban: "",
+                            bankAccountName: "",
+                            paypalAccountId: "",
+                            stripeConnectAccountId: "",
+                          });
+                        }}>
                           <FormControl>
                             <SelectTrigger data-testid="select-payout-method">
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="stripe">Stripe</SelectItem>
+                            <SelectItem value="stripe">Stripe (IBAN)</SelectItem>
                             <SelectItem value="paypal">PayPal</SelectItem>
-                            <SelectItem value="bank">Transferencia Bancaria</SelectItem>
+                            <SelectItem value="bank">Transferencia Bancaria (IBAN)</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -317,18 +322,32 @@ export default function MakerBalance() {
                   />
 
                   {methodForm.watch("method") === "stripe" && (
-                    <FormField
-                      control={methodForm.control}
-                      name="stripeConnectAccountId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Stripe Connect Account ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="acct_1234567890" {...field} data-testid="input-stripe-account-id" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                    <>
+                      <FormField
+                        control={methodForm.control}
+                        name="bankAccountIban"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>IBAN</FormLabel>
+                            <FormControl>
+                              <Input placeholder="ES9121000418450200051332" {...field} data-testid="input-stripe-iban" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={methodForm.control}
+                        name="bankAccountName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Titular de la Cuenta</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Tu nombre" {...field} data-testid="input-stripe-account-name" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </>
                   )}
 
                   {methodForm.watch("method") === "paypal" && (
@@ -394,40 +413,6 @@ export default function MakerBalance() {
           </CardContent>
         </Card>
 
-        {/* Stripe Setup Warning */}
-        {makerProfile?.payoutMethod === "stripe" && stripeStatus && !stripeStatus.hasBankAccount && (
-          <Card className="mb-8 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
-            <CardHeader>
-              <CardTitle className="text-yellow-800 dark:text-yellow-200">Configuración de Stripe necesaria</CardTitle>
-            </CardHeader>
-            <CardContent className="text-yellow-900 dark:text-yellow-100">
-              <p className="mb-4">Para hacer payouts con Stripe, necesitas agregar una cuenta bancaria en tu dashboard:</p>
-              <ol className="list-decimal list-inside space-y-2 text-sm mb-4">
-                {stripeStatus.setupInstructions?.steps.map((step: string, idx: number) => (
-                  <li key={idx}>{step}</li>
-                ))}
-              </ol>
-              <div className="flex gap-2 flex-wrap">
-                <Button 
-                  variant="outline" 
-                  className="border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900"
-                  onClick={() => window.open("https://dashboard.stripe.com/test/settings/payouts", "_blank")}
-                  data-testid="button-open-stripe-payouts"
-                >
-                  Payouts
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900"
-                  onClick={() => window.open("https://dashboard.stripe.com/test/settings/bank_accounts", "_blank")}
-                  data-testid="button-open-stripe-bank"
-                >
-                  Bank Accounts
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Request Payout */}
         {makerProfile?.payoutMethod && (
@@ -439,11 +424,6 @@ export default function MakerBalance() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {makerProfile?.payoutMethod === "stripe" && stripeStatus && !stripeStatus.hasBankAccount && (
-                <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-md text-sm">
-                  ⚠️ Completa la configuración de Stripe arriba antes de hacer un payout
-                </div>
-              )}
               <Form {...payoutForm}>
                 <form onSubmit={payoutForm.handleSubmit(data => requestPayout(data))} className="space-y-4">
                   <FormField
@@ -471,8 +451,11 @@ export default function MakerBalance() {
                     {makerProfile.payoutMethod === "bank" && (
                       <p className="text-muted-foreground mt-2">Mínimo: €20.00</p>
                     )}
-                    {(makerProfile.payoutMethod === "stripe" || makerProfile.payoutMethod === "paypal") && (
-                      <p className="text-muted-foreground mt-2">Mínimo: €10.00</p>
+                    {makerProfile.payoutMethod === "stripe" && (
+                      <p className="text-muted-foreground mt-2">Mínimo: €10.00 (a través de Stripe)</p>
+                    )}
+                    {makerProfile.payoutMethod === "paypal" && (
+                      <p className="text-muted-foreground mt-2">Mínimo: €10.00 (a través de PayPal)</p>
                     )}
                   </div>
                   <Button type="submit" disabled={isPayoutPending} className="w-full" data-testid="button-request-payout">
