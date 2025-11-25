@@ -181,6 +181,7 @@ export const marketplaceDesigns = pgTable("marketplace_designs", {
   title: varchar("title").notNull(),
   description: text("description").notNull(),
   imageUrl: varchar("image_url").notNull(),
+  stlFileContent: text("stl_file_content"), // Store STL as base64
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   priceType: designPriceTypeEnum("price_type").default("fixed").notNull(), // free, fixed, minimum
   material: varchar("material").notNull(),
@@ -190,6 +191,24 @@ export const marketplaceDesigns = pgTable("marketplace_designs", {
 }, (table) => [
   index("idx_marketplace_designs_maker_id").on(table.makerId),
   index("idx_marketplace_designs_status").on(table.status),
+]);
+
+// Design purchases/downloads table (track who bought/downloaded what and how much they paid)
+export const designPurchases = pgTable("design_purchases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  designId: varchar("design_id").notNull().references(() => marketplaceDesigns.id, { onDelete: "cascade" }),
+  buyerId: varchar("buyer_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  makerId: varchar("maker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  amountPaid: decimal("amount_paid", { precision: 10, scale: 2 }).notNull(), // 0.00 for free
+  paymentMethod: varchar("payment_method"), // stripe, paypal, free, etc
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  paypalTransactionId: varchar("paypal_transaction_id"),
+  status: varchar("status").notNull().default("completed"), // completed, pending, failed
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_design_purchases_design_id").on(table.designId),
+  index("idx_design_purchases_buyer_id").on(table.buyerId),
+  index("idx_design_purchases_maker_id").on(table.makerId),
 ]);
 
 // Relations
@@ -381,6 +400,16 @@ export const insertMarketplaceDesignSchema = createInsertSchema(marketplaceDesig
   price: z.string()
     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
     .refine(val => parseFloat(val) >= 0, "Price must be >= €0.00"),
+  stlFileContent: z.string().optional(), // base64 encoded STL
+});
+
+export const insertDesignPurchaseSchema = createInsertSchema(designPurchases).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  amountPaid: z.string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format")
+    .refine(val => parseFloat(val) >= 0, "Amount must be >= €0.00"),
 });
 
 // TypeScript types
@@ -398,6 +427,12 @@ export type Bid = typeof bids.$inferSelect;
 
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+
+export type InsertMarketplaceDesign = z.infer<typeof insertMarketplaceDesignSchema>;
+export type MarketplaceDesign = typeof marketplaceDesigns.$inferSelect;
+
+export type InsertDesignPurchase = z.infer<typeof insertDesignPurchaseSchema>;
+export type DesignPurchase = typeof designPurchases.$inferSelect;
 
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;

@@ -103,6 +103,14 @@ export interface IStorage {
   updateMarketplaceDesign(id: string, data: Partial<InsertMarketplaceDesign>): Promise<void>;
   deleteMarketplaceDesign(id: string): Promise<void>;
   getMakerDesignCount(makerId: string): Promise<number>;
+
+  // Design purchase operations
+  createDesignPurchase(purchase: InsertDesignPurchase): Promise<DesignPurchase>;
+  getDesignPurchase(id: string): Promise<DesignPurchase | undefined>;
+  getDesignPurchasesByBuyer(buyerId: string): Promise<DesignPurchase[]>;
+  getDesignPurchasesByDesign(designId: string): Promise<DesignPurchase[]>;
+  userHasPurchasedDesign(userId: string, designId: string): Promise<boolean>;
+  updateDesignPurchase(id: string, data: Partial<DesignPurchase>): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -811,6 +819,37 @@ export class DatabaseStorage implements IStorage {
       .from(marketplaceDesigns)
       .where(and(eq(marketplaceDesigns.makerId, makerId), eq(marketplaceDesigns.status, "active")));
     return result.count;
+  }
+
+  // Design purchase operations
+  async createDesignPurchase(purchase: InsertDesignPurchase): Promise<DesignPurchase> {
+    const [record] = await db.insert(designPurchases).values(purchase).returning();
+    return record;
+  }
+
+  async getDesignPurchase(id: string): Promise<DesignPurchase | undefined> {
+    const [purchase] = await db.select().from(designPurchases).where(eq(designPurchases.id, id));
+    return purchase;
+  }
+
+  async getDesignPurchasesByBuyer(buyerId: string): Promise<DesignPurchase[]> {
+    return db.select().from(designPurchases).where(eq(designPurchases.buyerId, buyerId)).orderBy(desc(designPurchases.createdAt));
+  }
+
+  async getDesignPurchasesByDesign(designId: string): Promise<DesignPurchase[]> {
+    return db.select().from(designPurchases).where(eq(designPurchases.designId, designId)).orderBy(desc(designPurchases.createdAt));
+  }
+
+  async userHasPurchasedDesign(userId: string, designId: string): Promise<boolean> {
+    const [purchase] = await db
+      .select()
+      .from(designPurchases)
+      .where(and(eq(designPurchases.buyerId, userId), eq(designPurchases.designId, designId), eq(designPurchases.status, "completed")));
+    return !!purchase;
+  }
+
+  async updateDesignPurchase(id: string, data: Partial<DesignPurchase>): Promise<void> {
+    await db.update(designPurchases).set(data).where(eq(designPurchases.id, id));
   }
 }
 

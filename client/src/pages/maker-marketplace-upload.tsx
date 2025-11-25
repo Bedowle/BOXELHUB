@@ -99,6 +99,14 @@ export default function MakerMarketplaceUpload() {
     reader.readAsDataURL(file);
   };
 
+  const handleSTLUpload = async (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      form.setValue("stlFileContent", e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = async (data: any) => {
     // If free, set price to 0
     if (data.priceType === "free") {
@@ -307,6 +315,41 @@ export default function MakerMarketplaceUpload() {
                               {...field}
                               data-testid="input-design-material"
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="stlFileContent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Archivo STL</FormLabel>
+                          <FormControl>
+                            <div className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors">
+                              <input
+                                type="file"
+                                accept=".stl"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleSTLUpload(file);
+                                  }
+                                }}
+                                className="hidden"
+                                id="stl-upload"
+                                data-testid="input-design-stl"
+                              />
+                              <label htmlFor="stl-upload" className="cursor-pointer flex flex-col items-center gap-2">
+                                <Upload className="w-6 h-6 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                  {field.value ? "STL cargado ✓" : "Haz clic para subir STL"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">Archivo .stl</span>
+                              </label>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -1441,6 +1441,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Design purchase routes
+  app.get('/api/marketplace/designs/:id/access', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Check if maker (can always access) or buyer (must have purchased or free)
+      if (design.makerId === userId) {
+        return res.json({ canAccess: true, reason: "maker" });
+      }
+
+      if (design.priceType === "free") {
+        return res.json({ canAccess: true, reason: "free" });
+      }
+
+      const hasPurchased = await storage.userHasPurchasedDesign(userId, id);
+      res.json({ canAccess: hasPurchased, reason: hasPurchased ? "purchased" : "not_purchased" });
+    } catch (error) {
+      console.error("Error checking access:", error);
+      res.status(500).json({ message: "Failed to check access" });
+    }
+  });
+
+  app.post('/api/marketplace/designs/:id/download', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Check access
+      if (design.makerId !== userId && design.priceType !== "free") {
+        const hasPurchased = await storage.userHasPurchasedDesign(userId, id);
+        if (!hasPurchased) {
+          return res.status(403).json({ message: "Must purchase design first" });
+        }
+      }
+
+      if (!design.stlFileContent) {
+        return res.status(404).json({ message: "STL file not available" });
+      }
+
+      // Return STL file
+      res.json({ stlFileContent: design.stlFileContent, fileName: `${design.title}.stl` });
+    } catch (error) {
+      console.error("Error downloading design:", error);
+      res.status(500).json({ message: "Failed to download design" });
+    }
+  });
+
+  app.post('/api/marketplace/designs/:id/purchase-free', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Can only "purchase" free designs
+      if (design.priceType !== "free") {
+        return res.status(400).json({ message: "Only free designs can use this endpoint" });
+      }
+
+      // Create purchase record (free)
+      const purchase = await storage.createDesignPurchase({
+        designId: id,
+        buyerId: userId,
+        makerId: design.makerId,
+        amountPaid: "0.00",
+        paymentMethod: "free",
+        status: "completed",
+      });
+
+      res.json({ message: "Design acquired", purchase });
+    } catch (error: any) {
+      console.error("Error recording free purchase:", error);
+      res.status(500).json({ message: error.message || "Failed to acquire design" });
+    }
+  });
+
+  // Stripe checkout for paid designs
+  app.post('/api/marketplace/designs/:id/checkout', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { paymentMethod, amount } = req.body; // amount = custom amount if type is "minimum"
+
+      const design = await storage.getMarketplaceDesign(id);
+      
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Validate price
+      let finalAmount = parseFloat(amount || String(design.price));
+      
+      if (design.priceType === "fixed") {
+        finalAmount = parseFloat(String(design.price));
+      } else if (design.priceType === "minimum") {
+        if (finalAmount < parseFloat(String(design.price))) {
+          return res.status(400).json({ message: `Amount must be at least €${design.price}` });
+        }
+      }
+
+      // For now, return payment info (Stripe integration would go here)
+      res.json({
+        designId: id,
+        amount: finalAmount,
+        paymentMethod,
+        status: "ready_for_payment",
+        message: "Payment processing is configured via environment variables"
+      });
+    } catch (error: any) {
+      console.error("Error creating checkout:", error);
+      res.status(500).json({ message: error.message || "Failed to create checkout" });
+    }
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
 
