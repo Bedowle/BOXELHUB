@@ -169,7 +169,7 @@ export default function MakerHome() {
     <div className="min-h-screen bg-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
+        <div className="container mx-auto px-4 py-4 max-w-7xl space-y-4">
           {/* Profile Section - Clickable */}
           {profile && (
             <Card 
@@ -202,6 +202,29 @@ export default function MakerHome() {
               </CardContent>
             </Card>
           )}
+
+          {/* Action Buttons */}
+          <div className="grid md:grid-cols-2 gap-3">
+            <Button 
+              size="sm" 
+              onClick={() => setLocation("/marketplace")}
+              className="w-full"
+              data-testid="button-browse-marketplace"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Explorar Diseños
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setLocation("/maker/marketplace")}
+              className="w-full"
+              data-testid="button-manage-shop"
+            >
+              <Package className="h-4 w-4 mr-2" />
+              Mi Tienda
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -214,29 +237,6 @@ export default function MakerHome() {
           <p className="text-lg text-muted-foreground">
             Gestiona tus ofertas, proyectos en progreso y entregas completadas
           </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid md:grid-cols-2 gap-4 mb-10">
-          <Button 
-            size="lg" 
-            onClick={() => setLocation("/marketplace")}
-            className="w-full"
-            data-testid="button-browse-marketplace"
-          >
-            <Sparkles className="h-5 w-5 mr-2" />
-            Explorar Diseños
-          </Button>
-          <Button 
-            size="lg" 
-            variant="outline"
-            onClick={() => setLocation("/maker/marketplace")}
-            className="w-full"
-            data-testid="button-manage-shop"
-          >
-            <Package className="h-5 w-5 mr-2" />
-            Mi Tienda
-          </Button>
         </div>
 
         {/* Stats Grid */}
