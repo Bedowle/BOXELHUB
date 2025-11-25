@@ -363,7 +363,7 @@ export default function UserProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <CardTitle className="text-2xl">{user.username}</CardTitle>
-                {isMaker && makerProfile?.rating && (
+                {isMaker && makerProfile && (
                   <button
                     onClick={() => setLocation(`/user/${userId}/reviews`)}
                     className="flex items-center gap-1 hover:opacity-80 cursor-pointer transition-opacity"
@@ -385,7 +385,7 @@ export default function UserProfilePage() {
                       );
                     })}
                     <span className="text-sm font-medium ml-2">
-                      ({makerProfile.totalReviews})
+                      ({makerProfile.totalReviews || 0})
                     </span>
                   </button>
                 )}
