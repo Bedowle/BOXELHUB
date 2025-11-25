@@ -297,21 +297,51 @@ export default function MakerBalance() {
           </CardHeader>
           <CardContent>
             {!editingMethod ? (
-              <div>
-                <p className="font-semibold mb-2">
-                  {makerProfile?.payoutMethod ? getPayoutMethodLabel(makerProfile.payoutMethod) : "No configurado"}
-                </p>
-                {makerProfile?.payoutMethod === "stripe" && (makerProfile as any)?.stripeConnectAccountId && (
-                  <p className="text-sm text-muted-foreground">Account: {(makerProfile as any).stripeConnectAccountId.substring(0, 20)}...</p>
-                )}
-                {makerProfile?.payoutMethod === "paypal" && (makerProfile as any)?.paypalAccountId && (
-                  <p className="text-sm text-muted-foreground">Account: {(makerProfile as any).paypalAccountId}</p>
-                )}
-                {makerProfile?.payoutMethod === "bank" && (
-                  <>
-                    <p className="text-sm text-muted-foreground">IBAN: {makerProfile?.bankAccountIban}</p>
-                    <p className="text-sm text-muted-foreground">Titular: {makerProfile?.bankAccountName}</p>
-                  </>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-semibold mb-2">
+                    {makerProfile?.payoutMethod ? getPayoutMethodLabel(makerProfile.payoutMethod) : "No configurado"}
+                  </p>
+                  {makerProfile?.payoutMethod === "stripe" && (
+                    <>
+                      {makerProfile?.bankAccountIban ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">IBAN: {makerProfile?.bankAccountIban}</p>
+                          <p className="text-sm text-muted-foreground">Titular: {makerProfile?.bankAccountName}</p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400">Por configurar</p>
+                      )}
+                    </>
+                  )}
+                  {makerProfile?.payoutMethod === "paypal" && (
+                    <>
+                      {(makerProfile as any)?.paypalAccountId ? (
+                        <p className="text-sm text-muted-foreground">Email: {(makerProfile as any).paypalAccountId}</p>
+                      ) : (
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400">Por configurar</p>
+                      )}
+                    </>
+                  )}
+                  {makerProfile?.payoutMethod === "bank" && (
+                    <>
+                      {makerProfile?.bankAccountIban ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">IBAN: {makerProfile?.bankAccountIban}</p>
+                          <p className="text-sm text-muted-foreground">Titular: {makerProfile?.bankAccountName}</p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-yellow-600 dark:text-yellow-400">Por configurar</p>
+                      )}
+                    </>
+                  )}
+                </div>
+                {process.env.NODE_ENV === "development" && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="text-xs text-blue-900 dark:text-blue-100">
+                      ℹ️ <strong>Modo desarrollo:</strong> Los payouts se simulan y se marcan como completados. En producción se enviarán realmente.
+                    </p>
+                  </div>
                 )}
               </div>
             ) : (
@@ -561,6 +591,9 @@ export default function MakerBalance() {
                         {payout.status === "failed" && "Fallido"}
                       </div>
                       <div className="text-xs text-muted-foreground">{getPayoutMethodLabel(payout.method)}</div>
+                      {payout.status === "completed" && (
+                        <div className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Completado</div>
+                      )}
                     </div>
                   </div>
                 ))}
