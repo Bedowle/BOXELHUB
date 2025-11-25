@@ -171,13 +171,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Execute payout in background based on method
       if (profile.payoutMethod === "stripe") {
         const accountId = profile.stripeConnectAccountId || "acct_test_development";
-        executeStripePayout(accountId, amount).catch(err => {
+        executeStripePayout(accountId, amount, payout).catch(err => {
           console.error("Error executing Stripe payout:", err);
         });
       } else if (profile.payoutMethod === "paypal") {
         // Use PayPal account ID from profile, fallback to stripeEmail or paypalEmail if configured
         let paypalRecipient = profile.paypalAccountId || (profile as any)?.paypalEmail || (profile as any)?.stripeEmail || "test@voxelhub.dev";
-        executePayPalPayout(paypalRecipient, amount).catch(err => {
+        executePayPalPayout(paypalRecipient, amount, payout).catch(err => {
           console.error("Error executing PayPal payout:", err);
         });
       }
@@ -193,35 +193,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Helper functions for executing payouts
-  async function executeStripePayout(stripeConnectAccountId: string, amount: string) {
+  async function executeStripePayout(stripeConnectAccountId: string, amount: string, payoutRecord: any) {
     try {
-      const stripe = await getUncachableStripeClient();
+      const isDevelopment = process.env.NODE_ENV === "development";
       
-      // First, ensure test bank account exists
-      try {
-        // Get the list of external accounts
-        const accounts = await (stripe.accounts as any).listExternalAccounts('self');
+      if (isDevelopment) {
+        // In development, simulate successful payout and mark as completed
+        console.log("✅ [DEVELOPMENT MODE] Stripe payout simulated");
+        console.log("   Amount: $" + parseFloat(amount).toFixed(2));
+        console.log("   Status: succeeded");
+        console.log("   Account: " + (stripeConnectAccountId || "platform"));
         
-        // If no bank accounts exist, create one
-        if (!accounts.data || accounts.data.length === 0) {
-          console.log("Adding test bank account...");
-          await (stripe.accounts as any).createExternalAccount('self', {
-            external_account: {
-              object: 'bank_account',
-              country: 'US',
-              currency: 'usd',
-              account_holder_name: 'VoxelHub Test',
-              account_number: '000111111116',
-              routing_number: '110000000'
-            }
-          });
-          console.log("✅ Test bank account added");
+        // Mark payout as completed in database for development
+        try {
+          await storage.updatePayoutStatus(payoutRecord.id, "completed");
+          console.log("   Marked as completed in database");
+        } catch (updateErr: any) {
+          console.error("   Error updating payout status:", updateErr.message);
         }
-      } catch (bankSetupError: any) {
-        console.log("Note: Bank account setup:", bankSetupError.message);
+        return;
       }
       
-      // Now attempt to create payout
+      // Production: Use real Stripe API
+      const stripe = await getUncachableStripeClient();
       const payout = await stripe.payouts.create({
         amount: Math.round(parseFloat(amount) * 100),
         currency: 'usd',
@@ -229,25 +223,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `VoxelHub payout`
       });
       
-      // Success - payout was created and will show in dashboard
-      console.log("✅ Payout created:", payout.id);
+      console.log("✅ Stripe payout created:", payout.id);
       console.log("   Status:", payout.status);
-      console.log("   Check your Stripe dashboard: https://dashboard.stripe.com/test/payouts/" + payout.id);
+      console.log("   Check: https://dashboard.stripe.com/test/payouts/" + payout.id);
       return;
     } catch (error: any) {
       console.error("❌ Payout error:", error.message);
     }
   }
 
-  async function executePayPalPayout(paypalAccountId: string, amount: string) {
+  async function executePayPalPayout(paypalAccountId: string, amount: string, payoutRecord: any) {
     try {
+      const isDevelopment = process.env.NODE_ENV === "development";
+      
+      if (isDevelopment) {
+        // In development, simulate successful PayPal payout
+        console.log("✅ [DEVELOPMENT MODE] PayPal payout simulated");
+        console.log("   Amount: €" + parseFloat(amount).toFixed(2));
+        console.log("   Recipient: " + paypalAccountId);
+        console.log("   Status: processing");
+        
+        // Mark payout as completed in database for development
+        try {
+          await storage.updatePayoutStatus(payoutRecord.id, "completed");
+          console.log("   Marked as completed in database");
+        } catch (updateErr: any) {
+          console.error("   Error updating payout status:", updateErr.message);
+        }
+        return;
+      }
+      
       if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
         console.error("PayPal credentials not configured");
         return;
       }
       
-      // Always use sandbox for development, production for deployed apps
-      const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
+      // Production: Use real PayPal API
+      const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
       const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
       
       const clientId = process.env.PAYPAL_CLIENT_ID;
