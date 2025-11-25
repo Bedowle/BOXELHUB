@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ChatDialog } from "@/components/ChatDialog";
 import { BidEditDialog } from "@/components/BidEditDialog";
+import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
 import { ArrowLeft, Calendar, FileText, Package, Download, MessageCircle, Edit2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -20,6 +21,7 @@ export default function MakerProjectDetails() {
   const { toast } = useToast();
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [editBidDialogOpen, setEditBidDialogOpen] = useState(false);
+  const [rebidDialogOpen, setRebidDialogOpen] = useState(false);
   const [projectOwner, setProjectOwner] = useState<User | null>(null);
 
   const projectId = params?.id;
@@ -230,6 +232,15 @@ export default function MakerProjectDetails() {
                       Editar Oferta
                     </Button>
                   )}
+                  {myBid.status === 'rejected' && (
+                    <Button 
+                      size="sm"
+                      onClick={() => setRebidDialogOpen(true)}
+                      data-testid="button-rebid-rejected"
+                    >
+                      Volver a Ofertar
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -256,6 +267,14 @@ export default function MakerProjectDetails() {
           currentPrice={myBid.price}
           currentDeliveryDays={myBid.deliveryDays}
           currentMessage={myBid.message}
+        />
+      )}
+
+      {projectId && (
+        <BidSubmissionDialog
+          open={rebidDialogOpen}
+          onOpenChange={setRebidDialogOpen}
+          projectId={projectId}
         />
       )}
     </div>
