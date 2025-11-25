@@ -191,31 +191,54 @@ export default function ClientMarketplace() {
                   </div>
 
                   {/* Price & CTA */}
-                  <div className="mt-auto pt-4 border-t border-border/50">
+                  <div className="mt-auto pt-4 border-t border-border/50 space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs text-muted-foreground">Precio</p>
                         <p className="text-2xl font-bold text-primary" data-testid={`text-price-${design.id}`}>
-                          €{parseFloat(String(design.price)).toFixed(2)}
+                          {design.priceType === "free" ? "Gratis" : `€${parseFloat(String(design.price)).toFixed(2)}`}
                         </p>
                       </div>
+                      {design.priceType && (
+                        <Badge variant="outline" className="text-xs">
+                          {design.priceType === "free"
+                            ? "Gratis"
+                            : design.priceType === "fixed"
+                              ? "Fijo"
+                              : "Mínimo"}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
                       {user?.id === design.makerId ? (
                         <Button
                           size="sm"
                           variant="outline"
+                          className="w-full"
                           onClick={() => setLocation(`/maker/marketplace`)}
                           data-testid={`button-edit-design-${design.id}`}
                         >
                           Editar
                         </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
-                          data-testid={`button-contact-maker-${design.id}`}
-                        >
-                          Contactar
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => setLocation(`/marketplace-design/${design.id}`)}
+                            data-testid={`button-buy-design-${design.id}`}
+                          >
+                            Comprar/Descargar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
+                            data-testid={`button-contact-maker-${design.id}`}
+                          >
+                            Contactar
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
