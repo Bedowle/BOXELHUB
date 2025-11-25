@@ -39,7 +39,7 @@ export default function AppHeader() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation("/client/marketplace")}
+                onClick={() => setLocation("/marketplace")}
                 data-testid="button-marketplace"
               >
                 <Sparkles className="h-4 w-4 mr-2" />

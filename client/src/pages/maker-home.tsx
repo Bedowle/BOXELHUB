@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Printer, Package, CheckCircle, Zap, Search, TrendingUp, MessageCircle, ArrowLeft } from "lucide-react";
+import { Printer, Package, CheckCircle, Zap, Search, TrendingUp, MessageCircle, ArrowLeft, Sparkles } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { MakerRatingDialog } from "@/components/MakerRatingDialog";
@@ -214,6 +214,29 @@ export default function MakerHome() {
           <p className="text-lg text-muted-foreground">
             Gestiona tus ofertas, proyectos en progreso y entregas completadas
           </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid md:grid-cols-2 gap-4 mb-10">
+          <Button 
+            size="lg" 
+            onClick={() => setLocation("/marketplace")}
+            className="w-full"
+            data-testid="button-browse-marketplace"
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            Explorar Diseños
+          </Button>
+          <Button 
+            size="lg" 
+            variant="outline"
+            onClick={() => setLocation("/maker/marketplace")}
+            className="w-full"
+            data-testid="button-manage-shop"
+          >
+            <Package className="h-5 w-5 mr-2" />
+            Mi Tienda
+          </Button>
         </div>
 
         {/* Stats Grid */}

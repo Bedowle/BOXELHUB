@@ -81,6 +81,7 @@ function Router() {
           <Route path="/chats" component={ChatsSplitPage} />
           <Route path="/chats-old" component={ChatsPage} />
           <Route path="/user/:userId" component={UserProfilePage} />
+          <Route path="/marketplace" component={ClientMarketplace} />
           <Route path="/marketplace-design/:designId" component={MarketplaceDesignDetailPage} />
 
           {/* Client Routes */}
@@ -91,7 +92,6 @@ function Router() {
               <Route path="/client/projects-active" component={ClientProjectsActive} />
               <Route path="/client/projects-completed" component={ClientProjectsCompleted} />
               <Route path="/client/bids" component={ClientBidsList} />
-              <Route path="/client/marketplace" component={ClientMarketplace} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
             </>
