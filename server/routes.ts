@@ -1710,9 +1710,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get PayPal status endpoint
+  app.get('/api/paypal/status', (req, res) => {
+    const hasPayPal = !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
+    res.json({ available: hasPayPal });
+  });
+
   // Create PayPal order for marketplace design
   app.post('/api/marketplace/designs/:id/paypal-order', isAuthenticated, async (req: any, res) => {
     try {
+      // Check if PayPal is configured
+      if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+        return res.status(503).json({ message: "PayPal is not configured" });
+      }
+
       const userId = getAuthenticatedUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -1808,6 +1819,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Capture PayPal order
   app.post('/api/marketplace/designs/:id/paypal-capture', isAuthenticated, async (req: any, res) => {
     try {
+      // Check if PayPal is configured
+      if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+        return res.status(503).json({ message: "PayPal is not configured" });
+      }
+
       const userId = getAuthenticatedUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });

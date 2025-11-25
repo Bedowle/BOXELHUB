@@ -30,6 +30,7 @@ export default function MarketplaceDesignDetailPage() {
   const { toast } = useToast();
   const [customAmount, setCustomAmount] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paypalAvailable, setPaypalAvailable] = useState(false);
 
   const { data: design, isLoading, error } = useQuery<any>({
     queryKey: ["/api/marketplace/designs", designId],
@@ -74,6 +75,14 @@ export default function MarketplaceDesignDetailPage() {
     },
     enabled: !!designId,
   });
+
+  // Check PayPal availability
+  useEffect(() => {
+    fetch('/api/paypal/status')
+      .then(res => res.json())
+      .then(data => setPaypalAvailable(data.available))
+      .catch(() => setPaypalAvailable(false));
+  }, []);
 
   // Download design mutation
   const downloadMutation = useMutation({
