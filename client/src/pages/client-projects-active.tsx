@@ -83,23 +83,21 @@ export default function ClientProjectsActive() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.history.back()}
-              className="flex items-center gap-2"
-              data-testid="button-back"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver
-            </Button>
-            {totalUnreadBids && totalUnreadBids.totalUnread > 0 && (
-              <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-lg" data-testid="badge-total-unread">
-                {totalUnreadBids.totalUnread > 9 ? '9+' : totalUnreadBids.totalUnread}
-              </div>
-            )}
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2"
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+          {totalUnreadBids && totalUnreadBids.totalUnread > 0 && (
+            <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold shadow-lg" data-testid="badge-total-unread">
+              {totalUnreadBids.totalUnread > 9 ? '9+' : totalUnreadBids.totalUnread}
+            </div>
+          )}
           <Button
             size="sm"
             onClick={() => setUploadDialogOpen(true)}
