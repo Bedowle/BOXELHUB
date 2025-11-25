@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatListItem } from "@/components/ChatListItem";
 import { ChatWindow } from "@/components/ChatWindow";
-import { ArrowLeft, Search, MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface Conversation {
@@ -28,7 +28,6 @@ export default function ChatsSplitPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const [selectedConvKey, setSelectedConvKey] = useState<SelectedConversationKey | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch conversations
   const { data: allConversations = [], isLoading } = useQuery({
@@ -57,15 +56,7 @@ export default function ChatsSplitPage() {
     enabled: !!selectedConvKey?.userId,
   });
 
-  // Filter conversations based on search
-  const filteredConversations = allConversations.filter((conv: Conversation) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      conv.user?.username?.toLowerCase().includes(searchLower) ||
-      conv.user?.email?.toLowerCase().includes(searchLower) ||
-      conv.lastMessage?.content?.toLowerCase().includes(searchLower)
-    );
-  });
+  const filteredConversations = allConversations;
 
   // Get selected conversation details - match by userId + context
   const selectedConv = selectedConvKey ? allConversations.find((c: Conversation) => {
@@ -96,7 +87,7 @@ export default function ChatsSplitPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.history.back()}
+            onClick={() => setLocation(user?.userType === "maker" ? "/maker" : "/client")}
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -128,7 +119,7 @@ export default function ChatsSplitPage() {
               <div className="p-8 text-center">
                 <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <p className="text-muted-foreground text-sm">
-                  {searchQuery ? "Sin resultados" : "Sin conversaciones aún"}
+                  Sin conversaciones aún
                 </p>
               </div>
             ) : (
