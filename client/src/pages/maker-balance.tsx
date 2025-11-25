@@ -521,19 +521,19 @@ export default function MakerBalance() {
         </Card>
 
 
-        {/* Stripe Sandbox Notice */}
+        {/* Development Mode Notice */}
         {process.env.NODE_ENV === "development" && (
           <Card className="mb-8 border-blue-400 bg-blue-50 dark:bg-blue-950">
             <CardContent className="pt-6">
               <div className="flex gap-3">
                 <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">✅ Stripe Sandbox - Payouts Funcionales</h3>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">🧪 Modo Desarrollo - Payouts Simulados</h3>
                   <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-                    Los payouts se envían <strong>DE VERDAD a Stripe</strong> en ambiente de prueba. Usa IBANs de prueba para evitar errores.
+                    Los payouts se simulan y se marcan como completados en desarrollo. <strong>Cuando publiques la app, los payouts serán REALES.</strong>
                   </p>
                   <p className="text-xs text-blue-700 dark:text-blue-300">
-                    En producción, los payouts se enviarán de verdad a tu cuenta bancaria. IBAN de prueba: <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">DE89370400440532013000</code>
+                    En producción: Los payouts se enviarán DE VERDAD a tu cuenta bancaria via Stripe o PayPal.
                   </p>
                 </div>
               </div>

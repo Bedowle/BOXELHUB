@@ -193,9 +193,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper functions for executing payouts
   async function executeStripePayout(stripeConnectAccountId: string, amount: string, payoutRecord: any) {
     try {
+      const isDevelopment = process.env.NODE_ENV === "development";
+      
+      if (isDevelopment) {
+        // In development, simulate successful payout (Stripe sandbox limitations)
+        console.log("✅ [DEVELOPMENT] Stripe payout simulated");
+        console.log("   Amount: €" + parseFloat(amount).toFixed(2));
+        console.log("   Status: completed");
+        console.log("   Note: In production, payouts will be sent REAL to Stripe");
+        
+        // Mark payout as completed in database for development
+        try {
+          await storage.updatePayoutStatus(payoutRecord.id, "completed");
+          console.log("   ✓ Database updated");
+        } catch (updateErr: any) {
+          console.error("   Error updating payout status:", updateErr.message);
+        }
+        return;
+      }
+      
+      // PRODUCTION: Use real Stripe API
       const stripe = await getUncachableStripeClient();
       
-      console.log("🔄 Initiating Stripe payout...");
+      console.log("🔄 [PRODUCTION] Initiating REAL Stripe payout...");
       console.log("   Amount: €" + parseFloat(amount).toFixed(2));
       console.log("   Payout ID:", payoutRecord.id);
       
@@ -207,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `VoxelHub maker payout #${payoutRecord.id.substring(0, 8)}`
       });
       
-      console.log("✅ Stripe payout created successfully!");
+      console.log("✅ [PRODUCTION] Stripe payout created successfully!");
       console.log("   Payout ID:", payout.id);
       console.log("   Status:", payout.status);
       console.log("   Amount:", payout.amount / 100, payout.currency.toUpperCase());
