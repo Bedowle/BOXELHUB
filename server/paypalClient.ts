@@ -1,8 +1,15 @@
 import * as paypalCheckoutServerSDK from '@paypal/checkout-server-sdk';
 
-let connectionSettings: any;
-
 async function getCredentials() {
+  // First try env vars (from secrets)
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  
+  if (clientId && clientSecret) {
+    return { clientId, clientSecret };
+  }
+
+  // If no env vars, try Replit connector
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -11,17 +18,11 @@ async function getCredentials() {
       : null;
 
   if (!xReplitToken) {
-    // If not in Replit deployment, try to get from env vars
-    const clientId = process.env.PAYPAL_CLIENT_ID;
-    const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    if (clientId && clientSecret) {
-      return { clientId, clientSecret };
-    }
-    throw new Error('PayPal credentials not found');
+    throw new Error('PayPal credentials not found in env vars or Replit connector');
   }
 
   const connectorName = 'paypal';
-  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+  const isProduction = process.env.REPLIT_DEPLOYMENT === '1' || process.env.NODE_ENV === 'production';
   const targetEnvironment = isProduction ? 'production' : 'development';
 
   const url = new URL(`https://${hostname}/api/v2/connection`);
@@ -37,7 +38,7 @@ async function getCredentials() {
   });
 
   const data = await response.json();
-  connectionSettings = data.items?.[0];
+  const connectionSettings = data.items?.[0];
 
   if (!connectionSettings || (!connectionSettings.settings.client_id || !connectionSettings.settings.secret)) {
     throw new Error(`PayPal ${targetEnvironment} connection not found`);
