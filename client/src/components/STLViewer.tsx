@@ -118,7 +118,7 @@ interface STLViewerProps {
 }
 
 export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const meshRef = useRef<THREE.Mesh | null>(null);
@@ -140,16 +140,15 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
       const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
       camera.position.z = 150;
 
-      // Renderer setup
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
+      // Renderer setup - use canvas element directly
+      const renderer = new THREE.WebGLRenderer({ 
+        canvas: containerRef.current,
+        antialias: true, 
+        alpha: true 
+      });
+      // Use pixelRatio of 1 to ensure canvas size matches CSS size exactly
+      renderer.setPixelRatio(1);
       renderer.setSize(width, height);
-      renderer.domElement.style.display = 'block';
-      renderer.domElement.style.margin = '0';
-      renderer.domElement.style.padding = '0';
-      renderer.domElement.style.border = 'none';
-      renderer.domElement.style.verticalAlign = 'middle';
-      containerRef.current.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
       // Lighting
@@ -222,9 +221,11 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         mouseRef.current.y = e.clientY;
       };
 
-      renderer.domElement.addEventListener("mouseenter", onMouseEnter, false);
-      renderer.domElement.addEventListener("mouseleave", onMouseLeave, false);
-      renderer.domElement.addEventListener("mousemove", onMouseMove, false);
+      if (containerRef.current) {
+        containerRef.current.addEventListener("mouseenter", onMouseEnter, false);
+        containerRef.current.addEventListener("mouseleave", onMouseLeave, false);
+        containerRef.current.addEventListener("mousemove", onMouseMove, false);
+      }
 
       // Animation loop
       const animate = () => {
@@ -233,24 +234,11 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
       };
       animate();
 
-      // Handle window resize
-      const handleResize = () => {
-        const newWidth = containerRef.current?.clientWidth || width;
-        const newHeight = containerRef.current?.clientHeight || height;
-        camera.aspect = newWidth / newHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(newWidth, newHeight);
-      };
-
-      window.addEventListener("resize", handleResize);
-
       return () => {
-        window.removeEventListener("resize", handleResize);
-        renderer.domElement.removeEventListener("mouseenter", onMouseEnter, false);
-        renderer.domElement.removeEventListener("mouseleave", onMouseLeave, false);
-        renderer.domElement.removeEventListener("mousemove", onMouseMove, false);
-        if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
-          containerRef.current.removeChild(renderer.domElement);
+        if (containerRef.current) {
+          containerRef.current.removeEventListener("mouseenter", onMouseEnter, false);
+          containerRef.current.removeEventListener("mouseleave", onMouseLeave, false);
+          containerRef.current.removeEventListener("mousemove", onMouseMove, false);
         }
         renderer.dispose();
       };
@@ -261,10 +249,10 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="relative bg-background rounded-lg pointer-events-auto" style={{ overflow: 'hidden', width: `${width}px`, height: `${height}px`, fontSize: 0 }}>
-      <div
-        ref={containerRef}
-        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'inline-block', margin: 0, padding: 0, overflow: 'hidden', fontSize: 0 }}
+    <div className="bg-background rounded-lg pointer-events-auto relative" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden' }}>
+      <canvas
+        ref={containerRef as any}
+        style={{ width: `${width}px`, height: `${height}px`, display: 'block', margin: 0, padding: 0 }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
