@@ -144,8 +144,10 @@ export default function MakerProfile() {
               {/* User Info */}
               <div className="flex-1 space-y-4">
                 <div>
-                  <h1 className="text-4xl font-bold mb-1">{user.firstName || "Mi Perfil"}</h1>
-                  <p className="text-muted-foreground">@{user.email}</p>
+                  <h1 className="text-4xl font-bold mb-1">{user.username}</h1>
+                  {user.showFullName && (
+                    <p className="text-muted-foreground">{user.firstName} {user.lastName}</p>
+                  )}
                 </div>
 
                 {/* Rating */}

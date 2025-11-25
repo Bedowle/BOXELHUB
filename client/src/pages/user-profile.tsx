@@ -36,6 +36,7 @@ const profileEditSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   location: z.string().optional(),
+  showFullName: z.boolean().default(false),
 });
 
 const makerProfileEditSchema = z.object({
@@ -52,6 +53,7 @@ const makerProfileEditSchema = z.object({
   addressNumber: z.string().optional(),
   addressPostalCode: z.string().optional(),
   capabilities: z.string().optional(),
+  showFullName: z.boolean().default(false),
 });
 
 type ProfileEditForm = z.infer<typeof profileEditSchema>;
@@ -157,13 +159,14 @@ export default function UserProfilePage() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         location: user.location || "",
+        showFullName: user.showFullName || false,
       });
     }
   }, [user, form]);
 
   // Update maker form when maker profile loads
   useEffect(() => {
-    if (makerProfile) {
+    if (makerProfile && user) {
       makerForm.reset({
         printerType: makerProfile.printerType || "",
         materials: makerProfile.materials || [],
@@ -178,9 +181,10 @@ export default function UserProfilePage() {
         addressNumber: makerProfile.addressNumber || "",
         addressPostalCode: makerProfile.addressPostalCode || "",
         capabilities: makerProfile.capabilities || "",
+        showFullName: user.showFullName || false,
       });
     }
-  }, [makerProfile, makerForm]);
+  }, [makerProfile, makerForm, user]);
 
   // Profile update mutation
   const updateProfileMutation = useMutation({
@@ -369,10 +373,11 @@ export default function UserProfilePage() {
             </div>
             <div className="flex-1">
               <CardTitle className="text-2xl">{user.username}</CardTitle>
-              <p className="text-muted-foreground">{user.email}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {user.firstName} {user.lastName}
-              </p>
+              {user.showFullName && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {user.firstName} {user.lastName}
+                </p>
+              )}
 
               {/* Rating */}
               {reviewCount > 0 && (
@@ -642,6 +647,19 @@ export default function UserProfilePage() {
                     )}
                   />
 
+                  <FormField
+                    control={makerForm.control}
+                    name="showFullName"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center gap-2 space-y-0 pt-2">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} data-testid="checkbox-show-full-name-maker" />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">Mostrar nombre completo en mi perfil</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
                   <div className="flex gap-2 pt-4">
                     <Button
                       type="submit"
@@ -695,6 +713,19 @@ export default function UserProfilePage() {
                           <Input placeholder="Ubicación (opcional)" {...field} data-testid="input-location" />
                         </FormControl>
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="showFullName"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center gap-2 space-y-0 pt-2">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} data-testid="checkbox-show-full-name" />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">Mostrar nombre completo en mi perfil</FormLabel>
                       </FormItem>
                     )}
                   />

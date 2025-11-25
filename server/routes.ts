@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot edit another user's profile" });
       }
 
-      const { firstName, lastName, location } = req.body;
+      const { firstName, lastName, location, showFullName } = req.body;
 
       const user = await storage.getUser(userId);
       if (!user) {
@@ -127,7 +127,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username: user.username,
         location: location || user.location,
         profileImageUrl: user.profileImageUrl,
-        userType: user.userType
+        userType: user.userType,
+        showFullName: showFullName !== undefined ? showFullName : user.showFullName
       });
 
       const updated = await storage.getUser(userId);
@@ -1174,7 +1175,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can update profiles" });
       }
 
-      const validated = insertMakerProfileSchema.parse(req.body);
+      const { showFullName, ...makerData } = req.body;
+      
+      // Update showFullName in user table if provided
+      if (showFullName !== undefined) {
+        await storage.upsertUser({
+          id: userId,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          profileImageUrl: user.profileImageUrl,
+          userType: user.userType,
+          showFullName
+        });
+      }
+
+      const validated = insertMakerProfileSchema.parse(makerData);
       const profile = await storage.upsertMakerProfile({ ...validated, userId });
       res.json(profile);
     } catch (error: any) {

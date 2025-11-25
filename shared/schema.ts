@@ -58,6 +58,7 @@ export const users = pgTable("users", {
   isEmailVerified: boolean("is_email_verified").default(false).notNull(),
   userType: userTypeEnum("user_type"),
   authProvider: varchar("auth_provider"), // 'email', 'google', 'facebook', 'apple', 'replit'
+  showFullName: boolean("show_full_name").default(false).notNull(), // Show firstName and lastName in profile
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
