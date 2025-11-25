@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
+import { STLViewer } from "@/components/STLViewer";
 import { BidCard } from "@/components/BidCard";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
 import { BidEditDialog } from "@/components/BidEditDialog";
@@ -211,12 +212,21 @@ export default function ProjectDetails() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Project Header */}
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* 3D Model - Centered and Prominent */}
+        <div className="mb-12 flex justify-center">
+          <Card className="w-full max-w-2xl">
+            <CardContent className="py-6 px-6 flex items-center justify-center">
+              <STLViewer projectId={project.id} width={500} height={400} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Project Details */}
         <Card className="mb-8">
           <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col gap-4">
+              <div>
                 <div className="flex items-center gap-3 mb-3">
                   <h1 className="text-3xl font-bold" data-testid="text-project-title">
                     {project.name}
@@ -250,29 +260,31 @@ export default function ProjectDetails() {
                   </div>
                 </div>
               </div>
-              {canBid && (
-                <Button 
-                  size="lg"
-                  onClick={() => setBidDialogOpen(true)}
-                  data-testid="button-submit-bid"
-                >
-                  Enviar Oferta
-                </Button>
-              )}
-              {isOwner && acceptedBid && acceptedBid.maker && (
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedMaker(acceptedBid.maker!);
-                    setChatDialogOpen(true);
-                  }}
-                  data-testid="button-chat-maker"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
-                </Button>
-              )}
+              <div className="flex flex-wrap gap-3">
+                {canBid && (
+                  <Button 
+                    size="lg"
+                    onClick={() => setBidDialogOpen(true)}
+                    data-testid="button-submit-bid"
+                  >
+                    Enviar Oferta
+                  </Button>
+                )}
+                {isOwner && acceptedBid && acceptedBid.maker && (
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedMaker(acceptedBid.maker!);
+                      setChatDialogOpen(true);
+                    }}
+                    data-testid="button-chat-maker"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
         </Card>
