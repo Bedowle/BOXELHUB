@@ -38,14 +38,9 @@ export default function ClientMarketplace() {
     },
   });
 
-  // Filter designs based on search and exclude user's own designs
+  // Filter designs based on search
   const filteredDesigns = useMemo(() => {
     return designs.filter((design: Design) => {
-      // Exclude user's own designs
-      if (user?.id === design.makerId) {
-        return false;
-      }
-
       const query = searchQuery.toLowerCase();
       return (
         design.title.toLowerCase().includes(query) ||
@@ -54,7 +49,7 @@ export default function ClientMarketplace() {
         design.maker?.username?.toLowerCase().includes(query)
       );
     });
-  }, [designs, searchQuery, user?.id]);
+  }, [designs, searchQuery]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5">
@@ -204,13 +199,24 @@ export default function ClientMarketplace() {
                           €{parseFloat(String(design.price)).toFixed(2)}
                         </p>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
-                        data-testid={`button-contact-maker-${design.id}`}
-                      >
-                        Contactar
-                      </Button>
+                      {user?.id === design.makerId ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setLocation(`/maker/marketplace`)}
+                          data-testid={`button-edit-design-${design.id}`}
+                        >
+                          Editar
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
+                          data-testid={`button-contact-maker-${design.id}`}
+                        >
+                          Contactar
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
