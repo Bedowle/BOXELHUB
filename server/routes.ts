@@ -471,6 +471,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/projects/:id/stl-content', async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      if (!project.stlFileContent) {
+        return res.status(404).json({ message: "STL file not found" });
+      }
+
+      // Convert base64 to binary
+      const binaryData = Buffer.from(project.stlFileContent, 'base64');
+      res.type('application/octet-stream').send(binaryData);
+    } catch (error) {
+      console.error("Error serving STL content:", error);
+      res.status(500).json({ message: "Failed to serve STL" });
+    }
+  });
+
   app.post('/api/projects/:id/bids', isAuthenticated, async (req: any, res) => {
     try {
       const { id: projectId } = req.params;

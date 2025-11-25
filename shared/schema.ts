@@ -96,6 +96,7 @@ export const projects = pgTable("projects", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   stlFileName: varchar("stl_file_name").notNull(),
+  stlFileContent: text("stl_file_content"), // Store as base64
   description: text("description").notNull(),
   material: varchar("material").notNull(),
   specifications: jsonb("specifications"),

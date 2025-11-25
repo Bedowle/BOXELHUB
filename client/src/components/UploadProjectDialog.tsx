@@ -50,6 +50,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
     defaultValues: {
       name: "",
       stlFileName: "",
+      stlFileContent: undefined,
       description: "",
       material: "",
       specifications: {
@@ -119,6 +120,16 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
     if (file) {
       setFileName(file.name);
       form.setValue("stlFileName", file.name);
+      
+      // Read file as base64
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        // Extract base64 from data URL
+        const base64Content = content.split(',')[1] || content;
+        form.setValue("stlFileContent", base64Content);
+      };
+      reader.readAsDataURL(file);
     }
   };
 

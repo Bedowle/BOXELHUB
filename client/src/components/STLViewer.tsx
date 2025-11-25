@@ -1,6 +1,115 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { STLLoader } from "three-stdlib";
+
+// STLLoader implementation
+class STLLoader {
+  load(
+    url: string,
+    onLoad: (geometry: THREE.BufferGeometry) => void,
+    onProgress?: (event: ProgressEvent) => void,
+    onError?: (event: ErrorEvent) => void
+  ) {
+    fetch(url)
+      .then((response) => response.arrayBuffer())
+      .then((arrayBuffer) => {
+        const geometry = this.parse(arrayBuffer);
+        onLoad(geometry);
+      })
+      .catch((error) => {
+        if (onError) onError(error as ErrorEvent);
+      });
+  }
+
+  parse(arrayBuffer: ArrayBuffer): THREE.BufferGeometry {
+    const view = new DataView(arrayBuffer);
+    const isASCII = this.isASCIISTL(arrayBuffer);
+
+    if (isASCII) {
+      return this.parseASCII(new TextDecoder().decode(arrayBuffer));
+    } else {
+      return this.parseBinary(arrayBuffer);
+    }
+  }
+
+  isASCIISTL(arrayBuffer: ArrayBuffer): boolean {
+    const view = new Uint8Array(arrayBuffer);
+    const header = new TextDecoder().decode(view.slice(0, 5));
+    return header === "solid";
+  }
+
+  parseBinary(arrayBuffer: ArrayBuffer): THREE.BufferGeometry {
+    const view = new DataView(arrayBuffer);
+    const faces = view.getUint32(80, true);
+    const geometry = new THREE.BufferGeometry();
+    const vertices: number[] = [];
+    const normals: number[] = [];
+
+    let offset = 84;
+    for (let i = 0; i < faces; i++) {
+      const nx = view.getFloat32(offset, true);
+      offset += 4;
+      const ny = view.getFloat32(offset, true);
+      offset += 4;
+      const nz = view.getFloat32(offset, true);
+      offset += 4;
+
+      for (let j = 0; j < 3; j++) {
+        vertices.push(view.getFloat32(offset, true));
+        offset += 4;
+        vertices.push(view.getFloat32(offset, true));
+        offset += 4;
+        vertices.push(view.getFloat32(offset, true));
+        offset += 4;
+
+        normals.push(nx, ny, nz);
+      }
+
+      offset += 2; // attribute byte count
+    }
+
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(vertices), 3));
+    geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+
+    return geometry;
+  }
+
+  parseASCII(data: string): THREE.BufferGeometry {
+    const geometry = new THREE.BufferGeometry();
+    const vertices: number[] = [];
+    const normals: number[] = [];
+
+    const vertexPattern = /vertex\s+([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s+([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s+([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)/g;
+    const normalPattern = /facet\s+normal\s+([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s+([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s+([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)/g;
+
+    let normalMatch;
+    let vertexMatch;
+    let currentNormal = [0, 0, 0];
+
+    while ((normalMatch = normalPattern.exec(data)) !== null) {
+      currentNormal = [parseFloat(normalMatch[1]), parseFloat(normalMatch[3]), parseFloat(normalMatch[5])];
+
+      // Reset vertex pattern lastIndex
+      vertexPattern.lastIndex = normalMatch.index;
+
+      for (let i = 0; i < 3; i++) {
+        vertexMatch = vertexPattern.exec(data);
+        if (vertexMatch) {
+          vertices.push(
+            parseFloat(vertexMatch[1]),
+            parseFloat(vertexMatch[3]),
+            parseFloat(vertexMatch[5])
+          );
+          normals.push(...currentNormal);
+        }
+      }
+    }
+
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(vertices), 3));
+    geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+
+    return geometry;
+  }
+}
 
 interface STLViewerProps {
   stlFileName: string;
@@ -48,7 +157,7 @@ export function STLViewer({ stlFileName, width = 400, height = 250 }: STLViewerP
 
       // Load STL
       const loader = new STLLoader();
-      const fileUrl = `/uploads/projects/${stlFileName}`;
+      const fileUrl = `/api/projects/${stlFileName}/stl-content`;
 
       loader.load(
         fileUrl,
