@@ -11,6 +11,8 @@ import {
   emailTokens,
   marketplaceDesigns,
   designPurchases,
+  makerEarnings,
+  makerPayouts,
   type User,
   type UpsertUser,
   type MakerProfile,
@@ -853,6 +855,87 @@ export class DatabaseStorage implements IStorage {
 
   async updateDesignPurchase(id: string, data: Partial<DesignPurchase>): Promise<void> {
     await db.update(designPurchases).set(data).where(eq(designPurchases.id, id));
+  }
+
+  // Maker earnings operations (with retention)
+  async createMakerEarning(makerId: string, designPurchaseId: string, amount: string): Promise<any> {
+    // Get payout method to determine retention period
+    const profile = await this.getMakerProfile(makerId);
+    const method = profile?.payoutMethod || "bank";
+    
+    // Calculate retention period
+    const retentionDays = method === "bank" ? 15 : 7; // 15 days for bank, 7 for stripe/paypal
+    const availableDate = new Date();
+    availableDate.setDate(availableDate.getDate() + retentionDays);
+
+    const [record] = await db.insert(makerEarnings).values({
+      makerId,
+      designPurchaseId,
+      amount: amount as any,
+      availableDate: availableDate as any,
+    }).returning();
+    return record;
+  }
+
+  async getMakerEarnings(makerId: string): Promise<any[]> {
+    return db.select().from(makerEarnings).where(eq(makerEarnings.makerId, makerId)).orderBy(desc(makerEarnings.createdAt));
+  }
+
+  async getMakerBalance(makerId: string): Promise<string> {
+    // Sum of all earnings (available + pending in voxelhub account)
+    const result = await db.execute(
+      sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_earnings WHERE maker_id = ${makerId}`
+    );
+    return (result.rows[0] as any)?.total?.toString() || "0.00";
+  }
+
+  async getMakerAvailableBalance(makerId: string): Promise<string> {
+    // Only earnings where retention period has passed
+    const result = await db.execute(
+      sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_earnings 
+          WHERE maker_id = ${makerId} AND available_date <= NOW()`
+    );
+    return (result.rows[0] as any)?.total?.toString() || "0.00";
+  }
+
+  // Payout configuration
+  async updatePayoutMethod(makerId: string, method: string, contactInfo: {
+    stripeEmail?: string;
+    paypalEmail?: string;
+    bankAccountIban?: string;
+    bankAccountName?: string;
+  }): Promise<MakerProfile | undefined> {
+    const [profile] = await db.update(makerProfiles)
+      .set({
+        payoutMethod: method as any,
+        ...contactInfo,
+      })
+      .where(eq(makerProfiles.userId, makerId))
+      .returning();
+    return profile;
+  }
+
+  // Maker payout operations
+  async createMakerPayout(makerId: string, amount: string, method: string): Promise<any> {
+    const [payout] = await db.insert(makerPayouts).values({
+      makerId,
+      amount: amount as any,
+      payoutMethod: method as any,
+      status: "pending",
+    }).returning();
+    return payout;
+  }
+
+  async getMakerPayouts(makerId: string): Promise<any[]> {
+    return db.select().from(makerPayouts).where(eq(makerPayouts.makerId, makerId)).orderBy(desc(makerPayouts.createdAt));
+  }
+
+  async updatePayoutStatus(payoutId: string, status: string, transactionId?: string): Promise<void> {
+    const updates: any = { status, sentAt: new Date() };
+    if (transactionId) {
+      updates.stripePayoutId = transactionId;
+    }
+    await db.update(makerPayouts).set(updates).where(eq(makerPayouts.id, payoutId));
   }
 }
 

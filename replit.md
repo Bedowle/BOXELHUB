@@ -27,13 +27,17 @@ Preferred communication style: Simple, everyday language.
 - **Database**: PostgreSQL (Neon serverless).
 - **Schema**:
     - `users`: Core user data, `userType` enum (client/maker).
-    - `makerProfiles`: Maker-specific details (printer capabilities, materials, ratings).
+    - `makerProfiles`: Maker-specific details (printer capabilities, materials, ratings, payout configuration).
     - `projects`: Client projects (STL files, specifications, status workflow).
     - `bids`: Maker offers (price, delivery time, status).
     - `messages`: Direct messaging.
     - `sessions`: For Replit Auth.
-- **Relationships**: One-to-many relationships between users and projects/bids, one-to-one (optional) for user to maker profile.
-- **Enums**: `userType`, `printerType`, `projectStatus`, `bidStatus`.
+    - `marketplaceDesigns`: STL designs uploaded by makers for sale (free, fixed price, or minimum price).
+    - `designPurchases`: Purchase transactions tracking (who bought what, payment status).
+    - `makerEarnings`: Earnings with retention periods (7 days for Stripe/PayPal, 15 days for bank transfers).
+    - `makerPayouts`: Payout requests/history (pending, processing, completed, failed status).
+- **Relationships**: One-to-many relationships between users and projects/bids/designs/earnings/payouts, one-to-one (optional) for user to maker profile.
+- **Enums**: `userType`, `printerType`, `projectStatus`, `bidStatus`, `payoutMethod` (stripe, paypal, bank).
 
 ### Authentication & Authorization
 - **Strategy**: Session-based with Replit's OIDC provider (7-day TTL).
@@ -55,6 +59,17 @@ Preferred communication style: Simple, everyday language.
 ### Feature Specifications
 - **Marketplace Design STL Upload & Purchase System**: Enables makers to upload STL files and clients to purchase/download them. Supports free, fixed, and minimum pricing models. Includes access control, download validation, and checkout integration (e.g., Stripe/PayPal).
 - **Unread Bids Badge System**: Displays unread bid counts for active/reserved projects, updates in real-time via WebSocket, and clears upon project access.
+- **Maker Payout System with Retention**: 
+  - **Payout Methods**: Three options (Stripe, PayPal, Bank Transfer).
+  - **Retention Periods**: Stripe/PayPal: 7 days, Bank Transfer: 15 days (to prevent fraud/chargebacks).
+  - **Bank Transfer Minimum**: €10.00 minimum, below which balance stays in VoxelHub account for future purchases.
+  - **Balance Management**: Total balance = all earnings, Available balance = earnings after retention period.
+  - **Configuration**: Makers set payout method and contact info (email for Stripe/PayPal, IBAN for bank) in profile.
+  - **Endpoints**: 
+    - `GET /api/maker/balance` - Fetch total and available balance.
+    - `POST /api/maker/payout-method` - Configure payout method.
+    - `GET /api/maker/payouts` - View payout history.
+    - `POST /api/maker/request-payout` - Request payout (after retention period expires).
 
 ## External Dependencies
 

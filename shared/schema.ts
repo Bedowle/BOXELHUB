@@ -23,6 +23,7 @@ export const bidStatusEnum = pgEnum("bid_status", ["pending", "accepted", "rejec
 export const designStatusEnum = pgEnum("design_status", ["active", "archived"]);
 export const designPriceTypeEnum = pgEnum("design_price_type", ["free", "fixed", "minimum"]);
 export const chatContextTypeEnum = pgEnum("chat_context_type", ["project", "marketplace_design"]);
+export const payoutMethodEnum = pgEnum("payout_method", ["stripe", "paypal", "bank"]);
 
 // Session storage table (mandatory for Replit Auth)
 export const sessions = pgTable(
@@ -61,7 +62,7 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Maker profiles table (extended with printer details)
+// Maker profiles table (extended with printer details + payout configuration)
 export const makerProfiles = pgTable("maker_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
@@ -87,6 +88,12 @@ export const makerProfiles = pgTable("maker_profiles", {
   capabilities: text("capabilities"),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   totalReviews: integer("total_reviews").default(0).notNull(),
+  // Payout configuration
+  payoutMethod: payoutMethodEnum("payout_method"), // stripe, paypal, bank
+  stripeEmail: varchar("stripe_email"), // Email for Stripe payouts
+  paypalEmail: varchar("paypal_email"), // Email for PayPal payouts
+  bankAccountIban: varchar("bank_account_iban"), // IBAN for bank transfers
+  bankAccountName: varchar("bank_account_name"), // Account holder name
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -209,6 +216,39 @@ export const designPurchases = pgTable("design_purchases", {
   index("idx_design_purchases_design_id").on(table.designId),
   index("idx_design_purchases_buyer_id").on(table.buyerId),
   index("idx_design_purchases_maker_id").on(table.makerId),
+]);
+
+// Maker earnings table (tracks earnings with retention periods)
+export const makerEarnings = pgTable("maker_earnings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  makerId: varchar("maker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  designPurchaseId: varchar("design_purchase_id").notNull().references(() => designPurchases.id, { onDelete: "cascade" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(), // Earnings from this purchase
+  earningDate: timestamp("earning_date").defaultNow().notNull(), // When earning was created
+  availableDate: timestamp("available_date").notNull(), // When available for payout (after retention)
+  status: varchar("status").notNull().default("pending"), // pending, available, paid
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_maker_earnings_maker_id").on(table.makerId),
+  index("idx_maker_earnings_status").on(table.status),
+  index("idx_maker_earnings_available_date").on(table.availableDate),
+]);
+
+// Maker payouts table (track all payout requests/completions)
+export const makerPayouts = pgTable("maker_payouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  makerId: varchar("maker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  payoutMethod: payoutMethodEnum("payout_method").notNull(), // stripe, paypal, bank
+  status: varchar("status").notNull().default("pending"), // pending, processing, completed, failed
+  stripePayoutId: varchar("stripe_payout_id"), // Stripe payout ID if using Stripe
+  paypalTransactionId: varchar("paypal_transaction_id"), // PayPal transaction ID if using PayPal
+  bankTransferId: varchar("bank_transfer_id"), // Bank transfer reference
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  sentAt: timestamp("sent_at"), // When payout was actually sent
+}, (table) => [
+  index("idx_maker_payouts_maker_id").on(table.makerId),
+  index("idx_maker_payouts_status").on(table.status),
 ]);
 
 // Relations
