@@ -198,13 +198,24 @@ export default function MakerProjectDetails() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Button 
-                  onClick={handleDownloadSTL}
-                  data-testid="button-download-stl"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Descargar STL
-                </Button>
+                {myBid?.status === 'accepted' ? (
+                  <Button 
+                    onClick={handleDownloadSTL}
+                    data-testid="button-download-stl"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Descargar STL
+                  </Button>
+                ) : (
+                  <Button 
+                    disabled
+                    variant="outline"
+                    data-testid="button-download-stl-disabled"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    STL (después de aceptar)
+                  </Button>
+                )}
                 {projectOwner && (
                   <Button 
                     variant="outline"
