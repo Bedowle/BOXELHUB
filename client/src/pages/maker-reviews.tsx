@@ -86,20 +86,24 @@ export default function MakerReviews() {
                   <div className="space-y-4">
                     {/* Review Header */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => review.fromUser?.id && setLocation(`/user/${review.fromUser.id}`)}
+                        className="flex items-center gap-3 hover-elevate cursor-pointer transition-colors rounded-md p-1"
+                        data-testid="button-view-user-profile"
+                      >
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={review.fromUser?.profileImageUrl || ""} alt={review.fromUser?.username || review.fromUser?.email || "Usuario"} />
                           <AvatarFallback>
                             {(review.fromUser?.username || review.fromUser?.email || "U").charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-semibold">{review.fromUser?.username || review.fromUser?.email || "Usuario Anónimo"}</p>
+                        <div className="text-left">
+                          <p className="font-semibold hover:text-primary">{review.fromUser?.username || review.fromUser?.email || "Usuario Anónimo"}</p>
                           <p className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(review.createdAt), { locale: es, addSuffix: true })}
                           </p>
                         </div>
-                      </div>
+                      </button>
 
                       {/* Rating Stars */}
                       <div className="flex items-center gap-2">

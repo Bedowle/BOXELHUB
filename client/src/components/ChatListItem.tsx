@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -32,11 +33,19 @@ export function ChatListItem({
   projectImage,
   designImage,
 }: ChatListItemProps) {
+  const [, setLocation] = useLocation();
   const userInitial = userName?.[0].toUpperCase() || "U";
   const isUnread = unreadCount > 0;
   const contextName = projectName || designName;
   const contextImage = projectImage || designImage;
   const contextInitial = contextName?.[0]?.toUpperCase() || "C";
+
+  const handleViewProfile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (userId) {
+      setLocation(`/user/${userId}`);
+    }
+  };
 
   return (
     <div
@@ -67,9 +76,13 @@ export function ChatListItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
           <div className="flex-1 min-w-0">
-            <p className={`font-semibold truncate ${isUnread ? "font-bold" : ""}`}>
+            <button
+              onClick={handleViewProfile}
+              className={`font-semibold truncate hover:text-primary hover-elevate cursor-pointer transition-colors block text-left ${isUnread ? "font-bold" : ""}`}
+              data-testid="button-view-user-profile"
+            >
               {userName}
-            </p>
+            </button>
             {contextName && (
               <p className="text-xs text-muted-foreground truncate">
                 {contextName}

@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,6 +23,7 @@ interface BidCardProps {
 }
 
 export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, onRebid, isClient, isMyBid, currentUserId, isPending }: BidCardProps) {
+  const [, setLocation] = useLocation();
   const profile = bid.maker?.makerProfile;
   const initials = (bid.maker?.username || bid.maker?.email)?.[0].toUpperCase() || "M";
   
@@ -30,6 +32,13 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
   const handleCardClick = () => {
     if (isClient && onContact) {
       onContact(bid.makerId, bid.projectId);
+    }
+  };
+
+  const handleViewProfile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (bid.maker?.id) {
+      setLocation(`/user/${bid.maker.id}`);
     }
   };
 
@@ -49,9 +58,13 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold text-lg" data-testid={`text-maker-name-${bid.id}`}>
+                <button
+                  onClick={handleViewProfile}
+                  className="font-semibold text-lg hover:text-primary hover-elevate cursor-pointer transition-colors"
+                  data-testid={`text-maker-name-${bid.id}`}
+                >
                   {bid.maker?.username || bid.maker?.email || "Maker"}
-                </h3>
+                </button>
                 {profile && (
                   <Badge variant="secondary" className="text-xs">
                     {profile.printerType}
