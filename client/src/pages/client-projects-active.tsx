@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -6,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { ArrowLeft, Package } from "lucide-react";
+import { UploadProjectDialog } from "@/components/UploadProjectDialog";
+import { ArrowLeft, Package, Upload } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 export default function ClientProjectsActive() {
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -49,7 +52,7 @@ export default function ClientProjectsActive() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
+        <div className="container mx-auto px-4 py-4 max-w-7xl flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
@@ -59,6 +62,15 @@ export default function ClientProjectsActive() {
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setUploadDialogOpen(true)}
+            className="flex items-center gap-2"
+            data-testid="button-upload-project"
+          >
+            <Upload className="h-4 w-4" />
+            Subir Proyecto
           </Button>
         </div>
       </header>
@@ -119,6 +131,11 @@ export default function ClientProjectsActive() {
           />
         )}
       </main>
+
+      <UploadProjectDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+      />
     </div>
   );
 }
