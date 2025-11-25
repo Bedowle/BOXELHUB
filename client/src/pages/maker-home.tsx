@@ -203,29 +203,7 @@ export default function MakerHome() {
             </Card>
           )}
 
-          {/* Action Buttons */}
-          <div className="grid md:grid-cols-2 gap-3">
-            <Button 
-              size="sm" 
-              onClick={() => setLocation("/marketplace")}
-              className="w-full"
-              data-testid="button-browse-marketplace"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Explorar Diseños
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => setLocation("/maker/marketplace")}
-              className="w-full"
-              data-testid="button-manage-shop"
-            >
-              <Package className="h-4 w-4 mr-2" />
-              Mi Tienda
-            </Button>
           </div>
-        </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
