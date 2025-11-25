@@ -348,6 +348,7 @@ export const insertMakerProfileSchema = createInsertSchema(makerProfiles).omit({
   updatedAt: true,
   rating: true,
   totalReviews: true,
+  userId: true, // Added by server from authenticated user
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
