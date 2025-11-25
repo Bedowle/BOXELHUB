@@ -124,7 +124,7 @@ export default function UserProfilePage() {
   // Calculate review count and average rating
   const reviewCount = reviews.length;
   const averageRating = reviewCount > 0 
-    ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewCount 
+    ? reviews.reduce((sum, r) => sum + parseFloat(String(r.rating || 0)), 0) / reviewCount 
     : 0;
 
   const isOwnProfile = currentUser?.id === userId;
