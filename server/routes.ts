@@ -93,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot edit another user's profile" });
       }
 
-      const { firstName, lastName, username, location } = req.body;
+      const { firstName, lastName, location } = req.body;
 
       const user = await storage.getUser(userId);
       if (!user) {
@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: user.email,
         firstName: firstName || user.firstName,
         lastName: lastName || user.lastName,
-        username: username || user.username,
+        username: user.username,
         location: location || user.location,
         profileImageUrl: user.profileImageUrl,
         userType: user.userType

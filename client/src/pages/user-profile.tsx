@@ -25,7 +25,6 @@ import type { User } from "@shared/schema";
 const profileEditSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  username: z.string().min(1, "Username is required"),
   location: z.string().optional(),
 });
 
@@ -59,7 +58,6 @@ export default function UserProfilePage() {
     defaultValues: {
       firstName: "",
       lastName: "",
-      username: "",
       location: "",
     },
   });
@@ -70,7 +68,6 @@ export default function UserProfilePage() {
       form.reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
-        username: user.username || "",
         location: user.location || "",
       });
     }
@@ -282,20 +279,6 @@ export default function UserProfilePage() {
                         <FormLabel>Apellido</FormLabel>
                         <FormControl>
                           <Input placeholder="Apellido" {...field} data-testid="input-lastName" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Usuario</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Usuario" {...field} data-testid="input-username" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
