@@ -1340,7 +1340,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const reviews = await storage.getReviewsForMaker(id);
-      res.json(reviews);
+      
+      // Enrich reviews with author user data
+      const enriched = await Promise.all(
+        reviews.map(async (review) => {
+          const fromUser = await storage.getUser(review.fromUserId);
+          return {
+            ...review,
+            fromUser,
+          };
+        })
+      );
+      
+      res.json(enriched);
     } catch (error) {
       console.error("Error fetching reviews:", error);
       res.status(500).json({ message: "Failed to fetch reviews" });
