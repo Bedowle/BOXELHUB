@@ -36,6 +36,7 @@ import MarketplaceDesignChatsPage from "@/pages/marketplace-design-chats";
 import ClientMarketplace from "@/pages/client-marketplace";
 import UserProfilePage from "@/pages/user-profile";
 import MarketplaceDesignDetailPage from "@/pages/marketplace-design-detail";
+import MakerBalance from "@/pages/maker-balance";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -105,6 +106,7 @@ function Router() {
               <Route path="/maker" component={MakerHome} />
               <Route path="/maker/profile" component={MakerProfile} />
               <Route path="/maker/reviews" component={MakerReviews} />
+              <Route path="/maker/balance" component={MakerBalance} />
               <Route path="/maker/explore" component={ExploreProjects} />
               <Route path="/maker/bids" component={MakerBidsList} />
               <Route path="/maker/won-projects" component={MakerWonProjects} />

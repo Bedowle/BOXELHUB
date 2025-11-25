@@ -103,11 +103,15 @@ export default function AppHeader() {
             )}
 
             {isMaker && makerBalance && (
-              <div className="hidden sm:flex items-center gap-1 px-3 py-1 bg-muted rounded-md">
+              <button
+                onClick={() => setLocation("/maker/balance")}
+                className="hidden sm:flex items-center gap-1 px-3 py-1 bg-muted rounded-md hover-elevate cursor-pointer"
+                data-testid="button-maker-balance"
+              >
                 <span className="text-sm font-semibold text-foreground" data-testid="text-maker-balance">
                   {formatBalance(makerBalance.availableBalance)}
                 </span>
-              </div>
+              </button>
             )}
 
             <Button
