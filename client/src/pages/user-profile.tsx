@@ -1,4 +1,4 @@
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -75,6 +75,7 @@ const MATERIALS = [
 
 export default function UserProfilePage() {
   const [match, params] = useRoute("/user/:userId");
+  const [, setLocation] = useLocation();
   const userId = params?.userId;
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
@@ -723,9 +724,13 @@ export default function UserProfilePage() {
                     {makerProfile.rating && (
                       <div>
                         <p className="text-sm font-medium">Calificación</p>
-                        <p className="text-sm text-muted-foreground">
+                        <button
+                          onClick={() => setLocation(`/user/${userId}/reviews`)}
+                          className="text-sm text-muted-foreground hover:text-primary cursor-pointer hover-elevate transition-colors"
+                          data-testid="button-view-reviews"
+                        >
                           {Number(makerProfile.rating).toFixed(1)} ⭐ ({makerProfile.totalReviews} reseñas)
-                        </p>
+                        </button>
                       </div>
                     )}
                   </div>

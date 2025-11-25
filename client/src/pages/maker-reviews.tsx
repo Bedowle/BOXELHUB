@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -18,10 +18,24 @@ interface ReviewWithAuthor extends Review {
 export default function MakerReviews() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const [userMatch, userParams] = useRoute("/user/:userId/reviews");
+  const targetUserId = userParams?.userId;
+  const isOwnReviews = !targetUserId; // If no userId param, showing own reviews
 
   const { data: reviews = [], isLoading } = useQuery<ReviewWithAuthor[]>({
-    queryKey: ["/api/reviews/my-reviews"],
-    enabled: !!user,
+    queryKey: isOwnReviews ? ["/api/reviews/my-reviews"] : ["/api/makers", targetUserId, "reviews"],
+    queryFn: async () => {
+      if (isOwnReviews) {
+        const res = await fetch("/api/reviews/my-reviews", { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        return res.json();
+      } else {
+        const res = await fetch(`/api/makers/${targetUserId}/reviews`, { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        return res.json();
+      }
+    },
+    enabled: !!user && (isOwnReviews || !!targetUserId),
   });
 
   if (isLoading) {
@@ -51,7 +65,7 @@ export default function MakerReviews() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Mis Reseñas</h1>
+          <h1 className="text-4xl font-bold mb-2">{isOwnReviews ? "Mis Reseñas" : "Reseñas del Maker"}</h1>
           <p className="text-muted-foreground">
             {reviews.length} reseña{reviews.length !== 1 ? "s" : ""} recibida{reviews.length !== 1 ? "s" : ""}
           </p>
@@ -62,7 +76,7 @@ export default function MakerReviews() {
           <EmptyState
             icon={MessageCircle}
             title="Sin reseñas"
-            description="Aún no has recibido ninguna reseña. Cuando completes tus primeros proyectos, tus clientes podrán valorarte."
+            description={isOwnReviews ? "Aún no has recibido ninguna reseña. Cuando completes tus primeros proyectos, tus clientes podrán valorarte." : "Este maker aún no ha recibido ninguna reseña."}
           />
         ) : (
           <div className="space-y-4">

@@ -81,6 +81,7 @@ function Router() {
           <Route path="/chats" component={ChatsSplitPage} />
           <Route path="/chats-old" component={ChatsPage} />
           <Route path="/user/:userId" component={UserProfilePage} />
+          <Route path="/user/:userId/reviews" component={MakerReviews} />
           <Route path="/marketplace" component={ClientMarketplace} />
           <Route path="/marketplace-design/:designId" component={MarketplaceDesignDetailPage} />
 
