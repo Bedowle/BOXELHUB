@@ -144,6 +144,9 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.margin = '0';
+      renderer.domElement.style.padding = '0';
       containerRef.current.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
@@ -259,7 +262,7 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
     <div className="relative bg-background rounded-lg overflow-hidden pointer-events-auto">
       <div
         ref={containerRef}
-        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto" }}
+        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'block', margin: 0, padding: 0 }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
