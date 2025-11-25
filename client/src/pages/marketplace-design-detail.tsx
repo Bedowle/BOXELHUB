@@ -9,7 +9,8 @@ import { ArrowLeft, Euro, Download, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import type { MarketplaceDesign } from "@shared/schema";
 
 export default function MarketplaceDesignDetailPage() {
@@ -18,6 +19,7 @@ export default function MarketplaceDesignDetailPage() {
   const designId = params?.designId;
   const { toast } = useToast();
   const [customAmount, setCustomAmount] = useState("");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const { data: design, isLoading, error } = useQuery<any>({
     queryKey: ["/api/marketplace/designs", designId],
@@ -127,30 +129,28 @@ export default function MarketplaceDesignDetailPage() {
     },
   });
 
-  // Checkout mutation (for paid designs)
+  // Checkout mutation (for paid designs) - redirects to Stripe
   const checkoutMutation = useMutation({
     mutationFn: async (amount: string) => {
+      // Get checkout URL from server
       const res = await fetch(`/api/marketplace/designs/${designId}/checkout`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount,
-          paymentMethod: "stripe", // Can be changed to "paypal"
-        }),
+        body: JSON.stringify({ amount }),
       });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message);
       }
-      return res.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Info",
-        description: "Stripe/PayPal checkout would be initiated here. Amount: €" + data.amount.toFixed(2),
-      });
-      // In production, redirect to Stripe checkout or PayPal
+      const { checkoutUrl } = await res.json();
+      
+      // Redirect to Stripe checkout
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error("No checkout URL received");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -160,6 +160,40 @@ export default function MarketplaceDesignDetailPage() {
       });
     },
   });
+
+  // Handle payment confirmation after redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    const paymentStatus = params.get("payment");
+
+    if (sessionId && paymentStatus === "success" && designId) {
+      // Record the purchase
+      fetch(`/api/marketplace/designs/${designId}/confirm-payment`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          toast({
+            title: "Success",
+            description: "Payment completed! Design acquired. You can now download it.",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/marketplace/designs", designId, "access"] });
+          // Clean up URL
+          window.history.replaceState({}, document.title, `/marketplace-design/${designId}`);
+        })
+        .catch(err => {
+          toast({
+            title: "Error",
+            description: err.message || "Failed to record purchase",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [designId]);
 
   if (!match) return null;
   if (isLoading) return <div className="p-4">Cargando...</div>;

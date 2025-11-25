@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertProjectSchema, insertBidSchema, updateBidSchema, insertMakerProfileSchema, insertMessageSchema, insertReviewSchema, insertMarketplaceDesignSchema } from "@shared/schema";
 import { getAuthenticatedUserId } from "./replitAuth";
 import { z } from "zod";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -1543,7 +1544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe checkout for paid designs
+  // Stripe checkout for paid designs - creates a checkout session
   app.post('/api/marketplace/designs/:id/checkout', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
@@ -1552,12 +1553,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { id } = req.params;
-      const { paymentMethod, amount } = req.body; // amount = custom amount if type is "minimum"
+      const { amount } = req.body;
 
       const design = await storage.getMarketplaceDesign(id);
-      
       if (!design) {
         return res.status(404).json({ message: "Design not found" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
       }
 
       // Validate price
@@ -1571,17 +1576,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // For now, return payment info (Stripe integration would go here)
+      // Convert amount to cents (Stripe uses cents)
+      const amountInCents = Math.round(finalAmount * 100);
+
+      // Create Stripe checkout session
+      const stripe = await getUncachableStripeClient();
+      
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'eur',
+              unit_amount: amountInCents,
+              product_data: {
+                name: design.name || 'Design Purchase',
+                description: `Designed by ${design.makerId}`,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${baseUrl}/marketplace-design/${id}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/marketplace-design/${id}?payment=canceled`,
+        metadata: {
+          designId: id,
+          buyerId: userId,
+          makerId: design.makerId,
+          designName: design.name,
+          amount: finalAmount.toString(),
+        },
+      });
+
       res.json({
-        designId: id,
-        amount: finalAmount,
-        paymentMethod,
-        status: "ready_for_payment",
-        message: "Payment processing is configured via environment variables"
+        checkoutUrl: session.url,
+        sessionId: session.id,
       });
     } catch (error: any) {
       console.error("Error creating checkout:", error);
       res.status(500).json({ message: error.message || "Failed to create checkout" });
+    }
+  });
+
+  // Confirm payment from checkout session and create purchase record
+  app.post('/api/marketplace/designs/:id/confirm-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { sessionId } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+
+      const design = await storage.getMarketplaceDesign(id);
+      if (!design) {
+        return res.status(404).json({ message: "Design not found" });
+      }
+
+      // Verify checkout session with Stripe
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+      if (session.payment_status !== 'paid') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+
+      // Check if purchase already exists
+      const existing = await storage.userHasPurchasedDesign(userId, id);
+      if (existing) {
+        return res.json({ message: "Design already purchased" });
+      }
+
+      // Get payment intent to get the amount
+      let amountPaid = "0.00";
+      if (session.payment_intent) {
+        const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+        amountPaid = (paymentIntent.amount / 100).toFixed(2);
+      }
+
+      // Create purchase record
+      const purchase = await storage.createDesignPurchase({
+        designId: id,
+        buyerId: userId,
+        makerId: design.makerId,
+        amountPaid: amountPaid,
+        paymentMethod: "stripe",
+        status: "completed",
+      });
+
+      res.json({ message: "Purchase recorded", purchase });
+    } catch (error: any) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: error.message || "Failed to confirm payment" });
     }
   });
 
