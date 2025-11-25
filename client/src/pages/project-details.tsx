@@ -214,10 +214,10 @@ export default function ProjectDetails() {
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Project Layout - Description Left, 3D Viewer Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 items-start lg:items-stretch">
           {/* Left - Project Details */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="h-full">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-3">
                   <h1 className="text-3xl font-bold" data-testid="text-project-title">
@@ -284,9 +284,9 @@ export default function ProjectDetails() {
 
           {/* Right - 3D Model */}
           <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="py-4 px-4 flex items-center justify-center">
-                <STLViewer projectId={project.id} width={300} height={280} />
+            <Card className="h-full flex flex-col">
+              <CardContent className="py-6 px-4 flex items-center justify-center flex-1">
+                <STLViewer projectId={project.id} width={280} height={240} />
               </CardContent>
             </Card>
           </div>
