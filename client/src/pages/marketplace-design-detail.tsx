@@ -274,7 +274,7 @@ export default function MarketplaceDesignDetailPage() {
                     </Button>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">¿Quieres pagar cero para acceso gratuito?</p>
+                      <p className="text-sm font-medium">¿Quieres pagar el mínimo para acceso?</p>
                       <Button
                         variant="outline"
                         className="w-full"
@@ -282,7 +282,7 @@ export default function MarketplaceDesignDetailPage() {
                         disabled={acquireFreeMutation.isPending}
                         data-testid="button-pay-zero"
                       >
-                        {acquireFreeMutation.isPending ? "Procesando..." : "Pagar €0.00"}
+                        {acquireFreeMutation.isPending ? "Procesando..." : `Pagar €${Number(design.price).toFixed(2)}`}
                       </Button>
                       <div className="relative my-3">
                         <div className="absolute inset-0 flex items-center">
