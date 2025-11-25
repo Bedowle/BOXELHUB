@@ -320,20 +320,9 @@ export default function ProjectDetails() {
               <BidCardSkeleton />
               <BidCardSkeleton />
             </div>
-          ) : myBid && isMaker ? (
-            <div className="mb-8 space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Tu oferta para este proyecto:</p>
-                {myBid?.status === "rejected" && (
-                  <Button 
-                    size="sm"
-                    onClick={() => setBidDialogOpen(true)}
-                    data-testid="button-rebid"
-                  >
-                    Volver a Ofertar
-                  </Button>
-                )}
-              </div>
+          ) : (myBid && isMaker && myBid.status !== "rejected") ? (
+            <div className="mb-8">
+              <p className="text-sm text-muted-foreground mb-4">Tu oferta para este proyecto:</p>
               <BidCard 
                 bid={myBid} 
                 isClient={false}
