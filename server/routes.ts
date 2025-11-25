@@ -572,9 +572,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "This project is no longer accepting bids" });
       }
 
-      // Check if maker already has a bid for this project
+      // Check if maker already has an active bid for this project
       const existingBid = await storage.getMakerBidForProject(userId, projectId);
-      if (existingBid) {
+      if (existingBid && existingBid.status !== 'rejected') {
         return res.status(400).json({ message: "You already have a bid for this project" });
       }
 
