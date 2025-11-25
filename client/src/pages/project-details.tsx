@@ -212,28 +212,22 @@ export default function ProjectDetails() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* 3D Model - Centered and Prominent */}
-        <div className="mb-12 flex justify-center">
-          <Card className="w-full max-w-2xl">
-            <CardContent className="py-6 px-6 flex items-center justify-center">
-              <STLViewer projectId={project.id} width={500} height={400} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Project Details */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex flex-col gap-4">
-              <div>
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Project Layout - Description Left, 3D Viewer Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Left - Project Details */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
                 <div className="flex items-center gap-3 mb-3">
                   <h1 className="text-3xl font-bold" data-testid="text-project-title">
                     {project.name}
                   </h1>
                   <StatusBadge status={project.status} />
                 </div>
-                <p className="text-muted-foreground text-lg mb-4" data-testid="text-project-description">
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-muted-foreground text-lg" data-testid="text-project-description">
                   {project.description}
                 </p>
                 <div className="flex flex-wrap gap-4 text-sm">
@@ -259,35 +253,44 @@ export default function ProjectDetails() {
                     </span>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {canBid && (
-                  <Button 
-                    size="lg"
-                    onClick={() => setBidDialogOpen(true)}
-                    data-testid="button-submit-bid"
-                  >
-                    Enviar Oferta
-                  </Button>
-                )}
-                {isOwner && acceptedBid && acceptedBid.maker && (
-                  <Button 
-                    size="lg"
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedMaker(acceptedBid.maker!);
-                      setChatDialogOpen(true);
-                    }}
-                    data-testid="button-chat-maker"
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+                <div className="flex flex-wrap gap-3 pt-4">
+                  {canBid && (
+                    <Button 
+                      size="lg"
+                      onClick={() => setBidDialogOpen(true)}
+                      data-testid="button-submit-bid"
+                    >
+                      Enviar Oferta
+                    </Button>
+                  )}
+                  {isOwner && acceptedBid && acceptedBid.maker && (
+                    <Button 
+                      size="lg"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedMaker(acceptedBid.maker!);
+                        setChatDialogOpen(true);
+                      }}
+                      data-testid="button-chat-maker"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right - 3D Model */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardContent className="py-4 px-4 flex items-center justify-center">
+                <STLViewer projectId={project.id} width={300} height={280} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Bids Section */}
         <div>
