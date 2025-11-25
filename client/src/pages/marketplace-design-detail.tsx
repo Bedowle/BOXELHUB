@@ -167,6 +167,20 @@ export default function MarketplaceDesignDetailPage() {
     const sessionId = params.get("session_id");
     const paymentStatus = params.get("payment");
 
+    if (paymentStatus === "canceled") {
+      // Payment was canceled
+      toast({
+        title: "Pago cancelado",
+        description: "Volviendo a la página anterior...",
+        variant: "destructive",
+      });
+      // Go back after 2 seconds
+      setTimeout(() => {
+        window.history.back();
+      }, 2000);
+      return;
+    }
+
     if (sessionId && paymentStatus === "success" && designId) {
       // Record the purchase
       fetch(`/api/marketplace/designs/${designId}/confirm-payment`, {
@@ -193,7 +207,7 @@ export default function MarketplaceDesignDetailPage() {
           });
         });
     }
-  }, [designId]);
+  }, [designId, toast]);
 
   if (!match) return null;
   if (isLoading) return <div className="p-4">Cargando...</div>;
