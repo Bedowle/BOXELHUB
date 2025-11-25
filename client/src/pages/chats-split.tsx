@@ -118,20 +118,6 @@ export default function ChatsSplitPage() {
       <div className="flex flex-1 min-h-0">
         {/* Conversations List */}
         <div className="w-80 border-r flex flex-col bg-card/50">
-          {/* Search */}
-          <div className="p-4 border-b">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar conversaciones..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-search-conversations"
-              />
-            </div>
-          </div>
-
           {/* Conversations */}
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
