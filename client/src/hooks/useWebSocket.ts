@@ -44,8 +44,11 @@ export function useWebSocket() {
               });
               queryClient.invalidateQueries({ queryKey: ["/api/projects/my-projects"] });
               queryClient.invalidateQueries({ queryKey: ["/api/projects/stats"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/projects/total-unread-bids"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/projects/unread-bid-counts"] });
               if (data.projectId) {
                 queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "bids"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/projects", data.projectId, "unread-bid-count"] });
               }
               break;
               
