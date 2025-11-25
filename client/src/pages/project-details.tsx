@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { STLViewer } from "@/components/STLViewer";
 import { BidCard } from "@/components/BidCard";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
+import { AdvancedSlicerInterface } from "@/components/AdvancedSlicerInterface";
 import { BidEditDialog } from "@/components/BidEditDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { RatingDialog } from "@/components/RatingDialog";
@@ -314,11 +315,17 @@ export default function ProjectDetails() {
             </Card>
           </div>
 
-          {/* Right - 3D Model */}
+          {/* Right - 3D Model or Slicer */}
           <div className="lg:col-span-1">
             <Card className="h-full flex flex-col">
               <CardContent className="py-6 px-4 flex items-center justify-center flex-1">
-                <STLViewer projectId={project.id} width={280} height={240} />
+                {canBid && isMaker ? (
+                  <div style={{ width: '100%' }}>
+                    <AdvancedSlicerInterface projectId={project.id} disabled={false} />
+                  </div>
+                ) : (
+                  <STLViewer projectId={project.id} width={280} height={240} />
+                )}
               </CardContent>
             </Card>
           </div>
