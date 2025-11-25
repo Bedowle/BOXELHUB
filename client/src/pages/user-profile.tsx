@@ -108,19 +108,24 @@ export default function UserProfilePage() {
     enabled: !!userId && user?.userType === "maker",
   });
 
-  // Load review count for any user (makers and clients can have reviews)
-  const { data: reviewCount = 0 } = useQuery<number>({
-    queryKey: ["/api/users", userId, "review-count"],
+  // Load reviews for any user to calculate rating
+  const { data: reviews = [] } = useQuery<Review[]>({
+    queryKey: ["/api/makers", userId, "reviews"],
     queryFn: async () => {
-      const res = await fetch(`/api/users/${userId}/review-count`, {
+      const res = await fetch(`/api/makers/${userId}/reviews`, {
         credentials: "include",
       });
-      if (!res.ok) return 0;
-      const data = await res.json();
-      return data.count;
+      if (!res.ok) return [];
+      return res.json();
     },
     enabled: !!userId,
   });
+
+  // Calculate review count and average rating
+  const reviewCount = reviews.length;
+  const averageRating = reviewCount > 0 
+    ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviewCount 
+    : 0;
 
   const isOwnProfile = currentUser?.id === userId;
 
@@ -373,7 +378,7 @@ export default function UserProfilePage() {
                   disabled={reviewCount === 0}
                 >
                   {[...Array(5)].map((_, i) => {
-                    const rating = isMaker && makerProfile ? parseFloat(String(makerProfile.rating || 0)) : 0;
+                    const rating = averageRating;
                     return (
                       <Star
                         key={i}
