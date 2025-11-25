@@ -22,6 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: Replit Auth (OIDC-based) with Passport.js and express-session (PostgreSQL session store).
 - **API Design**: RESTful endpoints (`/api`), WebSocket server (`/ws`).
 - **Database Access**: Drizzle ORM with connection pooling (@neondatabase/serverless).
+- **Slicing Engine**: Slic3r CLI-based real 3D slicer running on server (generates actual G-code).
 
 ### Data Architecture
 - **Database**: PostgreSQL (Neon serverless).
@@ -36,7 +37,7 @@ Preferred communication style: Simple, everyday language.
     - `designPurchases`: Purchase transactions tracking (who bought what, payment status).
     - `makerEarnings`: Earnings with retention periods (7 days for Stripe/PayPal, 15 days for bank transfers).
     - `makerPayouts`: Payout requests/history (pending, processing, completed, failed status).
-    - `sliceEstimates`: Temporary slice previews for makers to estimate pricing without STL access (stores parameters and results, never G-code).
+    - `sliceEstimates`: Real G-code generation results from Slic3r (stores parameters, G-code, and statistics).
 - **Relationships**: One-to-many relationships between users and projects/bids/designs/earnings/payouts/sliceEstimates, one-to-one (optional) for user to maker profile.
 - **Enums**: `userType`, `printerType`, `projectStatus`, `bidStatus`, `payoutMethod` (stripe, paypal, bank).
 
@@ -65,17 +66,18 @@ Preferred communication style: Simple, everyday language.
 - **Username**: Always visible and clickable to navigate to user profiles
 - **Implementation**: Both client and maker profile edit forms include privacy toggle
 
-#### Maker Slicing Preview System (NEW)
-- **Purpose**: Allow makers to estimate pricing by slicing with their own parameters without accessing the STL file
-- **Security Model**: STL remains on server, never exposed to frontend during slicing
-- **Slicing Engine**: `server/slicingEngine.ts` calculates realistic estimates based on STL geometry and parameters
+#### Real Cloud Slicer (Slic3r Integration) - IMPLEMENTED
+- **Purpose**: Makers can use Slic3r (industry standard) to generate actual G-code for projects without STL file access
+- **Security Model**: STL remains on server, never exposed to client. Slic3r runs on server backend.
+- **Slicing Engine**: `server/slicerService.ts` - CLI wrapper around Slic3r for real G-code generation
 - **Endpoints**:
-  - `POST /api/projects/:id/slice-estimate` - Create slice estimate with parameters
-  - `GET /api/projects/:id/slice-estimates` - Retrieve estimates for a project
-- **Parameters**: Nozzle temperature, bed temperature, layer height, infill density, print speed
-- **Results**: Estimated weight, time, layers, material used (never G-code)
-- **UI**: SliceEstimator component in maker project details, interactive sliders for parameter adjustment
-- **Access Control**: Only makers with pending bids can request estimates
+  - `POST /api/projects/:id/slice-estimate` - Slice STL with custom parameters, returns real G-code + statistics
+  - `GET /api/projects/:id/slice-estimates` - Retrieve all slice estimates for a project
+- **Parameters**: Nozzle temperature, bed temperature, layer height, infill density, print speed, infill pattern
+- **Results**: Real G-code, estimated weight, print time, layer count, material usage
+- **Download**: G-code files can be downloaded directly from the UI
+- **UI**: SliceEstimator component with interactive parameter sliders and real-time results
+- **Access Control**: Only makers with pending/active bids can request slicing
 
 #### Marketplace Design STL Upload & Purchase System
 - **Purpose**: Enables makers to upload STL files and clients to purchase/download them
@@ -106,6 +108,9 @@ Preferred communication style: Simple, everyday language.
 - **Replit Auth**: OAuth 2.0 / OIDC provider.
 - **Neon Database**: Serverless PostgreSQL.
 
+### System Tools
+- **Slic3r**: Industry-standard open-source 3D slicer for real G-code generation.
+
 ### Key Libraries
 - **Frontend**: `@tanstack/react-query`, `wouter`, `react-hook-form`, `zod`, `date-fns`, `@radix-ui/*`, `tailwindcss`.
 - **Backend**: `express`, `passport`, `openid-client`, `drizzle-orm`, `drizzle-zod`, `ws`, `express-session`, `connect-pg-simple`.
@@ -120,13 +125,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Nov 25, 2025)
 
-### Implemented Maker Slicing Preview System
+### MAJOR: Integrated Real Slic3r Cloud Slicer (TODAY)
+- **Replaced**: Mock slicing estimations with REAL G-code generation
+- **New File**: `server/slicerService.ts` - Full Slic3r CLI wrapper
+- **System Tool**: Installed Slic3r package for real 3D slicing
+- **Database**: Added `gcode` field to `sliceEstimates` table
+- **Endpoint**: Updated POST `/api/projects/:id/slice-estimate` to use real Slic3r
+- **Frontend**: Updated SliceEstimator UI to show "Slic3r" and G-code download button
+- **Features**: 
+  - Makers can now generate actual printable G-code
+  - Download .gcode files directly from the UI
+  - Real parameter support (temperatures, layer height, infill, speed)
+  - STL stays on server for security
+
+### Fixed STL Download Access Control
+- STL download button only appears AFTER bid is accepted
+- Previously was accessible during pending bid status
+
+### Improved Maker Slicing Preview System (Earlier)
 - **New Table**: `sliceEstimates` for storing temporary slice previews
 - **Backend Engine**: `server/slicingEngine.ts` - intelligent slicing estimates without G-code exposure
 - **Endpoints**: POST/GET slice estimates with parameter-based estimation
 - **Frontend Component**: `SliceEstimator.tsx` with interactive parameter controls
 - **Integration**: Added to maker project details for pending bids
-- **Security**: STL remains protected on server, only statistics returned to frontend
+- **Security**: STL remains protected on server
 
 ### Fixed "Mis Proyectos Ganados" Page
 - Changed filter to show ALL won projects (completed + in-progress)

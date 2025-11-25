@@ -9,6 +9,7 @@ import { z } from "zod";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { getPayPalClient, getPayPalClientId } from "./paypalClient";
 import { estimateSlicing } from "./slicingEngine";
+import { sliceSTLToGCode } from "./slicerService";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
@@ -473,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Slice estimate endpoint (for makers to estimate pricing without STL access)
+  // Slice estimate endpoint (REAL Slic3r laminador en la nube)
   app.post('/api/projects/:id/slice-estimate', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
@@ -500,10 +501,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validated = insertSliceEstimateSchema.parse(req.body);
 
-      // Perform slicing estimation (safe - no G-code exposed)
-      const slicingResult = estimateSlicing(project.stlFileContent || "", validated);
+      // Save STL to temporary file for slicing
+      const fs = await import("fs");
+      const path = await import("path");
+      const tmpDir = `/tmp/stl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+      const stlPath = path.join(tmpDir, "model.stl");
+      fs.writeFileSync(stlPath, project.stlFileContent || "", "utf-8");
 
-      // Store estimate
+      // REAL slicing with Slic3r!
+      console.log(`Starting real slicing with Slic3r for project ${id}...`);
+      const slicingResult = await sliceSTLToGCode(stlPath, {
+        layerHeight: validated.layerHeight,
+        infillDensity: validated.infillDensity,
+        nozzleTemp: validated.nozzleTemp,
+        bedTemp: validated.bedTemp,
+        printSpeed: validated.printSpeed,
+      });
+
+      console.log(`Slicing complete! Generated ${slicingResult.gcode.length} bytes of G-code`);
+
+      // Store estimate WITH G-code
       const estimate = await storage.createSliceEstimate({
         ...validated,
         projectId: id,
@@ -511,13 +531,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         estimatedWeight: slicingResult.estimatedWeight.toString() as any,
         estimatedTime: slicingResult.estimatedTime,
         estimatedLayers: slicingResult.estimatedLayers,
-        materialUsedGrams: slicingResult.materialUsedGrams.toString() as any,
-      });
+        materialUsedGrams: slicingResult.materialUsedMm3.toString() as any,
+        gcode: slicingResult.gcode,
+      } as any);
+
+      // Cleanup STL file
+      fs.rmSync(tmpDir, { recursive: true, force: true });
 
       res.json(estimate);
     } catch (error: any) {
       console.error("Error creating slice estimate:", error);
-      res.status(400).json({ message: error.message || "Failed to create slice estimate" });
+      res.status(400).json({ message: error.message || "Failed to slice model. Try adjusting parameters." });
     }
   });
 
