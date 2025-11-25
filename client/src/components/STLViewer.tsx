@@ -249,7 +249,7 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="bg-background rounded-lg pointer-events-auto" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden', display: 'block' }}>
+    <div className="bg-background rounded-lg pointer-events-auto relative" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden', display: 'block' }}>
       <canvas
         ref={containerRef as any}
         width={width}
@@ -264,7 +264,7 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} className="flex items-center justify-center bg-background/80 backdrop-blur-sm pointer-events-none">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             <p className="text-sm text-muted-foreground mt-2">Cargando modelo...</p>
@@ -272,7 +272,7 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} className="flex items-center justify-center bg-background/80 backdrop-blur-sm pointer-events-none">
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
