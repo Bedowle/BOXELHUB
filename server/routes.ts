@@ -139,10 +139,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify connected account for Stripe/PayPal
-      if (profile.payoutMethod === "stripe" && !profile.stripeConnectAccountId) {
+      // In development, use test account if not configured
+      const isDevelopment = process.env.NODE_ENV === "development";
+      
+      if (profile.payoutMethod === "stripe" && !profile.stripeConnectAccountId && !isDevelopment) {
         return res.status(400).json({ message: "Please connect your Stripe account first" });
       }
-      if (profile.payoutMethod === "paypal" && !profile.paypalAccountId) {
+      if (profile.payoutMethod === "paypal" && !profile.paypalAccountId && !isDevelopment) {
         return res.status(400).json({ message: "Please connect your PayPal account first" });
       }
 
@@ -166,12 +169,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payout = await storage.createMakerPayout(userId, amount, profile.payoutMethod);
 
       // Execute payout in background based on method
-      if (profile.payoutMethod === "stripe" && profile.stripeConnectAccountId) {
-        executeStripePayout(profile.stripeConnectAccountId, amount).catch(err => {
+      if (profile.payoutMethod === "stripe") {
+        const accountId = profile.stripeConnectAccountId || "acct_test_development";
+        executeStripePayout(accountId, amount).catch(err => {
           console.error("Error executing Stripe payout:", err);
         });
-      } else if (profile.payoutMethod === "paypal" && profile.paypalAccountId) {
-        executePayPalPayout(profile.paypalAccountId, amount).catch(err => {
+      } else if (profile.payoutMethod === "paypal") {
+        const accountId = profile.paypalAccountId || "test@voxelhub.dev";
+        executePayPalPayout(accountId, amount).catch(err => {
           console.error("Error executing PayPal payout:", err);
         });
       }
