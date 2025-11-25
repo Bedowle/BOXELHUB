@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { LogOut, MessageCircle, Sparkles, Package } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, Package, Briefcase } from "lucide-react";
 
 export default function AppHeader() {
   const [, setLocation] = useLocation();
@@ -45,6 +45,18 @@ export default function AppHeader() {
               <Sparkles className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Explorar Diseños</span>
             </Button>
+            
+            {isClient && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/client/projects-active")}
+                data-testid="button-my-projects"
+              >
+                <Briefcase className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Mis Proyectos</span>
+              </Button>
+            )}
             
             {isMaker && (
               <Button
