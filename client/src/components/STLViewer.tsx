@@ -259,10 +259,10 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
   }, [projectId, width, height]);
 
   return (
-    <div className="relative bg-background rounded-lg overflow-hidden pointer-events-auto">
+    <div className="relative bg-background rounded-lg pointer-events-auto" style={{ overflow: 'hidden', width: `${width}px` }}>
       <div
         ref={containerRef}
-        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'block', margin: 0, padding: 0 }}
+        style={{ width: `${width}px`, height: `${height}px`, pointerEvents: "auto", display: 'block', margin: 0, padding: 0, overflow: 'hidden' }}
         className="cursor-grab active:cursor-grabbing"
       />
       {isLoading && (
