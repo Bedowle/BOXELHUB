@@ -197,7 +197,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stripe = await getUncachableStripeClient();
       
-      // Attempt to create payout
+      // First, ensure test bank account exists
+      try {
+        // Get the list of external accounts
+        const accounts = await (stripe.accounts as any).listExternalAccounts('self');
+        
+        // If no bank accounts exist, create one
+        if (!accounts.data || accounts.data.length === 0) {
+          console.log("Adding test bank account...");
+          await (stripe.accounts as any).createExternalAccount('self', {
+            external_account: {
+              object: 'bank_account',
+              country: 'US',
+              currency: 'usd',
+              account_holder_name: 'VoxelHub Test',
+              account_number: '000111111116',
+              routing_number: '110000000'
+            }
+          });
+          console.log("✅ Test bank account added");
+        }
+      } catch (bankSetupError: any) {
+        console.log("Note: Bank account setup:", bankSetupError.message);
+      }
+      
+      // Now attempt to create payout
       const payout = await stripe.payouts.create({
         amount: Math.round(parseFloat(amount) * 100),
         currency: 'usd',
@@ -207,15 +231,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Success - payout was created and will show in dashboard
       console.log("✅ Payout created:", payout.id);
+      console.log("   Status:", payout.status);
+      console.log("   Check your Stripe dashboard: https://dashboard.stripe.com/test/payouts/" + payout.id);
       return;
     } catch (error: any) {
-      if (error.message?.includes("external accounts")) {
-        // Bank account not linked - this is expected in fresh sandbox
-        console.error("❌ Error: No bank account linked in Stripe");
-        console.error("Action: Add a test bank account to https://dashboard.stripe.com/test/settings/payouts");
-      } else {
-        console.error("❌ Payout error:", error.message);
-      }
+      console.error("❌ Payout error:", error.message);
     }
   }
 
