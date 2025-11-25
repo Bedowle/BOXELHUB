@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState, useMemo } from "react";
-import { ArrowLeft, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, Sparkles, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Design {
@@ -21,6 +21,160 @@ interface Design {
   makerId: string;
   maker: any;
   makerProfile: any;
+}
+
+interface DesignCardProps {
+  design: Design;
+  setLocation: (path: string) => void;
+  user: any;
+}
+
+function DesignCard({ design, setLocation, user }: DesignCardProps) {
+  // Check if user has access to this design
+  const { data: accessInfo } = useQuery({
+    queryKey: [`/api/marketplace/designs/${design.id}/access`],
+    enabled: !!user,
+  });
+
+  const canAccess = accessInfo?.canAccess ?? false;
+
+  return (
+    <Card className="hover-elevate overflow-hidden flex flex-col h-full">
+      {/* Image */}
+      {design.imageUrl && (
+        <div className="relative overflow-hidden bg-muted h-48">
+          <img
+            src={design.imageUrl}
+            alt={design.title}
+            className="w-full h-full object-cover"
+            data-testid={`img-design-${design.id}`}
+          />
+        </div>
+      )}
+
+      <CardContent className="pt-4 flex-1 flex flex-col">
+        {/* Maker Info */}
+        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
+          {design.maker?.profileImageUrl && (
+            <img
+              src={design.maker.profileImageUrl}
+              alt={design.maker.username}
+              className="w-6 h-6 rounded-full bg-muted"
+              data-testid={`img-maker-avatar-${design.id}`}
+            />
+          )}
+          <div className="flex-1">
+            <p className="text-xs text-muted-foreground">Por</p>
+            <p className="text-sm font-medium" data-testid={`text-maker-name-${design.id}`}>
+              {design.maker?.username || "Anónimo"}
+            </p>
+          </div>
+          {design.makerProfile?.rating && (
+            <Badge variant="outline" className="text-xs">
+              ⭐ {parseFloat(String(design.makerProfile.rating)).toFixed(1)}
+            </Badge>
+          )}
+        </div>
+
+        {/* Title & Description */}
+        <h3 className="font-semibold text-lg mb-1 line-clamp-2" data-testid={`text-design-title-${design.id}`}>
+          {design.title}
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+          {design.description}
+        </p>
+
+        {/* Details */}
+        <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
+          <div className="bg-secondary/50 rounded p-2">
+            <p className="text-muted-foreground">Material</p>
+            <p className="font-medium">{design.material}</p>
+          </div>
+          <div className="bg-secondary/50 rounded p-2">
+            <p className="text-muted-foreground">Impresora</p>
+            <p className="font-medium">{design.printerType}</p>
+          </div>
+          {design.estimatedPrintTime && (
+            <div className="bg-secondary/50 rounded p-2">
+              <p className="text-muted-foreground">Tiempo</p>
+              <p className="font-medium">{design.estimatedPrintTime}h</p>
+            </div>
+          )}
+          {design.estimatedWeight && (
+            <div className="bg-secondary/50 rounded p-2">
+              <p className="text-muted-foreground">Peso</p>
+              <p className="font-medium">{design.estimatedWeight}g</p>
+            </div>
+          )}
+        </div>
+
+        {/* Price & CTA */}
+        <div className="mt-auto pt-4 border-t border-border/50 space-y-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground">Precio</p>
+              <p className="text-2xl font-bold text-primary" data-testid={`text-price-${design.id}`}>
+                {design.priceType === "free" ? "Gratis" : `€${parseFloat(String(design.price)).toFixed(2)}`}
+              </p>
+            </div>
+            {design.priceType && (
+              <Badge variant="outline" className="text-xs">
+                {design.priceType === "free"
+                  ? "Gratis"
+                  : design.priceType === "fixed"
+                    ? "Fijo"
+                    : "Mínimo"}
+              </Badge>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {user?.id === design.makerId ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => setLocation(`/maker/marketplace`)}
+                data-testid={`button-edit-design-${design.id}`}
+              >
+                Editar
+              </Button>
+            ) : (
+              <>
+                {canAccess ? (
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setLocation(`/marketplace-design/${design.id}`)}
+                    data-testid={`button-view-design-${design.id}`}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Descargar
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setLocation(`/marketplace-design/${design.id}`)}
+                    data-testid={`button-buy-design-${design.id}`}
+                  >
+                    Comprar
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
+                  data-testid={`button-contact-maker-${design.id}`}
+                >
+                  Contactar
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function ClientMarketplace() {
@@ -121,129 +275,7 @@ export default function ClientMarketplace() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDesigns.map((design: Design) => (
-              <Card key={design.id} className="hover-elevate overflow-hidden flex flex-col h-full">
-                {/* Image */}
-                {design.imageUrl && (
-                  <div className="relative overflow-hidden bg-muted h-48">
-                    <img
-                      src={design.imageUrl}
-                      alt={design.title}
-                      className="w-full h-full object-cover"
-                      data-testid={`img-design-${design.id}`}
-                    />
-                  </div>
-                )}
-
-                <CardContent className="pt-4 flex-1 flex flex-col">
-                  {/* Maker Info */}
-                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
-                    {design.maker?.profileImageUrl && (
-                      <img
-                        src={design.maker.profileImageUrl}
-                        alt={design.maker.username}
-                        className="w-6 h-6 rounded-full bg-muted"
-                        data-testid={`img-maker-avatar-${design.id}`}
-                      />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-xs text-muted-foreground">Por</p>
-                      <p className="text-sm font-medium" data-testid={`text-maker-name-${design.id}`}>
-                        {design.maker?.username || "Anónimo"}
-                      </p>
-                    </div>
-                    {design.makerProfile?.rating && (
-                      <Badge variant="outline" className="text-xs">
-                        ⭐ {parseFloat(String(design.makerProfile.rating)).toFixed(1)}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Title & Description */}
-                  <h3 className="font-semibold text-lg mb-1 line-clamp-2" data-testid={`text-design-title-${design.id}`}>
-                    {design.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {design.description}
-                  </p>
-
-                  {/* Details */}
-                  <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-                    <div className="bg-secondary/50 rounded p-2">
-                      <p className="text-muted-foreground">Material</p>
-                      <p className="font-medium">{design.material}</p>
-                    </div>
-                    <div className="bg-secondary/50 rounded p-2">
-                      <p className="text-muted-foreground">Impresora</p>
-                      <p className="font-medium">{design.printerType}</p>
-                    </div>
-                    {design.estimatedPrintTime && (
-                      <div className="bg-secondary/50 rounded p-2">
-                        <p className="text-muted-foreground">Tiempo</p>
-                        <p className="font-medium">{design.estimatedPrintTime}h</p>
-                      </div>
-                    )}
-                    {design.estimatedWeight && (
-                      <div className="bg-secondary/50 rounded p-2">
-                        <p className="text-muted-foreground">Peso</p>
-                        <p className="font-medium">{design.estimatedWeight}g</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Price & CTA */}
-                  <div className="mt-auto pt-4 border-t border-border/50 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Precio</p>
-                        <p className="text-2xl font-bold text-primary" data-testid={`text-price-${design.id}`}>
-                          {design.priceType === "free" ? "Gratis" : `€${parseFloat(String(design.price)).toFixed(2)}`}
-                        </p>
-                      </div>
-                      {design.priceType && (
-                        <Badge variant="outline" className="text-xs">
-                          {design.priceType === "free"
-                            ? "Gratis"
-                            : design.priceType === "fixed"
-                              ? "Fijo"
-                              : "Mínimo"}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      {user?.id === design.makerId ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => setLocation(`/maker/marketplace`)}
-                          data-testid={`button-edit-design-${design.id}`}
-                        >
-                          Editar
-                        </Button>
-                      ) : (
-                        <>
-                          <Button
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => setLocation(`/marketplace-design/${design.id}`)}
-                            data-testid={`button-buy-design-${design.id}`}
-                          >
-                            Comprar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setLocation(`/chat/${design.makerId}?marketplaceDesignId=${design.id}`)}
-                            data-testid={`button-contact-maker-${design.id}`}
-                          >
-                            Contactar
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <DesignCard key={design.id} design={design} setLocation={setLocation} user={user} />
             ))}
           </div>
         )}
