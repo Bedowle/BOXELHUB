@@ -211,14 +211,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Step 1: Already created as "pending" - Notify
         console.log("   📍 Step 1/3: PENDING - Dinero bloqueado");
-        notifyPayoutUpdate(makerId, payoutRecord.id, "pending");
+        const client1 = wsClients.get(makerId);
+        if (client1 && client1.readyState === WebSocket.OPEN) {
+          client1.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "pending" }));
+        }
         
         // Step 2: After 3 seconds → processing
         setTimeout(async () => {
           try {
             await storage.updatePayoutStatus(payoutRecord.id, "processing", fakePayoutId);
             console.log("   ✓ Step 2/3: PROCESSING - Enviando a banco");
-            notifyPayoutUpdate(makerId, payoutRecord.id, "processing");
+            const client2 = wsClients.get(makerId);
+            if (client2 && client2.readyState === WebSocket.OPEN) {
+              client2.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "processing" }));
+            }
           } catch (e) {
             console.error("Error updating to processing:", e);
           }
@@ -229,7 +235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             await storage.updatePayoutStatus(payoutRecord.id, "completed", fakePayoutId);
             console.log("✅ Step 3/3: COMPLETED - Dinero enviado");
-            notifyPayoutUpdate(makerId, payoutRecord.id, "completed");
+            const client3 = wsClients.get(makerId);
+            if (client3 && client3.readyState === WebSocket.OPEN) {
+              client3.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "completed" }));
+            }
           } catch (e) {
             console.error("Error updating to completed:", e);
           }
@@ -262,7 +271,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newStatus = payout.status === "paid" ? "completed" : "processing";
       await storage.updatePayoutStatus(payoutRecord.id, newStatus, payout.id);
       console.log("   ✓ Database updated, Status: " + newStatus);
-      notifyPayoutUpdate(makerId, payoutRecord.id, newStatus);
+      const wsClient = wsClients.get(makerId);
+      if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+        wsClient.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: newStatus }));
+      }
       console.log("=== PAYOUT EXECUTION END ===\n");
       
       return payout;
@@ -275,25 +287,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         await storage.updatePayoutStatus(payoutRecord.id, "failed");
         console.log("   ✓ Marked as FAILED in database");
-        notifyPayoutUpdate(makerId, payoutRecord.id, "failed");
+        const wsClientFail = wsClients.get(makerId);
+        if (wsClientFail && wsClientFail.readyState === WebSocket.OPEN) {
+          wsClientFail.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "failed" }));
+        }
       } catch (_) {
         console.error("   ⚠ Could not mark as failed");
       }
       
       console.error("=== PAYOUT EXECUTION END (ERROR) ===\n");
-    }
-  }
-  
-  // Helper to notify client of payout status changes
-  function notifyPayoutUpdate(makerId: string, payoutId: string, status: string) {
-    if (!wsClients.has(makerId)) return;
-    const client = wsClients.get(makerId);
-    if (client && client.readyState === 1) {
-      client.send(JSON.stringify({
-        type: "payout_status_update",
-        payoutId,
-        status,
-      }));
     }
   }
 
