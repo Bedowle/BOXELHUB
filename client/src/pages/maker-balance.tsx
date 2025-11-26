@@ -524,19 +524,19 @@ export default function MakerBalance() {
         </Card>
 
 
-        {/* Stripe Testing Notice */}
+        {/* Environment Notice */}
         {process.env.NODE_ENV === "development" && (
-          <Card className="mb-8 border-purple-400 bg-purple-50 dark:bg-purple-950">
+          <Card className="mb-8 border-blue-400 bg-blue-50 dark:bg-blue-950">
             <CardContent className="pt-6">
               <div className="flex gap-3">
-                <CheckCircle className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-purple-900 dark:text-purple-100 mb-1">🔬 Stripe Sandbox - Payouts REALES</h3>
-                  <p className="text-sm text-purple-800 dark:text-purple-200 mb-2">
-                    Los payouts se envían <strong>DE VERDAD a Stripe</strong> en ambiente de prueba (USD). <strong>Ver en tu Dashboard de Stripe.</strong>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">🧪 Desarrollo - Payouts Simulados (USD)</h3>
+                  <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                    Los payouts se simulan en desarrollo para testing. <strong>En producción (cuando publiques), funcionarán REALES con EUR.</strong>
                   </p>
-                  <p className="text-xs text-purple-700 dark:text-purple-300">
-                    En producción: Los payouts se enviarán a tu cuenta bancaria real via Stripe.
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    Aparecerán en tu Balance como "Completados" para simular el flujo.
                   </p>
                 </div>
               </div>
