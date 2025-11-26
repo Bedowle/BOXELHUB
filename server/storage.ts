@@ -880,11 +880,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMakerBalance(makerId: string): Promise<string> {
-    // Sum of all earnings (available + pending in voxelhub account)
-    const result = await db.execute(
-      sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_earnings WHERE maker_id = ${makerId}`
-    );
-    return (result.rows[0] as any)?.total?.toString() || "0.00";
+    // Total earnings minus completed payouts (money actually withdrawn)
+    try {
+      const earningsResult = await db.execute(
+        sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_earnings WHERE maker_id = ${makerId}`
+      );
+      const totalEarnings = parseFloat((earningsResult.rows[0] as any)?.total || "0");
+
+      const completedPayoutsResult = await db.execute(
+        sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_payouts WHERE maker_id = ${makerId} AND status = 'completed'`
+      );
+      const completedPayouts = parseFloat((completedPayoutsResult.rows[0] as any)?.total || "0");
+
+      const finalBalance = Math.max(0, totalEarnings - completedPayouts);
+      return finalBalance.toFixed(2);
+    } catch (error) {
+      console.error("Error calculating total balance:", error);
+      return "0.00";
+    }
   }
 
   async getMakerAvailableBalance(makerId: string): Promise<string> {
