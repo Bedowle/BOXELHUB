@@ -194,6 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   async function executeStripePayout(stripeConnectAccountId: string, amount: string, payoutRecord: any) {
     const isDevelopment = process.env.NODE_ENV === "development";
     const currency = isDevelopment ? 'usd' : 'eur';
+    const makerId = payoutRecord.makerId || payoutRecord.maker_id;
     
     try {
       console.log("\n=== PAYOUT EXECUTION START ===");
@@ -204,11 +205,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("   Payout ID:", payoutRecord.id);
       
       if (isDevelopment) {
-        // In development, simulate with fake ID (sandbox testing)
-        console.log("   ℹ Dev mode: Creating simulated Stripe payout");
+        // In development, simulate realistic payout workflow
+        console.log("   ℹ Dev mode: Starting simulated payout workflow");
         const fakePayoutId = "py_test_" + Date.now();
-        await storage.updatePayoutStatus(payoutRecord.id, "completed", fakePayoutId);
-        console.log("✅ [DEV SANDBOX] Simulated payout completed!");
+        
+        // Step 1: Already created as "pending" - Notify
+        console.log("   📍 Step 1/3: PENDING - Dinero bloqueado");
+        notifyPayoutUpdate(makerId, payoutRecord.id, "pending");
+        
+        // Step 2: After 3 seconds → processing
+        setTimeout(async () => {
+          try {
+            await storage.updatePayoutStatus(payoutRecord.id, "processing", fakePayoutId);
+            console.log("   ✓ Step 2/3: PROCESSING - Enviando a banco");
+            notifyPayoutUpdate(makerId, payoutRecord.id, "processing");
+          } catch (e) {
+            console.error("Error updating to processing:", e);
+          }
+        }, 3000);
+        
+        // Step 3: After 6 seconds total → completed
+        setTimeout(async () => {
+          try {
+            await storage.updatePayoutStatus(payoutRecord.id, "completed", fakePayoutId);
+            console.log("✅ Step 3/3: COMPLETED - Dinero enviado");
+            notifyPayoutUpdate(makerId, payoutRecord.id, "completed");
+          } catch (e) {
+            console.error("Error updating to completed:", e);
+          }
+        }, 6000);
+        
+        console.log("   ✓ Payout workflow initiated");
         console.log("   Fake Payout ID:", fakePayoutId);
         console.log("=== PAYOUT EXECUTION END ===\n");
         return;
@@ -235,6 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newStatus = payout.status === "paid" ? "completed" : "processing";
       await storage.updatePayoutStatus(payoutRecord.id, newStatus, payout.id);
       console.log("   ✓ Database updated, Status: " + newStatus);
+      notifyPayoutUpdate(makerId, payoutRecord.id, newStatus);
       console.log("=== PAYOUT EXECUTION END ===\n");
       
       return payout;
@@ -247,11 +275,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         await storage.updatePayoutStatus(payoutRecord.id, "failed");
         console.log("   ✓ Marked as FAILED in database");
+        notifyPayoutUpdate(makerId, payoutRecord.id, "failed");
       } catch (_) {
         console.error("   ⚠ Could not mark as failed");
       }
       
       console.error("=== PAYOUT EXECUTION END (ERROR) ===\n");
+    }
+  }
+  
+  // Helper to notify client of payout status changes
+  function notifyPayoutUpdate(makerId: string, payoutId: string, status: string) {
+    if (!wsClients.has(makerId)) return;
+    const client = wsClients.get(makerId);
+    if (client && client.readyState === 1) {
+      client.send(JSON.stringify({
+        type: "payout_status_update",
+        payoutId,
+        status,
+      }));
     }
   }
 

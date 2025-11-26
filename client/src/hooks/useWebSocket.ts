@@ -17,9 +17,15 @@ export function useWebSocket() {
     }
 
     const connect = () => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host || `localhost:${window.location.port || 5000}`;
-      const wsUrl = `${protocol}//${host}/ws`;
+      // Construct WebSocket URL using current location
+      const isSecure = window.location.protocol === "https:";
+      const protocol = isSecure ? "wss:" : "ws:";
+      
+      // Use current hostname and port, with fallback
+      const hostname = window.location.hostname || "localhost";
+      const port = window.location.port ? `:${window.location.port}` : "";
+      const wsUrl = `${protocol}//${hostname}${port}/ws`;
+      
       console.log("[WebSocket] Connecting to:", wsUrl);
       const ws = new WebSocket(wsUrl);
 
@@ -122,6 +128,16 @@ export function useWebSocket() {
                 });
               }
               queryClient.invalidateQueries({ queryKey: ["/api/my-conversations-full"] });
+              break;
+              
+            case "payout_status_update":
+              // Refresh payout history and balance when payout status changes
+              queryClient.refetchQueries({ queryKey: ["/api/maker/payouts"] });
+              queryClient.refetchQueries({ queryKey: ["/api/maker/balance"] });
+              toast({
+                title: "Estado del Payout Actualizado",
+                description: `Tu payout está: ${data.status === "pending" ? "Pendiente" : data.status === "processing" ? "Procesando" : data.status === "completed" ? "✓ Completado" : "Fallido"}`,
+              });
               break;
           }
         } catch (error) {
