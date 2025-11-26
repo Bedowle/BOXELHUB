@@ -888,23 +888,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMakerAvailableBalance(makerId: string): Promise<string> {
-    // Available earnings (passed retention) minus ALL non-failed payouts (they're committed once requested)
-    const result = await db.execute(
-      sql`WITH available_earnings AS (
-        SELECT COALESCE(SUM(amount), 0) as total 
-        FROM maker_earnings 
-        WHERE maker_id = ${makerId} AND available_date <= NOW()
-      ),
-      committed_payouts AS (
-        SELECT COALESCE(SUM(amount), 0) as total 
-        FROM maker_payouts 
-        WHERE maker_id = ${makerId} AND status NOT IN ('failed')
-      )
-      SELECT (available_earnings.total - committed_payouts.total) as total
-      FROM available_earnings, committed_payouts`
-    );
-    const balance = (result.rows[0] as any)?.total || 0;
-    return Math.max(0, parseFloat(balance.toString())).toFixed(2);
+    // Available earnings (passed retention) minus ALL non-failed payouts
+    try {
+      const availableEarningsResult = await db.execute(
+        sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_earnings WHERE maker_id = ${makerId} AND available_date <= NOW()`
+      );
+      const availableEarnings = parseFloat((availableEarningsResult.rows[0] as any)?.total || "0");
+
+      const committedPayoutsResult = await db.execute(
+        sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_payouts WHERE maker_id = ${makerId} AND status NOT IN ('failed')`
+      );
+      const committedPayouts = parseFloat((committedPayoutsResult.rows[0] as any)?.total || "0");
+
+      const finalBalance = Math.max(0, availableEarnings - committedPayouts);
+      return finalBalance.toFixed(2);
+    } catch (error) {
+      console.error("Error calculating available balance:", error);
+      return "0.00";
+    }
   }
 
   // Payout configuration
