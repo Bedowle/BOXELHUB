@@ -888,12 +888,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMakerAvailableBalance(makerId: string): Promise<string> {
-    // Only earnings where retention period has passed
+    // Available earnings minus pending/processing payouts
     const result = await db.execute(
-      sql`SELECT COALESCE(SUM(amount), 0) as total FROM maker_earnings 
-          WHERE maker_id = ${makerId} AND available_date <= NOW()`
+      sql`SELECT 
+        COALESCE(SUM(CASE WHEN me.available_date <= NOW() THEN me.amount ELSE 0 END), 0) -
+        COALESCE(SUM(CASE WHEN mp.status IN ('pending', 'processing') THEN mp.amount ELSE 0 END), 0) as total
+      FROM maker_earnings me
+      FULL OUTER JOIN maker_payouts mp ON me.maker_id = mp.maker_id
+      WHERE me.maker_id = ${makerId}`
     );
-    return (result.rows[0] as any)?.total?.toString() || "0.00";
+    const balance = (result.rows[0] as any)?.total || 0;
+    return Math.max(0, parseFloat(balance.toString())).toFixed(2);
   }
 
   // Payout configuration
