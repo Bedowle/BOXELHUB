@@ -133,7 +133,7 @@ export default function AppHeader() {
               {isClient ? "Cliente" : isMaker ? "Maker" : ""}
             </span>
             <button
-              onClick={() => setLocation(`/user/${user?.id}`)}
+              onClick={() => setLocation(isMaker ? "/maker/profile" : `/user/${user?.id}`)}
               className="text-sm font-medium hidden sm:block hover:text-primary transition-colors cursor-pointer"
               data-testid="button-profile-link"
             >
