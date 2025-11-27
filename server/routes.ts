@@ -2239,6 +2239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amountInCents = Math.round(finalAmount * 100);
 
       // Create Stripe checkout session
+      // ✅ ALL PAYMENTS GO TO CENTRALIZED STRIPE ACCOUNT (using centralized API key)
       const stripe = await getUncachableStripeClient();
       
       const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -2301,6 +2302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify checkout session with Stripe
+      // ✅ FUNDS ALREADY RECEIVED IN CENTRALIZED ACCOUNT
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -2331,7 +2333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "completed",
       });
 
-      // Create maker earning (with retention period)
+      // Create maker earning with retention period
+      // (Funds are in centralized account, maker will receive via payout after retention period)
       const earning = await storage.createMakerEarning(design.makerId, purchase.id, amountPaid);
 
       res.json({ message: "Purchase recorded", purchase, earning });
