@@ -3,6 +3,18 @@ import Stripe from 'stripe';
 let connectionSettings: any;
 
 async function getCredentials() {
+  // ✅ PRIORITY 1: Use the CENTRALIZED Stripe API key from env vars
+  if (process.env.STRIPE_SECRET_KEY) {
+    console.log("[Stripe] Using CENTRALIZED Stripe API key from environment");
+    return {
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder",
+      secretKey: process.env.STRIPE_SECRET_KEY,
+    };
+  }
+
+  // PRIORITY 2: Fall back to Replit connector
+  console.log("[Stripe] STRIPE_SECRET_KEY not found, attempting to use Replit connector");
+  
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
