@@ -117,6 +117,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Verify payout status against Stripe (real verification)
+  app.get('/api/maker/verify-payouts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const payouts = await storage.getMakerPayouts(userId);
+      
+      const results = [];
+      for (const payout of payouts) {
+        if (payout.status === "pending" || payout.status === "processing") {
+          if (payout.stripePayoutId) {
+            try {
+              const stripeStatus = await stripe.payouts.retrieve(payout.stripePayoutId);
+              console.log(`[Payout Verification] ${payout.id}: Stripe status = ${stripeStatus.status}`);
+              
+              let newStatus = payout.status;
+              if (stripeStatus.status === "paid") {
+                newStatus = "completed";
+              } else if (stripeStatus.status === "in_transit" || stripeStatus.status === "pending") {
+                newStatus = "processing";
+              } else if (stripeStatus.status === "failed" || stripeStatus.status === "canceled") {
+                newStatus = "failed";
+              }
+              
+              if (newStatus !== payout.status) {
+                await storage.updatePayoutStatus(payout.id, newStatus, payout.stripePayoutId);
+                console.log(`[Payout Update] ${payout.id}: ${payout.status} → ${newStatus}`);
+                
+                // Notify via WebSocket
+                const wsClient = wsClients.get(userId);
+                if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+                  wsClient.send(JSON.stringify({ 
+                    type: "payout_status_update", 
+                    payoutId: payout.id, 
+                    status: newStatus 
+                  }));
+                }
+                
+                results.push({ id: payout.id, oldStatus: payout.status, newStatus });
+              }
+            } catch (e) {
+              console.error(`Error checking Stripe payout ${payout.stripePayoutId}:`, e);
+            }
+          }
+        }
+      }
+      
+      res.json({ verified: results.length > 0, updates: results });
+    } catch (error: any) {
+      console.error("Error verifying payouts:", error);
+      res.status(500).json({ message: error.message || "Failed to verify payouts" });
+    }
+  });
+
   // Request payout
   app.post('/api/maker/request-payout', isAuthenticated, async (req: any, res) => {
     try {
@@ -181,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({
-        message: "Payout request created successfully. Processing...",
+        message: "Payout request created successfully. Verifying with payment provider...",
         payout
       });
     } catch (error: any) {

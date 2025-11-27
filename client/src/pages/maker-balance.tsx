@@ -87,10 +87,27 @@ export default function MakerBalance() {
     staleTime: 0, // Always refetch when invalidated
   });
 
-  const { data: payouts } = useQuery<Payout[]>({
+  const { data: payouts, refetch: refetchPayouts } = useQuery<Payout[]>({
     queryKey: ["/api/maker/payouts"],
     enabled: !!user,
   });
+
+  // Poll every 5 seconds to verify payout status against Stripe
+  useEffect(() => {
+    if (!user) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        await apiRequest("/api/maker/verify-payouts", "GET");
+        // Refetch payouts after verification
+        refetchPayouts();
+      } catch (error) {
+        console.error("Error verifying payouts:", error);
+      }
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [user, refetchPayouts]);
 
   const payoutForm = useForm<PayoutFormValues>({
     resolver: zodResolver(payoutSchema),
