@@ -98,7 +98,7 @@ export default function MakerBalance() {
     
     const verifyPayouts = async () => {
       try {
-        await apiRequest("/api/maker/verify-payouts", "GET");
+        await apiRequest("GET", "/api/maker/verify-payouts");
         refetchPayouts();
       } catch (error) {
         console.error("Error verifying payouts:", error);
