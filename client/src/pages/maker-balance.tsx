@@ -631,15 +631,12 @@ export default function MakerBalance() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className={`text-sm font-medium ${getStatusColor(payout.status)}`}>
-                        {payout.status === "completed" && "Completado"}
+                        {payout.status === "completed" && "✓ Completado"}
                         {payout.status === "processing" && "En proceso"}
                         {payout.status === "pending" && "Pendiente"}
                         {payout.status === "failed" && "Fallido"}
                       </div>
-                      <div className="text-xs text-muted-foreground">{getPayoutMethodLabel(payout.method)}</div>
-                      {payout.status === "completed" && (
-                        <div className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Completado</div>
-                      )}
+                      <div className="text-xs text-muted-foreground">{getPayoutMethodLabel(payout.payoutMethod)}</div>
                     </div>
                   </div>
                 ))}
