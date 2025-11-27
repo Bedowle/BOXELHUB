@@ -178,17 +178,16 @@ export default function MakerHome() {
               data-testid="card-profile-header"
             >
               <CardContent className="pt-6 pb-6">
-                <Button 
-                  variant="outline" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setLocation("/maker/profile");
-                  }}
-                  className="w-full"
-                  data-testid="button-view-profile"
-                >
-                  Editar Perfil
-                </Button>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Printer className="h-5 w-5 text-primary flex-shrink-0" />
+                    <h3 className="font-semibold text-lg">{profile.printerType}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.materials.slice(0, 3).join(", ")}
+                    {profile.materials.length > 3 && `... (+${profile.materials.length - 3})`}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )}
