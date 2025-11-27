@@ -104,7 +104,7 @@ export default function MakerBalance() {
     defaultValues: {
       method: (makerProfile?.payoutMethod as any) || "stripe",
       stripeConnectAccountId: (makerProfile as any)?.stripeConnectAccountId || "",
-      paypalAccountId: (makerProfile as any)?.paypalAccountId || "",
+      paypalAccountId: (makerProfile as any)?.paypalEmail || "",
       bankAccountIban: makerProfile?.bankAccountIban || "",
       bankAccountName: makerProfile?.bankAccountName || "",
     },
@@ -117,7 +117,7 @@ export default function MakerBalance() {
       methodForm.reset({
         method: (makerProfile.payoutMethod as any) || "stripe",
         stripeConnectAccountId: (makerProfile as any)?.stripeConnectAccountId || "",
-        paypalAccountId: (makerProfile as any)?.paypalAccountId || "",
+        paypalAccountId: (makerProfile as any)?.paypalEmail || "",
         bankAccountIban: makerProfile.bankAccountIban || "",
         bankAccountName: makerProfile.bankAccountName || "",
       });
@@ -342,8 +342,8 @@ export default function MakerBalance() {
                   )}
                   {makerProfile?.payoutMethod === "paypal" && (
                     <>
-                      {(makerProfile as any)?.paypalAccountId ? (
-                        <p className="text-sm text-muted-foreground">Email: {(makerProfile as any).paypalAccountId}</p>
+                      {(makerProfile as any)?.paypalEmail ? (
+                        <p className="text-sm text-muted-foreground">Email: {(makerProfile as any).paypalEmail}</p>
                       ) : (
                         <p className="text-sm text-yellow-600 dark:text-yellow-400">Por configurar</p>
                       )}
