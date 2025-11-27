@@ -2301,6 +2301,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Design not found" });
       }
 
+      console.log(`[confirm-payment] User ${userId} confirming payment for design ${id} (maker: ${design.makerId})`);
+
       // Verify checkout session with Stripe
       // ✅ FUNDS ALREADY RECEIVED IN CENTRALIZED ACCOUNT
       const stripe = await getUncachableStripeClient();
@@ -2313,6 +2315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if purchase already exists
       const existing = await storage.userHasPurchasedDesign(userId, id);
       if (existing) {
+        console.log(`[confirm-payment] Design already purchased by user ${userId}`);
         return res.json({ message: "Design already purchased" });
       }
 
@@ -2321,6 +2324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (session.payment_intent) {
         const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string);
         amountPaid = (paymentIntent.amount / 100).toFixed(2);
+        console.log(`[confirm-payment] Payment amount: €${amountPaid}`);
       }
 
       // Create purchase record
@@ -2333,13 +2337,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "completed",
       });
 
+      console.log(`[confirm-payment] Purchase created: ${purchase.id} for maker ${design.makerId}`);
+
       // Create maker earning with retention period
       // (Funds are in centralized account, maker will receive via payout after retention period)
       const earning = await storage.createMakerEarning(design.makerId, purchase.id, amountPaid);
+      
+      console.log(`[confirm-payment] ✅ Earning created for maker ${design.makerId}: €${amountPaid} (earning id: ${earning.id})`);
 
       res.json({ message: "Purchase recorded", purchase, earning });
     } catch (error: any) {
-      console.error("Error confirming payment:", error);
+      console.error("[confirm-payment] ❌ Error confirming payment:", error);
       res.status(500).json({ message: error.message || "Failed to confirm payment" });
     }
   });
