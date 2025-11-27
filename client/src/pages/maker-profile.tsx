@@ -439,43 +439,6 @@ export default function MakerProfile() {
               </CardContent>
             </Card>
 
-            {/* Request Payout Card */}
-            {balance && parseFloat(balance.availableBalance) > 0 && (
-              <Card className="md:col-span-2">
-                <CardContent className="pt-6 pb-6">
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-semibold">Solicitar Payout</h2>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Cantidad (€)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={payoutAmount}
-                        onChange={(e) => setPayoutAmount(e.target.value)}
-                        placeholder="0.00"
-                        max={balance.availableBalance}
-                        className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-                        data-testid="input-payout-amount"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Disponible: €{balance.availableBalance}
-                      </p>
-                    </div>
-
-                    <Button
-                      onClick={handleRequestPayout}
-                      disabled={requestPayoutMutation.isPending}
-                      className="w-full"
-                      data-testid="button-request-payout"
-                    >
-                      {requestPayoutMutation.isPending ? "Procesando..." : "Solicitar Payout"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Payout History */}
             {payouts && payouts.length > 0 && (
               <Card className="md:col-span-2">
