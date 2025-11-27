@@ -300,22 +300,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   async function executePayPalPayout(paypalAccountId: string, amount: string, payoutRecord: any) {
+    const isDevelopment = process.env.NODE_ENV === "development";
+    const makerId = payoutRecord.makerId || payoutRecord.maker_id;
+    
     try {
+      console.log("\n=== PAYPAL PAYOUT EXECUTION START ===");
+      console.log("🔄 Processing PayPal payout...");
+      console.log("   Recipient:", paypalAccountId);
+      console.log("   Amount: €" + parseFloat(amount).toFixed(2));
+      console.log("   Environment:", isDevelopment ? "DEVELOPMENT" : "PRODUCTION");
+      console.log("   Payout ID:", payoutRecord.id);
+      
+      if (isDevelopment) {
+        // In development, simulate realistic payout workflow
+        console.log("   ℹ Dev mode: Starting simulated PayPal payout workflow");
+        const fakePayoutId = "PAYID_" + Date.now();
+        
+        // Step 1: Already created as "pending" - Notify
+        console.log("   📍 Step 1/3: PENDING - Dinero bloqueado");
+        const client1 = wsClients.get(makerId);
+        if (client1 && client1.readyState === WebSocket.OPEN) {
+          client1.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "pending" }));
+        }
+        
+        // Step 2: After 3 seconds → processing
+        setTimeout(async () => {
+          try {
+            await storage.updatePayoutStatus(payoutRecord.id, "processing", fakePayoutId);
+            console.log("   ✓ Step 2/3: PROCESSING - Enviando a PayPal");
+            const client2 = wsClients.get(makerId);
+            if (client2 && client2.readyState === WebSocket.OPEN) {
+              client2.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "processing" }));
+            }
+          } catch (e) {
+            console.error("Error updating to processing:", e);
+          }
+        }, 3000);
+        
+        // Step 3: After 6 seconds total → completed
+        setTimeout(async () => {
+          try {
+            await storage.updatePayoutStatus(payoutRecord.id, "completed", fakePayoutId);
+            console.log("✅ Step 3/3: COMPLETED - Dinero enviado a PayPal");
+            const client3 = wsClients.get(makerId);
+            if (client3 && client3.readyState === WebSocket.OPEN) {
+              client3.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "completed" }));
+            }
+          } catch (e) {
+            console.error("Error updating to completed:", e);
+          }
+        }, 6000);
+        
+        console.log("   ✓ PayPal payout workflow initiated");
+        console.log("   Fake Payout ID:", fakePayoutId);
+        console.log("=== PAYPAL PAYOUT EXECUTION END ===\n");
+        return;
+      }
+      
+      // PRODUCTION: Real PayPal API
       if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
         throw new Error("PayPal credentials not configured in environment");
       }
       
-      // Production: Use real PayPal API
       const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
       const apiBase = isProduction ? 'https://api.paypal.com' : 'https://api.sandbox.paypal.com';
       
       const clientId = process.env.PAYPAL_CLIENT_ID;
       const auth = Buffer.from(`${clientId}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
-      
-      console.log("🔄 Processing PayPal payout...");
-      console.log("   Recipient:", paypalAccountId);
-      console.log("   Amount: €" + parseFloat(amount).toFixed(2));
-      console.log("   Environment:", isProduction ? "production" : "sandbox");
       
       const tokenResponse = await fetch(`${apiBase}/v1/oauth2/token`, {
         method: 'POST',
@@ -367,12 +418,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("   Status:", payoutData.batch_header.batch_status);
         console.log("   To: " + paypalAccountId);
         console.log("   Amount: €" + parseFloat(amount).toFixed(2));
-        console.log("   Should appear in your PayPal " + (isProduction ? "account" : "sandbox") + " shortly");
+        await storage.updatePayoutStatus(payoutRecord.id, "processing", payoutData.batch_header.payout_batch_id);
+        const wsClient = wsClients.get(makerId);
+        if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+          wsClient.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "processing" }));
+        }
+        console.log("=== PAYPAL PAYOUT EXECUTION END ===\n");
       } else {
         console.error("❌ PayPal payout failed:", payoutData);
+        await storage.updatePayoutStatus(payoutRecord.id, "failed");
+        const wsClientFail = wsClients.get(makerId);
+        if (wsClientFail && wsClientFail.readyState === WebSocket.OPEN) {
+          wsClientFail.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "failed" }));
+        }
       }
     } catch (error: any) {
       console.error("❌ PayPal payout error:", error.message);
+      try {
+        await storage.updatePayoutStatus(payoutRecord.id, "failed");
+        const wsClientFail = wsClients.get(makerId);
+        if (wsClientFail && wsClientFail.readyState === WebSocket.OPEN) {
+          wsClientFail.send(JSON.stringify({ type: "payout_status_update", payoutId: payoutRecord.id, status: "failed" }));
+        }
+      } catch (_) {
+        console.error("   ⚠ Could not mark as failed");
+      }
     }
   }
 
