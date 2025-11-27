@@ -170,28 +170,6 @@ export default function MakerHome() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl space-y-4">
-          {/* Profile Section - Clickable */}
-          {profile && (
-            <Card 
-              className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10 hover-elevate cursor-pointer"
-              onClick={() => setLocation("/maker/profile")}
-              data-testid="card-profile-header"
-            >
-              <CardContent className="pt-6 pb-6">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Printer className="h-5 w-5 text-primary flex-shrink-0" />
-                    <h3 className="font-semibold text-lg">{profile.printerType}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {profile.materials.slice(0, 3).join(", ")}
-                    {profile.materials.length > 3 && `... (+${profile.materials.length - 3})`}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           </div>
       </header>
 
