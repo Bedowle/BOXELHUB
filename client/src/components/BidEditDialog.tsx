@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
+import { useState } from "react";
 
 type UpdateBidData = z.infer<typeof updateBidSchema>;
 
@@ -49,6 +50,7 @@ export function BidEditDialog({
 }: BidEditDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const form = useForm<UpdateBidData>({
     resolver: zodResolver(updateBidSchema),
@@ -135,14 +137,18 @@ export function BidEditDialog({
   });
 
   const handleDelete = () => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta oferta?")) {
-      deleteMutation.mutate();
-    }
+    setConfirmDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setConfirmDelete(false);
+    deleteMutation.mutate();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Editar Oferta</DialogTitle>
           <DialogDescription>
@@ -258,5 +264,36 @@ export function BidEditDialog({
         </Form>
       </DialogContent>
     </Dialog>
+
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Eliminar Oferta</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar esta oferta? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setConfirmDelete(false)}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+              className="flex-1"
+            >
+              {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
