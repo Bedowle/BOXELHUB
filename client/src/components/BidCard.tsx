@@ -39,8 +39,9 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
 
   const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (bid.maker?.id) {
-      setLocation(`/user/${bid.maker.id}`);
+    const profileId = isMyBid && currentUserId ? currentUserId : bid.maker?.id;
+    if (profileId) {
+      setLocation(`/user/${profileId}`);
     }
   };
 
