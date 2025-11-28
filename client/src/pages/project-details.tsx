@@ -131,13 +131,6 @@ export default function ProjectDetails() {
       }, 1000);
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar el proyecto",
-        variant: "destructive",
-      });
-    },
-    onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
           title: "No autorizado",
@@ -151,7 +144,7 @@ export default function ProjectDetails() {
       }
       toast({
         title: "Error",
-        description: error.message || "No se pudo rechazar la oferta",
+        description: error.message || "No se pudo eliminar el proyecto",
         variant: "destructive",
       });
     },
