@@ -145,13 +145,14 @@ const STLViewerComponent = ({ projectId, width = 400, height = 250, stlIndex = 0
       const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
       camera.position.z = 150;
 
-      // Renderer setup - use canvas element directly
+      // Renderer setup - use canvas element directly with optimizations
       const renderer = new THREE.WebGLRenderer({ 
         canvas: containerRef.current,
-        antialias: true, 
-        alpha: true 
+        antialias: false,  // Disable antialias for performance
+        alpha: true,
+        precision: 'lowp'  // Use low precision for mobile perf
       });
-      renderer.setPixelRatio(1);
+      renderer.setPixelRatio(0.5);  // Half pixel ratio for speed
       renderer.setSize(width, height);
       rendererRef.current = renderer;
 
@@ -194,10 +195,20 @@ const STLViewerComponent = ({ projectId, width = 400, height = 250, stlIndex = 0
         containerRef.current.addEventListener("mousemove", onMouseMove, false);
       }
 
-      // Animation loop
+      // Animation loop with throttling - only render on demand
+      let frameTime = 0;
+      let lastRenderTime = 0;
+      const throttleMs = 33; // ~30fps max
+      
       const animate = () => {
         animationIdRef.current = requestAnimationFrame(animate);
-        renderer.render(scene, camera);
+        frameTime = Date.now();
+        
+        // Only render if enough time has passed OR there's mouse interaction
+        if (frameTime - lastRenderTime >= throttleMs || mouseRef.current.isDown) {
+          renderer.render(scene, camera);
+          lastRenderTime = frameTime;
+        }
       };
       animate();
 

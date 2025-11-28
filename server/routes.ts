@@ -821,11 +821,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
+      const limit = Math.min(parseInt(req.query.limit || '20'), 100);
+      const offset = parseInt(req.query.offset || '0');
+
       const projects = await storage.getProjects({ status: 'active' });
+      const paginatedProjects = projects.slice(offset, offset + limit);
       
-      // Add bid count for each project
+      // Add bid count for each project (with limit)
       const projectsWithBids = await Promise.all(
-        projects.map(async (project) => {
+        paginatedProjects.map(async (project) => {
           const bids = await storage.getBidsByProject(project.id);
           return { ...project, bidCount: bids.length };
         })
@@ -850,11 +854,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
+      const limit = Math.min(parseInt(req.query.limit || '20'), 100);
+      const offset = parseInt(req.query.offset || '0');
+
       // Get all bids from this maker
       const bids = await storage.getBidsByMaker(userId);
       
-      // Get unique project IDs
-      const projectIds = [...new Set(bids.map(b => b.projectId))];
+      // Get unique project IDs with pagination
+      const projectIds = [...new Set(bids.map(b => b.projectId))].slice(offset, offset + limit);
       
       // Get projects for those IDs
       const projects = await Promise.all(
@@ -1613,11 +1620,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
+      const limit = Math.min(parseInt(req.query.limit || '30'), 100);
+      const offset = parseInt(req.query.offset || '0');
+
       const bids = await storage.getBidsByMaker(userId);
+      const paginatedBids = bids.slice(offset, offset + limit);
       
       // Enrich bids with project data (including deleted projects)
       const enrichedBids = await Promise.all(
-        bids.map(async (bid) => {
+        paginatedBids.map(async (bid) => {
           const project = await storage.getProjectIncludeDeleted(bid.projectId);
           return {
             ...bid,
