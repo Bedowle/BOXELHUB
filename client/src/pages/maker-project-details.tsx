@@ -155,8 +155,8 @@ export default function MakerProjectDetails() {
         {/* Project Header */}
         <Card className="mb-8">
           <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-              <div className="flex-1">
+            <div className="space-y-4">
+              <div>
                 <div className="flex items-center gap-3 mb-3">
                   <h1 className="text-3xl font-bold" data-testid="text-project-title">
                     {project.name}
@@ -213,12 +213,12 @@ export default function MakerProjectDetails() {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 md:flex-row">
+              <div className="flex flex-col gap-2 md:flex-row md:gap-3">
                 <Button 
                   onClick={handleDownloadSTL}
                   variant="default"
                   data-testid="button-download-stl"
-                  className="md:order-first"
+                  size="lg"
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Descargar STL
@@ -227,15 +227,16 @@ export default function MakerProjectDetails() {
                   onClick={() => setRebidDialogOpen(true)}
                   variant="outline"
                   data-testid="button-send-offer"
-                  className="md:flex-1"
+                  size="lg"
                 >
-                  ✓ Enviar Oferta
+                  Enviar Oferta
                 </Button>
                 {projectOwner && (
                   <Button 
                     variant="outline"
                     onClick={() => setChatDialogOpen(true)}
                     data-testid="button-contact-client"
+                    size="lg"
                   >
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Contactar
