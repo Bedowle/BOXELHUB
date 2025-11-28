@@ -23,10 +23,11 @@ export default function AppHeader() {
     enabled: !!user && isClient,
   });
 
-  const { data: makerBalance } = useQuery<MakerBalance>({
-    queryKey: ["/api/maker/balance"],
-    enabled: !!user && isMaker,
-  });
+  // MARKETPLACE HIDDEN - Balance query disabled
+  // const { data: makerBalance } = useQuery<MakerBalance>({
+  //   queryKey: ["/api/maker/balance"],
+  //   enabled: !!user && isMaker,
+  // });
 
   const totalUnread = conversations?.reduce((sum, conv) => sum + conv.unreadCount, 0) || 0;
 
