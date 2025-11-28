@@ -91,8 +91,8 @@ export default function ClientHome() {
             onClick={() => setLocation("/client/projects-active")}
             data-testid="card-stats-in-progress"
           >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Proyectos en Progreso</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
@@ -115,8 +115,8 @@ export default function ClientHome() {
             onClick={() => setLocation("/client/bids")}
             data-testid="card-stats-pending-bids"
           >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Ofertas Pendientes</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
@@ -137,8 +137,8 @@ export default function ClientHome() {
             onClick={() => setLocation("/client/projects-completed")}
             data-testid="card-stats-completed-projects"
           >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Proyectos Terminados</span>
                   <div className="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-lg">
@@ -156,7 +156,7 @@ export default function ClientHome() {
 
         {/* CTA Card - Upload Project */}
         <Card className="mb-12 border-2 border-dashed border-primary/30 hover-elevate bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 dark:from-primary/10 dark:via-transparent dark:to-secondary/10">
-          <CardContent className="pt-10 pb-10">
+          <CardContent className="pt-6 pb-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 justify-center md:justify-start">

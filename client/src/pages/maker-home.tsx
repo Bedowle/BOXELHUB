@@ -192,8 +192,8 @@ export default function MakerHome() {
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
@@ -214,8 +214,8 @@ export default function MakerHome() {
             onClick={() => setLocation("/maker/won-projects")}
             data-testid="card-stats-won-projects"
           >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
@@ -236,8 +236,8 @@ export default function MakerHome() {
             onClick={() => setLocation("/maker/completed-projects")}
             data-testid="card-stats-completed-projects"
           >
-            <CardContent className="pt-6 pb-6">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
                   <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
