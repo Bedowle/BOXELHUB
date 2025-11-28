@@ -980,6 +980,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only delete your own projects" });
       }
 
+      // Completed projects cannot be deleted - they serve as proof of completion
+      if (project.status === "completed") {
+        return res.status(400).json({ message: "Completed projects cannot be deleted - they serve as proof of completion" });
+      }
+
       // Delete all bids associated with project first
       const projectBids = await storage.getBidsByProject(id);
       for (const bid of projectBids) {

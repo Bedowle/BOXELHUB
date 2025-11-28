@@ -234,6 +234,7 @@ export default function ProjectDetails() {
 
   const isOwner = isClient && project.userId === user.id;
   const canBid = isMaker && project.status === "active" && (!myBid || myBid.status === "rejected");
+  const canDelete = isOwner && project.status !== "completed";
 
   return (
     <div className="min-h-screen bg-background">
@@ -328,7 +329,7 @@ export default function ProjectDetails() {
                       Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
                     </Button>
                   )}
-                  {isOwner && !deleteConfirmed && (
+                  {isOwner && !deleteConfirmed && canDelete && (
                     <Button 
                       size="lg"
                       variant="destructive"
