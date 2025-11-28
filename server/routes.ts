@@ -1928,12 +1928,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const conversations = await storage.getConversationsWithUnread(userId);
       
-      // Enrich with user data and project/design data
+      // Enrich with user data and project/design data (including deleted ones for chat context)
       const enriched = await Promise.all(
         conversations.map(async (conv) => {
           const user = await storage.getUser(conv.userId);
-          const project = conv.projectId ? await storage.getProject(conv.projectId) : null;
-          const design = conv.marketplaceDesignId ? await storage.getMarketplaceDesign(conv.marketplaceDesignId) : null;
+          // Use IncludeDeleted versions to show deleted projects/designs in chat list
+          const project = conv.projectId ? await storage.getProjectIncludeDeleted(conv.projectId) : null;
+          const design = conv.marketplaceDesignId ? await storage.getMarketplaceDesignIncludeDeleted(conv.marketplaceDesignId) : null;
           return {
             userId: conv.userId,
             projectId: conv.projectId,
