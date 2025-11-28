@@ -155,7 +155,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col" style={{ overflow: "visible" }}>
         {isSuccess ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto">
@@ -175,9 +175,9 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
               </DialogDescription>
             </DialogHeader>
 
-            <div className="overflow-y-auto flex-1">
+            <div className="overflow-y-auto flex-1 pr-4" style={{ overflow: "auto" }}>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pl-0">
                 {/* File Upload */}
                 <FormItem>
                   <FormLabel>Archivos STL</FormLabel>
