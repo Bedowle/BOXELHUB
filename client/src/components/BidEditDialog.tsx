@@ -232,10 +232,9 @@ export function BidEditDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="flex-1"
                 data-testid="button-cancel-edit-bid"
               >
-                ← Atrás
+                Cancelar
               </Button>
               <Button
                 type="submit"
@@ -243,7 +242,16 @@ export function BidEditDialog({
                 className="flex-1"
                 data-testid="button-update-bid"
               >
-                {mutation.isPending ? "Actualizando..." : "Actualizar Oferta"}
+                {mutation.isPending ? "Actualizando..." : "Actualizar"}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                data-testid="button-delete-bid"
+              >
+                {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
               </Button>
             </div>
           </form>

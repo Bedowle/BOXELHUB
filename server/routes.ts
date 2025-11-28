@@ -1410,6 +1410,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/bids/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const bid = await storage.getBid(id);
+      if (!bid) {
+        return res.status(404).json({ message: "Bid not found" });
+      }
+
+      // Only the maker who created the bid can delete it
+      if (bid.makerId !== userId) {
+        return res.status(403).json({ message: "Only the bid creator can delete it" });
+      }
+
+      // Can only delete if bid is pending
+      if (bid.status !== 'pending') {
+        return res.status(400).json({ message: "Can only delete pending bids" });
+      }
+
+      await storage.deleteBid(id);
+
+      // Notify client via WebSocket
+      const project = await storage.getProject(bid.projectId);
+      if (project) {
+        const clientWs = wsClients.get(project.userId);
+        if (clientWs && clientWs.readyState === WebSocket.OPEN) {
+          clientWs.send(JSON.stringify({
+            type: 'bid_deleted',
+            projectId: bid.projectId,
+            bidId: id,
+          }));
+        }
+      }
+
+      res.json({ message: "Bid deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting bid:", error);
+      res.status(500).json({ message: "Failed to delete bid" });
+    }
+  });
+
   app.put('/api/bids/:id/confirm-delivery', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;

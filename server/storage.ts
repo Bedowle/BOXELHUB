@@ -61,6 +61,7 @@ export interface IStorage {
   getMakerBidForProject(makerId: string, projectId: string): Promise<Bid | undefined>;
   createBid(bid: InsertBid): Promise<Bid>;
   updateBidStatus(id: string, status: Bid["status"]): Promise<void>;
+  deleteBid(id: string): Promise<void>;
   confirmBidDelivery(id: string): Promise<void>;
   markBidsAsRead(projectId: string): Promise<void>;
   getUnreadBidCount(projectId: string): Promise<number>;
@@ -382,6 +383,10 @@ export class DatabaseStorage implements IStorage {
       .update(bids)
       .set({ status, updatedAt: new Date() })
       .where(eq(bids.id, id));
+  }
+
+  async deleteBid(id: string): Promise<void> {
+    await db.delete(bids).where(eq(bids.id, id));
   }
 
   async updateBid(id: string, data: { price?: string; deliveryDays?: number; message?: string }): Promise<void> {
