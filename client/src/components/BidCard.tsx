@@ -45,7 +45,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
 
   return (
     <Card 
-      className="border hover:border-primary/50 transition-colors hover-elevate active-elevate-2 cursor-pointer" 
+      className={`border ${!isProjectDeleted ? 'hover:border-primary/50 transition-colors hover-elevate active-elevate-2 cursor-pointer' : ''}`}
       onClick={handleCardClick}
       data-testid={`card-bid-${bid.id}`}
     >
@@ -64,7 +64,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                   className="font-semibold text-lg hover:text-primary hover-elevate cursor-pointer transition-colors"
                   data-testid={`text-maker-name-${bid.id}`}
                 >
-                  {bid.maker?.username || bid.maker?.email || "Maker"}
+                  {bid.maker?.username || bid.maker?.email || bid.maker?.id || "Desconocido"}
                 </button>
                 {profile && (
                   <Badge variant="secondary" className="text-xs">
