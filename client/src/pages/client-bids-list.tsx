@@ -97,9 +97,11 @@ export default function ClientBidsList() {
                         Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg">
-                      <Gavel className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      <span className="font-bold text-green-600 dark:text-green-400">{project.bidCount}</span>
+                    <div className="bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-lg">
+                      <p className="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1">
+                        <Gavel className="h-3 w-3" />
+                        {project.bidCount} ofertas
+                      </p>
                     </div>
                   </div>
                 </CardContent>
