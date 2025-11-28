@@ -182,7 +182,7 @@ export default function MakerHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
           <Card 
-            className="border-2 border-amber-500/40 hover-elevate cursor-pointer bg-gradient-to-br from-amber-100/20 to-transparent dark:from-amber-900/20 dark:to-transparent"
+            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent"
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
@@ -190,8 +190,8 @@ export default function MakerHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Ofertas Activas</span>
-                  <div className="bg-amber-500/20 dark:bg-amber-600/30 p-2 rounded-lg">
-                    <Gavel className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
+                    <Gavel className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
