@@ -2,10 +2,11 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadge";
 import { STLViewer } from "./STLViewer";
-import { Calendar, MessageSquare, Box } from "lucide-react";
+import { Calendar, MessageSquare, Box, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import type { Project } from "@shared/schema";
 
 interface ProjectCardProps {
@@ -16,7 +17,57 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = memo(function ProjectCard({ project, onClick, showBidCount = true, unreadBidCount = 0 }: ProjectCardProps) {
+  const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
+  
   const handleClick = useCallback(() => onClick?.(), [onClick]);
+  
+  const handleDownloadSTL = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      setIsDownloading(true);
+      const response = await fetch(`/api/projects/${project.id}/download-stl`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to download STL");
+      }
+      const data = await response.json();
+      
+      // Trigger actual download
+      const stlResponse = await fetch(`/api/projects/${project.id}/stl-content`, {
+        credentials: "include",
+      });
+      if (stlResponse.ok) {
+        const blob = await stlResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = data.fileName || `proyecto_${project.id}.stl`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "Descargado",
+          description: `STL descargado: ${data.fileName}`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo descargar el STL",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [project.id, toast]);
+  
+  // Check if project can have STL downloaded (not deleted, not accepted)
+  const canDownload = !project.deletedAt && project.status !== "completed";
+  
   return (
     <Card 
       className="border-2 border-blue-300/50 bg-gradient-to-br from-blue-100 to-blue-50/50 dark:from-blue-900/40 dark:to-blue-950/20 hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
@@ -59,7 +110,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, showBid
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between pt-0">
+      <CardFooter className="flex items-center justify-between pt-0 gap-2">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Box className="h-3.5 w-3.5" />
@@ -70,9 +121,24 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, showBid
             {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true, locale: es })}
           </span>
         </div>
-        <Button size="sm" variant="ghost" className="h-8" onClick={handleClick} data-testid={`button-view-details-${project.id}`}>
-          Ver detalles
-        </Button>
+        <div className="flex gap-1.5">
+          {canDownload && (
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="h-8 px-2" 
+              onClick={handleDownloadSTL}
+              disabled={isDownloading}
+              data-testid={`button-download-stl-card-${project.id}`}
+              title="Descargar archivos STL"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" className="h-8" onClick={handleClick} data-testid={`button-view-details-${project.id}`}>
+            Ver detalles
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
