@@ -394,13 +394,15 @@ export default function ProjectDetails() {
           </h2>
 
           {!showBids && isOwner ? (
-            <EmptyState
-              icon={Package}
-              title="Ofertas Pendientes"
-              description="Carga las ofertas que han recibido tus proyectos"
-              actionLabel="Cargar ofertas"
-              onAction={() => setShowBids(true)}
-            />
+            <div className="bg-yellow-50 dark:bg-yellow-950/20 border-2 border-yellow-200 dark:border-yellow-900 rounded-lg p-8">
+              <EmptyState
+                icon={Package}
+                title="Ofertas Pendientes"
+                description="Carga las ofertas que han recibido tus proyectos"
+                actionLabel="Cargar ofertas"
+                onAction={() => setShowBids(true)}
+              />
+            </div>
           ) : bidsLoading ? (
             <div className="space-y-4">
               <BidCardSkeleton />
@@ -458,21 +460,23 @@ export default function ProjectDetails() {
               ))}
             </div>
           ) : (
-            <EmptyState
-              icon={Package}
-              title={isOwner ? "No hay ofertas aún" : isMaker && myBid ? "Ya has hecho una oferta" : isMaker ? "Todavía no has hecho ninguna oferta" : "Este proyecto no tiene ofertas"}
-              description={isOwner 
-                ? "Los makers comenzarán a enviar ofertas pronto. Te notificaremos cuando lleguen."
-                : isMaker && myBid
-                  ? "Tu oferta está pendiente de revisión"
-                  : isMaker
-                  ? undefined
-                  : canBid 
-                  ? "Sé el primero en enviar una oferta para este proyecto"
-                  : "Este proyecto ya tiene ofertas de otros makers"}
-              actionLabel={canBid || isMaker ? "Enviar Oferta" : undefined}
-              onAction={(canBid || isMaker) ? () => setBidDialogOpen(true) : undefined}
-            />
+            <div className={isOwner ? "bg-yellow-50 dark:bg-yellow-950/20 border-2 border-yellow-200 dark:border-yellow-900 rounded-lg p-8" : ""}>
+              <EmptyState
+                icon={Package}
+                title={isOwner ? "No hay ofertas aún" : isMaker && myBid ? "Ya has hecho una oferta" : isMaker ? "Todavía no has hecho ninguna oferta" : "Este proyecto no tiene ofertas"}
+                description={isOwner 
+                  ? "Los makers comenzarán a enviar ofertas pronto. Te notificaremos cuando lleguen."
+                  : isMaker && myBid
+                    ? "Tu oferta está pendiente de revisión"
+                    : isMaker
+                    ? undefined
+                    : canBid 
+                    ? "Sé el primero en enviar una oferta para este proyecto"
+                    : "Este proyecto ya tiene ofertas de otros makers"}
+                actionLabel={canBid || isMaker ? "Enviar Oferta" : undefined}
+                onAction={(canBid || isMaker) ? () => setBidDialogOpen(true) : undefined}
+              />
+            </div>
           )}
         </div>
       </main>
