@@ -375,13 +375,15 @@ export default function ProjectDetails() {
           </div>
 
           {/* Right - 3D Model */}
-          <div className="lg:col-span-1">
-            <Card className="h-full flex flex-col">
-              <CardContent className="py-6 px-4 flex items-center justify-center flex-1">
-                <STLViewer projectId={project.id} width={280} height={240} />
-              </CardContent>
-            </Card>
-          </div>
+          {!isDeleted && (
+            <div className="lg:col-span-1">
+              <Card className="h-full flex flex-col">
+                <CardContent className="py-6 px-4 flex items-center justify-center flex-1">
+                  <STLViewer projectId={project.id} width={280} height={240} />
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
         {/* Bids Section */}
