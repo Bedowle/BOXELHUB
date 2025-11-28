@@ -113,8 +113,8 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
 
             {/* Actions */}
             <div className="flex flex-col gap-2 items-end">
-              {/* Chat button - Always available for clients */}
-              {isClient && (
+              {/* Chat button - Available for clients only if project not deleted */}
+              {isClient && !isProjectDeleted && (
                 <Button
                   variant="outline"
                   size="sm"

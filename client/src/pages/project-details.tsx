@@ -314,7 +314,7 @@ export default function ProjectDetails() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-4">
-                  {canBid && (
+                  {canBid && !isDeleted && (
                     <Button 
                       size="lg"
                       onClick={() => setBidDialogOpen(true)}
@@ -323,7 +323,7 @@ export default function ProjectDetails() {
                       Enviar Oferta
                     </Button>
                   )}
-                  {isOwner && acceptedBid && acceptedBid.maker && (
+                  {isOwner && acceptedBid && acceptedBid.maker && !isDeleted && (
                     <Button 
                       size="lg"
                       variant="outline"
