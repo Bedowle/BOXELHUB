@@ -113,10 +113,17 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
 
             {/* Actions */}
             <div className="flex flex-col gap-2 items-end">
-              {/* Pending bid status badge */}
-              {(bid.status === "pending" || bid.status === undefined || bid.status === null) && (
+              {/* Pending bid status badge - but show as rejected if project deleted */}
+              {(bid.status === "pending" || bid.status === undefined || bid.status === null) && !isProjectDeleted && (
                 <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100" data-testid={`badge-pending-${bid.id}`}>
                   Pendiente
+                </Badge>
+              )}
+              
+              {/* If project deleted, pending bids are treated as rejected */}
+              {(bid.status === "pending" || bid.status === undefined || bid.status === null) && isProjectDeleted && (
+                <Badge variant="secondary" data-testid={`badge-rejected-deleted-${bid.id}`}>
+                  Rechazada
                 </Badge>
               )}
 
