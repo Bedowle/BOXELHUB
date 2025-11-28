@@ -19,11 +19,12 @@ interface BidCardProps {
   isClient?: boolean;
   isMyBid?: boolean;
   currentUserId?: string;
+  currentUserName?: string;
   isPending?: boolean;
   isProjectDeleted?: boolean;
 }
 
-export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, onRebid, isClient, isMyBid, currentUserId, isPending, isProjectDeleted }: BidCardProps) {
+export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, onRebid, isClient, isMyBid, currentUserId, currentUserName, isPending, isProjectDeleted }: BidCardProps) {
   const [, setLocation] = useLocation();
   const profile = bid.maker?.makerProfile;
   const initials = (bid.maker?.username || bid.maker?.email)?.[0].toUpperCase() || "M";
@@ -64,7 +65,7 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
                   className="font-semibold text-lg hover:text-primary hover-elevate cursor-pointer transition-colors"
                   data-testid={`text-maker-name-${bid.id}`}
                 >
-                  {bid.maker?.username || bid.maker?.email || bid.maker?.id || "Desconocido"}
+                  {isMyBid && currentUserName ? currentUserName : bid.maker?.username || bid.maker?.email || bid.maker?.id || "Desconocido"}
                 </button>
                 {profile && (
                   <Badge variant="secondary" className="text-xs">

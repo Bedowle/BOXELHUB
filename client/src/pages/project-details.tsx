@@ -410,6 +410,7 @@ export default function ProjectDetails() {
                 isClient={false}
                 isMyBid={true}
                 currentUserId={user?.id}
+                currentUserName={user?.username || user?.firstName || user?.email}
                 isProjectDeleted={project?.deletedAt ? true : false}
                 onEdit={(bidId) => {
                   const bid = myBid;
@@ -428,6 +429,7 @@ export default function ProjectDetails() {
                   isClient={isOwner}
                   isMyBid={isMaker && bid.makerId === user?.id}
                   currentUserId={user?.id}
+                  currentUserName={isMaker && bid.makerId === user?.id ? (user?.username || user?.firstName || user?.email) : undefined}
                   isProjectDeleted={project?.deletedAt ? true : false}
                   onAccept={(bidId) => acceptBidMutation.mutate(bidId)}
                   onReject={(bidId) => rejectBidMutation.mutate(bidId)}
