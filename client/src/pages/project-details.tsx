@@ -406,7 +406,7 @@ export default function ProjectDetails() {
               <BidCardSkeleton />
               <BidCardSkeleton />
             </div>
-          ) : (myBid && isMaker && myBid.status !== "rejected") ? (
+          ) : myBid && isMaker && myBid.status !== "rejected" ? (
             <div className="mb-8">
               <p className="text-sm text-muted-foreground mb-4">Tu oferta para este proyecto:</p>
               <BidCard 
