@@ -1221,6 +1221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot download STL from deleted projects" });
       }
 
+      // Makers can download STL files without any restrictions
       res.json({ fileName: project.stlFileName });
     } catch (error) {
       console.error("Error downloading STL:", error);

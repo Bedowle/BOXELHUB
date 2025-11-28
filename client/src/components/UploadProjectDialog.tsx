@@ -86,7 +86,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
         queryClient.invalidateQueries({ queryKey: ["/api/projects/stats"] });
         queryClient.invalidateQueries({ queryKey: ["/api/projects/available"] });
         form.reset();
-        setFileName("");
+        setFileNames([]);
         setIsSuccess(false);
         onOpenChange(false);
       }, 2000);
