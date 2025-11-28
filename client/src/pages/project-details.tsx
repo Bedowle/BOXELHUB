@@ -36,6 +36,7 @@ export default function ProjectDetails() {
   const [selectedBidForRating, setSelectedBidForRating] = useState<string | null>(null);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
   const [stlIndex, setStlIndex] = useState(0);
+  const [showBids, setShowBids] = useState(false); // Lazy load bids
 
   const projectId = params?.id;
 
@@ -46,7 +47,7 @@ export default function ProjectDetails() {
 
   const { data: bids, isLoading: bidsLoading } = useQuery<(Bid & { maker?: User & { makerProfile?: MakerProfile | null } })[]>({
     queryKey: ["/api/projects", projectId, "bids"],
-    enabled: !!projectId && !!user,
+    enabled: !!projectId && !!user && showBids, // Only load when needed
   });
 
   const { data: unreadBidCount } = useQuery<{ unreadCount: number }>({
@@ -391,6 +392,15 @@ export default function ProjectDetails() {
               </span>
             )}
           </h2>
+          {!showBids && (
+            <button 
+              onClick={() => setShowBids(true)}
+              className="text-primary hover:underline mb-4 text-sm"
+              data-testid="button-load-bids"
+            >
+              Cargar ofertas...
+            </button>
+          )}
 
           {bidsLoading ? (
             <div className="space-y-4">

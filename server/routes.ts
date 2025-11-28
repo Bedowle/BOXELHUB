@@ -1072,10 +1072,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const bids = await storage.getBidsByProject(id);
+      const limitedBids = bids.slice(0, 20); // Limit to first 20 to avoid slowness
       
-      // Populate maker information
+      // Populate maker information with reduced concurrency
       const bidsWithMakers = await Promise.all(
-        bids.map(async (bid) => {
+        limitedBids.map(async (bid) => {
           const maker = await storage.getUser(bid.makerId);
           const makerProfile = maker ? await storage.getMakerProfile(maker.id) : null;
           return { 
@@ -1620,22 +1621,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
-      const limit = Math.min(parseInt(req.query.limit || '30'), 100);
+      const limit = Math.min(parseInt(req.query.limit || '20'), 50); // Reduced limit from 30 to 20
       const offset = parseInt(req.query.offset || '0');
 
       const bids = await storage.getBidsByMaker(userId);
       const paginatedBids = bids.slice(offset, offset + limit);
       
-      // Enrich bids with project data (including deleted projects)
-      const enrichedBids = await Promise.all(
-        paginatedBids.map(async (bid) => {
-          const project = await storage.getProjectIncludeDeleted(bid.projectId);
-          return {
-            ...bid,
-            project,
-          };
-        })
-      );
+      // Enrich bids with project data (including deleted projects) - limit concurrency to 5
+      const enrichedBids: any[] = [];
+      for (let i = 0; i < paginatedBids.length; i += 5) {
+        const chunk = paginatedBids.slice(i, i + 5);
+        const chunkResults = await Promise.all(
+          chunk.map(async (bid) => {
+            const project = await storage.getProjectIncludeDeleted(bid.projectId);
+            return { ...bid, project };
+          })
+        );
+        enrichedBids.push(...chunkResults);
+      }
       
       console.log(`[/api/bids/my-bids] User ${userId.slice(0, 8)}... has ${enrichedBids.length} bids:`, enrichedBids.map(b => ({ projectId: b.projectId, status: b.status, deleted: b.project?.deletedAt ? true : false })));
       res.json(enrichedBids);
