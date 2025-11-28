@@ -115,9 +115,12 @@ interface STLViewerProps {
   projectId: string;
   width?: number;
   height?: number;
+  stlIndex?: number;
+  onIndexChange?: (index: number) => void;
+  totalStls?: number;
 }
 
-export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerProps) {
+export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, onIndexChange, totalStls = 1 }: STLViewerProps) {
   const containerRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -161,7 +164,7 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
 
       // Load STL
       const loader = new STLLoader();
-      const fileUrl = `/api/projects/${projectId}/stl-content`;
+      const fileUrl = `/api/projects/${projectId}/stl-content?index=${stlIndex}`;
 
       loader.load(
         fileUrl,
@@ -246,7 +249,19 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
       setError("Error inicializando el visor 3D");
       setIsLoading(false);
     }
-  }, [projectId, width, height]);
+  }, [projectId, width, height, stlIndex]);
+
+  const handlePrevious = () => {
+    if (stlIndex > 0 && onIndexChange) {
+      onIndexChange(stlIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (stlIndex < totalStls - 1 && onIndexChange) {
+      onIndexChange(stlIndex + 1);
+    }
+  };
 
   return (
     <div className="bg-background rounded-lg pointer-events-auto relative" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden', display: 'block' }}>
@@ -263,6 +278,32 @@ export function STLViewer({ projectId, width = 400, height = 250 }: STLViewerPro
         }}
         className="cursor-grab active:cursor-grabbing"
       />
+      
+      {/* Navigation Buttons */}
+      {totalStls > 1 && (
+        <>
+          <button
+            onClick={handlePrevious}
+            disabled={stlIndex === 0}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 disabled:opacity-50 p-2 rounded-full z-10 transition-all"
+            data-testid="button-stl-prev"
+          >
+            ←
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={stlIndex === totalStls - 1}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background/95 disabled:opacity-50 p-2 rounded-full z-10 transition-all"
+            data-testid="button-stl-next"
+          >
+            →
+          </button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/80 px-2 py-1 rounded text-xs text-muted-foreground z-10">
+            {stlIndex + 1}/{totalStls}
+          </div>
+        </>
+      )}
+
       {isLoading && (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} className="flex items-center justify-center bg-background/80 backdrop-blur-sm pointer-events-none">
           <div className="text-center">

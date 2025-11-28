@@ -107,8 +107,10 @@ export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
-  stlFileName: varchar("stl_file_name").notNull(),
-  stlFileContent: text("stl_file_content"), // Store as base64
+  stlFileName: varchar("stl_file_name"), // Legacy single file support, deprecated
+  stlFileContent: text("stl_file_content"), // Legacy single file support, deprecated
+  stlFileNames: text("stl_file_names").array().notNull().default(sql`ARRAY[]::text[]`), // Array of up to 10 files
+  stlFileContents: text("stl_file_contents").array().notNull().default(sql`ARRAY[]::text[]`), // Array of base64 contents
   description: text("description").notNull(),
   material: varchar("material").notNull(),
   specifications: jsonb("specifications"),
