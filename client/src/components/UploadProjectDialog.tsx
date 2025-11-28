@@ -286,13 +286,10 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                   )}
                 />
 
-                {/* Dimensions - REQUIRED */}
-                <div className="space-y-3 border-l-4 border-primary pl-4 py-3 bg-primary/5 rounded">
-                  <div className="flex items-center gap-2">
-                    <FormLabel className="mb-0">Dimensiones (mm) *</FormLabel>
-                    <span className="text-xs font-semibold text-red-600 dark:text-red-400">REQUERIDO</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Especifica las medidas máximas del objeto para que los makers sepan si pueden imprimirlo</p>
+                {/* Dimensions */}
+                <div className="space-y-3">
+                  <FormLabel>Dimensiones (mm)</FormLabel>
+                  <p className="text-sm text-muted-foreground">Las medidas máximas del objeto más grande</p>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="text-xs font-semibold flex items-center gap-1.5 mb-2">
