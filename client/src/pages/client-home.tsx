@@ -133,7 +133,7 @@ export default function ClientHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/5 to-transparent dark:from-accent/15 dark:to-transparent"
+            className="border-2 border-green-500/40 hover-elevate cursor-pointer bg-gradient-to-br from-green-50/50 to-transparent dark:from-green-900/20 dark:to-transparent"
             onClick={() => setLocation("/client/projects-completed")}
             data-testid="card-stats-completed-projects"
           >
@@ -141,8 +141,8 @@ export default function ClientHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Proyectos Terminados</span>
-                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-accent" />
+                  <div className="bg-green-500/20 dark:bg-green-600/30 p-2 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
