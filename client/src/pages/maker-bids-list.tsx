@@ -46,7 +46,8 @@ export default function MakerBidsList() {
 
   const activeBids = myBids?.filter(b => b.status === "pending" && !b.project?.deletedAt) || [];
   const acceptedBids = myBids?.filter(b => b.status === "accepted") || [];
-  const rejectedBids = myBids?.filter(b => b.status === "rejected") || [];
+  // Include explicitly rejected AND pending bids from deleted projects (treated as rejected)
+  const rejectedBids = myBids?.filter(b => b.status === "rejected" || (b.status === "pending" && b.project?.deletedAt)) || [];
   const inactiveBids = [...(acceptedBids || []), ...(rejectedBids || [])];
 
   return (
