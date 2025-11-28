@@ -1394,6 +1394,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Can only edit pending bids" });
       }
 
+      // Cannot edit bids for deleted projects
+      const project = await storage.getProject(bid.projectId);
+      if (!project || project.deletedAt) {
+        return res.status(400).json({ message: "Cannot edit bids for deleted projects" });
+      }
+
       const validated = updateBidSchema.parse(req.body);
       
       await storage.updateBid(id, validated);
@@ -1432,10 +1438,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Can only delete pending bids" });
       }
 
+      // Cannot delete bids for deleted projects
+      const project = await storage.getProject(bid.projectId);
+      if (!project || project.deletedAt) {
+        return res.status(400).json({ message: "Cannot delete bids for deleted projects" });
+      }
+
       await storage.deleteBid(id);
 
       // Notify client via WebSocket
-      const project = await storage.getProject(bid.projectId);
       if (project) {
         const clientWs = wsClients.get(project.userId);
         if (clientWs && clientWs.readyState === WebSocket.OPEN) {
