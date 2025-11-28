@@ -462,7 +462,7 @@ export default function ProjectDetails() {
                 : isMaker && myBid
                   ? "Tu oferta está pendiente de revisión"
                   : isMaker
-                  ? ""
+                  ? undefined
                   : canBid 
                   ? "Sé el primero en enviar una oferta para este proyecto"
                   : "Este proyecto ya tiene ofertas de otros makers"}

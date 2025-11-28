@@ -68,8 +68,8 @@ export default function MakerBidsList() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8 bg-gradient-to-r from-purple-600/15 via-secondary/15 to-primary/15 dark:from-purple-500/25 dark:via-secondary/25 dark:to-primary/25 rounded-2xl p-8 border-2 border-secondary/50 dark:border-secondary/60">
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 via-secondary to-primary bg-clip-text text-transparent dark:from-purple-300 dark:via-secondary dark:to-primary">Mis Ofertas Activas</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Mis Ofertas Activas</h1>
           <p className="text-muted-foreground">
             {activeBids.length} oferta{activeBids.length !== 1 ? "s" : ""}
           </p>
@@ -88,7 +88,7 @@ export default function MakerBidsList() {
             {activeBids.map((bid) => (
               <Card 
                 key={bid.id}
-                className="border-2 border-primary/60 hover-elevate cursor-pointer bg-gradient-to-br from-primary/20 to-blue-100/30 dark:from-primary/30 dark:to-blue-900/20 shadow-md"
+                className="hover-elevate cursor-pointer"
                 onClick={() => setLocation(`/project/${bid.projectId}`)}
               >
                 <CardContent className="pt-6 pb-6">
@@ -100,7 +100,7 @@ export default function MakerBidsList() {
                         Publicado {formatDistanceToNow(new Date(bid.project?.createdAt || new Date()), { locale: es, addSuffix: true })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 bg-primary/40 dark:bg-primary/50 px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
                       <Zap className="h-5 w-5 text-primary" />
                       <span className="font-bold text-primary">Activa</span>
                     </div>

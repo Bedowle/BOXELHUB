@@ -68,8 +68,8 @@ export default function ClientBidsList() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8 bg-gradient-to-r from-blue-600/15 via-primary/15 to-secondary/15 dark:from-blue-500/25 dark:via-primary/25 dark:to-secondary/25 rounded-2xl p-8 border-2 border-primary/50 dark:border-primary/60">
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-primary to-secondary bg-clip-text text-transparent dark:from-blue-300 dark:via-primary dark:to-secondary">Ofertas Recibidas</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Ofertas Recibidas</h1>
           <p className="text-muted-foreground">
             {projectsWithBids.length} proyecto{projectsWithBids.length !== 1 ? "s" : ""} con ofertas
           </p>
@@ -88,7 +88,7 @@ export default function ClientBidsList() {
             {projectsWithBids.map((project) => (
               <Card 
                 key={project.id}
-                className="border-2 border-secondary/60 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/20 to-purple-100/30 dark:from-secondary/30 dark:to-purple-900/20 shadow-md"
+                className="hover-elevate cursor-pointer"
                 onClick={() => setLocation(`/project/${project.id}`)}
               >
                 <CardContent className="pt-6 pb-6">
@@ -100,9 +100,9 @@ export default function ClientBidsList() {
                         Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 bg-secondary/40 dark:bg-secondary/50 px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2 bg-secondary/10 px-3 py-2 rounded-lg">
                       <Zap className="h-5 w-5 text-secondary" />
-                      <span className="font-bold text-secondary">{project.bidCount}</span>
+                      <span className="font-bold">{project.bidCount}</span>
                     </div>
                   </div>
                 </CardContent>
