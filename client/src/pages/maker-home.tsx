@@ -272,52 +272,39 @@ export default function MakerHome() {
               description="No hay proyectos disponibles en este momento"
             />
           ) : (
-            <div className="relative">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-0">
-                {filteredProjects?.map((project, index) => {
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {filteredProjects?.slice(0, 3).map((project) => {
                   const hasMyBid = myBidProjects?.some(p => p.id === project.id);
-                  const isHidden = index >= 3;
                   return (
-                    <div
+                    <ProjectCard
                       key={project.id}
-                      className={isHidden ? "opacity-40 pointer-events-none" : ""}
-                    >
-                      <ProjectCard
-                        project={project}
-                        onClick={() => {
-                          // Save the current page before navigating
-                          localStorage.setItem('previousProjectPath', '/maker');
-                          if (hasMyBid) {
-                            setLocation(`/maker/project/${project.id}`);
-                          } else {
-                            setLocation(`/project/${project.id}`);
-                          }
-                        }}
-                      />
-                    </div>
+                      project={project}
+                      onClick={() => {
+                        // Save the current page before navigating
+                        localStorage.setItem('previousProjectPath', '/maker');
+                        if (hasMyBid) {
+                          setLocation(`/maker/project/${project.id}`);
+                        } else {
+                          setLocation(`/project/${project.id}`);
+                        }
+                      }}
+                    />
                   );
                 })}
               </div>
-              {filteredProjects && filteredProjects.length > 3 && (
-                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background pointer-events-none" />
-              )}
-            </div>
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  onClick={() => setLocation("/maker/explore")}
+                  className="px-8"
+                  data-testid="button-explore-more-projects"
+                >
+                  Explora Más Proyectos
+                </Button>
+              </div>
+            </>
           )}
-
-          {/* Fade & Button Section - Always visible */}
-          <div className="relative -mt-48 pt-0">
-            <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
-            <div className="flex justify-center">
-              <Button
-                size="lg"
-                onClick={() => setLocation("/maker/explore")}
-                className="px-8"
-                data-testid="button-explore-more-projects"
-              >
-                Explora Más Proyectos
-              </Button>
-            </div>
-          </div>
         </div>
       </main>
 
