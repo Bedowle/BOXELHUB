@@ -238,7 +238,7 @@ export default function ProjectDetails() {
   const canDelete = isOwner && project.status !== "completed" && !isDeleted;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-100/20 dark:via-blue-950/20 to-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 max-w-7xl">

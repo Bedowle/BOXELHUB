@@ -109,7 +109,7 @@ export default function MakerProjectDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/20 dark:via-purple-950/20 to-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
