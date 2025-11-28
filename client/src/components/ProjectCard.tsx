@@ -5,6 +5,7 @@ import { STLViewer } from "./STLViewer";
 import { Calendar, MessageSquare, Box } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import { memo, useCallback } from "react";
 import type { Project } from "@shared/schema";
 
 interface ProjectCardProps {
@@ -14,11 +15,12 @@ interface ProjectCardProps {
   unreadBidCount?: number;
 }
 
-export function ProjectCard({ project, onClick, showBidCount = true, unreadBidCount = 0 }: ProjectCardProps) {
+export const ProjectCard = memo(function ProjectCard({ project, onClick, showBidCount = true, unreadBidCount = 0 }: ProjectCardProps) {
+  const handleClick = useCallback(() => onClick?.(), [onClick]);
   return (
     <Card 
       className="border-2 border-primary/40 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
-      onClick={onClick}
+      onClick={handleClick}
       data-testid={`card-project-${project.id}`}
     >
       {unreadBidCount > 0 && (
@@ -68,10 +70,10 @@ export function ProjectCard({ project, onClick, showBidCount = true, unreadBidCo
             {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true, locale: es })}
           </span>
         </div>
-        <Button size="sm" variant="ghost" className="h-8" onClick={onClick} data-testid={`button-view-details-${project.id}`}>
+        <Button size="sm" variant="ghost" className="h-8" onClick={handleClick} data-testid={`button-view-details-${project.id}`}>
           Ver detalles
         </Button>
       </CardFooter>
     </Card>
   );
-}
+});

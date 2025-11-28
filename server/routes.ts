@@ -793,14 +793,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const projects = await storage.getProjects({ userId });
+      const limitedProjects = projects.slice(0, 50); // Hard limit
       
-      // Add bid count for each project
-      const projectsWithBids = await Promise.all(
-        projects.map(async (project) => {
-          const bids = await storage.getBidsByProject(project.id);
-          return { ...project, bidCount: bids.length };
-        })
-      );
+      // Chunked loading - max 5 concurrent
+      const projectsWithBids: any[] = [];
+      for (let i = 0; i < limitedProjects.length; i += 5) {
+        const chunk = limitedProjects.slice(i, i + 5);
+        const chunkResults = await Promise.all(
+          chunk.map(async (project) => {
+            const bids = await storage.getBidsByProject(project.id);
+            return { ...project, bidCount: bids.length };
+          })
+        );
+        projectsWithBids.push(...chunkResults);
+      }
       
       res.json(projectsWithBids);
     } catch (error) {
@@ -821,19 +827,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
-      const limit = Math.min(parseInt(req.query.limit || '20'), 100);
+      const limit = Math.min(parseInt(req.query.limit || '15'), 50); // Reduced from 20 to 15
       const offset = parseInt(req.query.offset || '0');
 
       const projects = await storage.getProjects({ status: 'active' });
       const paginatedProjects = projects.slice(offset, offset + limit);
       
-      // Add bid count for each project (with limit)
-      const projectsWithBids = await Promise.all(
-        paginatedProjects.map(async (project) => {
-          const bids = await storage.getBidsByProject(project.id);
-          return { ...project, bidCount: bids.length };
-        })
-      );
+      // Chunked loading - max 3 concurrent for faster response
+      const projectsWithBids: any[] = [];
+      for (let i = 0; i < paginatedProjects.length; i += 3) {
+        const chunk = paginatedProjects.slice(i, i + 3);
+        const chunkResults = await Promise.all(
+          chunk.map(async (project) => {
+            const bids = await storage.getBidsByProject(project.id);
+            return { ...project, bidCount: bids.length };
+          })
+        );
+        projectsWithBids.push(...chunkResults);
+      }
       
       res.json(projectsWithBids);
     } catch (error) {
@@ -854,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
-      const limit = Math.min(parseInt(req.query.limit || '20'), 100);
+      const limit = Math.min(parseInt(req.query.limit || '15'), 50); // Reduced from 20
       const offset = parseInt(req.query.offset || '0');
 
       // Get all bids from this maker
@@ -863,21 +874,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get unique project IDs with pagination
       const projectIds = [...new Set(bids.map(b => b.projectId))].slice(offset, offset + limit);
       
-      // Get projects for those IDs
-      const projects = await Promise.all(
-        projectIds.map(projectId => storage.getProject(projectId))
-      );
+      // Get projects for those IDs with chunking
+      const projects: any[] = [];
+      for (let i = 0; i < projectIds.length; i += 5) {
+        const chunk = projectIds.slice(i, i + 5);
+        const chunkResults = await Promise.all(
+          chunk.map(projectId => storage.getProject(projectId))
+        );
+        projects.push(...chunkResults);
+      }
       
       // Filter out any null projects
       const validProjects = projects.filter(p => p !== undefined) as any[];
       
-      // Add bid count for each project
-      const projectsWithBids = await Promise.all(
-        validProjects.map(async (project) => {
-          const projectBids = await storage.getBidsByProject(project.id);
-          return { ...project, bidCount: projectBids.length };
-        })
-      );
+      // Add bid count for each project with chunking
+      const projectsWithBids: any[] = [];
+      for (let i = 0; i < validProjects.length; i += 5) {
+        const chunk = validProjects.slice(i, i + 5);
+        const chunkResults = await Promise.all(
+          chunk.map(async (project) => {
+            const projectBids = await storage.getBidsByProject(project.id);
+            return { ...project, bidCount: projectBids.length };
+          })
+        );
+        projectsWithBids.push(...chunkResults);
+      }
       
       res.json(projectsWithBids);
     } catch (error) {
@@ -1621,16 +1642,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only makers can access this endpoint" });
       }
 
-      const limit = Math.min(parseInt(req.query.limit || '20'), 50); // Reduced limit from 30 to 20
+      const limit = Math.min(parseInt(req.query.limit || '15'), 50); // Reduced limit from 30 to 15
       const offset = parseInt(req.query.offset || '0');
 
       const bids = await storage.getBidsByMaker(userId);
       const paginatedBids = bids.slice(offset, offset + limit);
       
-      // Enrich bids with project data (including deleted projects) - limit concurrency to 5
+      // Enrich bids with project data (including deleted projects) - limit concurrency to 3
       const enrichedBids: any[] = [];
-      for (let i = 0; i < paginatedBids.length; i += 5) {
-        const chunk = paginatedBids.slice(i, i + 5);
+      for (let i = 0; i < paginatedBids.length; i += 3) {
+        const chunk = paginatedBids.slice(i, i + 3);
         const chunkResults = await Promise.all(
           chunk.map(async (bid) => {
             const project = await storage.getProjectIncludeDeleted(bid.projectId);
