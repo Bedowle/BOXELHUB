@@ -166,18 +166,18 @@ export default function MakerHome() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-purple-50/50 dark:via-slate-900/50 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/40 dark:via-purple-950/40 to-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b" />
 
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
-        <div className="mb-12 bg-gradient-to-r from-secondary/10 to-primary/10 dark:from-secondary/20 dark:to-primary/20 rounded-2xl p-8 border border-secondary/20 dark:border-secondary/30">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-transparent">
+        <div className="mb-12 bg-gradient-to-r from-purple-600/15 via-secondary/15 to-primary/15 dark:from-purple-500/25 dark:via-secondary/25 dark:to-primary/25 rounded-2xl p-8 border-2 border-secondary/50 dark:border-secondary/60 shadow-lg">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-purple-600 via-secondary to-primary bg-clip-text text-transparent dark:from-purple-300 dark:via-secondary dark:to-primary">
             Tu Panel de Maker
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-foreground/80 dark:text-foreground/90">
             Gestiona tus ofertas, proyectos en progreso y entregas completadas
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function MakerHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
           <Card 
-            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/5 to-transparent dark:from-primary/15 dark:to-transparent"
+            className="border-2 border-primary/60 hover-elevate cursor-pointer bg-gradient-to-br from-primary/20 to-blue-100/30 dark:from-primary/30 dark:to-blue-900/20 shadow-md"
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
@@ -194,7 +194,7 @@ export default function MakerHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Ofertas Activas</span>
-                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
+                  <div className="bg-primary/40 dark:bg-primary/50 p-2 rounded-lg">
                     <Gavel className="h-5 w-5 text-primary" />
                   </div>
                 </div>
@@ -208,7 +208,7 @@ export default function MakerHome() {
 
           {/* Won Projects */}
           <Card 
-            className="border-2 border-secondary/40 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/5 to-transparent dark:from-secondary/15 dark:to-transparent"
+            className="border-2 border-secondary/60 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/20 to-purple-100/30 dark:from-secondary/30 dark:to-purple-900/20 shadow-md"
             onClick={() => setLocation("/maker/won-projects")}
             data-testid="card-stats-won-projects"
           >
@@ -216,7 +216,7 @@ export default function MakerHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Proyectos Ganados</span>
-                  <div className="bg-secondary/20 dark:bg-secondary/30 p-2 rounded-lg">
+                  <div className="bg-secondary/40 dark:bg-secondary/50 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
@@ -230,7 +230,7 @@ export default function MakerHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/5 to-transparent dark:from-accent/15 dark:to-transparent"
+            className="border-2 border-accent/60 hover-elevate cursor-pointer bg-gradient-to-br from-accent/20 to-orange-100/30 dark:from-accent/30 dark:to-orange-900/20 shadow-md"
             onClick={() => setLocation("/maker/completed-projects")}
             data-testid="card-stats-completed-projects"
           >
@@ -238,7 +238,7 @@ export default function MakerHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Proyectos Completados</span>
-                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
+                  <div className="bg-accent/40 dark:bg-accent/50 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>

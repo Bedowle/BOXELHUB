@@ -71,14 +71,14 @@ export default function ClientHome() {
   const totalBids = projects?.reduce((sum, p) => sum + p.bidCount, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/50 dark:via-slate-900/50 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-blue-100/40 dark:via-blue-950/40 to-background">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
-        <div className="mb-12 bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-2xl p-8 border border-primary/20 dark:border-primary/30">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+        <div className="mb-12 bg-gradient-to-r from-blue-600/15 via-primary/15 to-secondary/15 dark:from-blue-500/25 dark:via-primary/25 dark:to-secondary/25 rounded-2xl p-8 border-2 border-primary/50 dark:border-primary/60 shadow-lg">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-blue-600 via-primary to-secondary bg-clip-text text-transparent dark:from-blue-300 dark:via-primary dark:to-secondary">
             Bienvenido a tu Dashboard
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-foreground/80 dark:text-foreground/90">
             Gestiona tus proyectos STL y recibe ofertas de los mejores makers
           </p>
         </div>
@@ -87,7 +87,7 @@ export default function ClientHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Projects in Progress */}
           <Card 
-            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/5 to-transparent dark:from-primary/15 dark:to-transparent"
+            className="border-2 border-primary/60 hover-elevate cursor-pointer bg-gradient-to-br from-primary/20 to-blue-100/30 dark:from-primary/30 dark:to-blue-900/20 shadow-md"
             onClick={() => setLocation("/client/projects-active")}
             data-testid="card-stats-in-progress"
           >
@@ -95,7 +95,7 @@ export default function ClientHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Proyectos en Progreso</span>
-                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
+                  <div className="bg-primary/40 dark:bg-primary/50 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export default function ClientHome() {
 
           {/* Pending Bids */}
           <Card 
-            className="border-2 border-secondary/40 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/5 to-transparent dark:from-secondary/15 dark:to-transparent"
+            className="border-2 border-secondary/60 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/20 to-purple-100/30 dark:from-secondary/30 dark:to-purple-900/20 shadow-md"
             onClick={() => setLocation("/client/bids")}
             data-testid="card-stats-pending-bids"
           >
@@ -119,7 +119,7 @@ export default function ClientHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Ofertas Pendientes</span>
-                  <div className="bg-secondary/20 dark:bg-secondary/30 p-2 rounded-lg">
+                  <div className="bg-secondary/40 dark:bg-secondary/50 p-2 rounded-lg">
                     <Gavel className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
@@ -133,7 +133,7 @@ export default function ClientHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/5 to-transparent dark:from-accent/15 dark:to-transparent"
+            className="border-2 border-accent/60 hover-elevate cursor-pointer bg-gradient-to-br from-accent/20 to-orange-100/30 dark:from-accent/30 dark:to-orange-900/20 shadow-md"
             onClick={() => setLocation("/client/projects-completed")}
             data-testid="card-stats-completed-projects"
           >
@@ -141,7 +141,7 @@ export default function ClientHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Proyectos Terminados</span>
-                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
+                  <div className="bg-accent/40 dark:bg-accent/50 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
