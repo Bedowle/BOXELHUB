@@ -89,7 +89,7 @@ export default function MakerBidsList() {
               <Card 
                 key={bid.id}
                 className="hover-elevate cursor-pointer"
-                onClick={() => setLocation(`/maker/project/${bid.projectId}`)}
+                onClick={() => setLocation(`/project/${bid.projectId}`)}
               >
                 <CardContent className="pt-6 pb-6">
                   <div className="flex items-start justify-between gap-4">
@@ -126,7 +126,7 @@ export default function MakerBidsList() {
                 <Card 
                   key={`accepted-${bid.id}`}
                   className="hover-elevate cursor-pointer opacity-75"
-                  onClick={() => setLocation(`/maker/project/${bid.projectId}`)}
+                  onClick={() => setLocation(`/project/${bid.projectId}`)}
                 >
                   <CardContent className="pt-6 pb-6">
                     <div className="flex items-start justify-between gap-4">
@@ -150,7 +150,7 @@ export default function MakerBidsList() {
                 <Card 
                   key={`rejected-${bid.id}`}
                   className="hover-elevate cursor-pointer opacity-75"
-                  onClick={() => setLocation(`/maker/project/${bid.projectId}`)}
+                  onClick={() => setLocation(`/project/${bid.projectId}`)}
                 >
                   <CardContent className="pt-6 pb-6">
                     <div className="flex items-start justify-between gap-4">
