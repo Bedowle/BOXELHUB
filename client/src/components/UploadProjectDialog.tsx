@@ -32,7 +32,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload, CheckCircle } from "lucide-react";
+import { Upload, CheckCircle, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface UploadProjectDialogProps {
   open: boolean;
@@ -285,15 +286,29 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                   )}
                 />
 
-                {/* Dimensions */}
-                <div className="space-y-3">
-                  <FormLabel>Dimensiones (mm)</FormLabel>
-                  <p className="text-sm text-muted-foreground">Especifica las medidas máximas del objeto</p>
+                {/* Dimensions - REQUIRED */}
+                <div className="space-y-3 border-l-4 border-primary pl-4 py-3 bg-primary/5 rounded">
+                  <div className="flex items-center gap-2">
+                    <FormLabel className="mb-0">Dimensiones (mm) *</FormLabel>
+                    <span className="text-xs font-semibold text-red-600 dark:text-red-400">REQUERIDO</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Especifica las medidas máximas del objeto para que los makers sepan si pueden imprimirlo</p>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
+                      <label className="text-xs font-semibold flex items-center gap-1.5 mb-2">
+                        X (Largo)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Dimensión a lo largo del eje X (izquierda-derecha)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
                       <Input
                         type="number"
-                        placeholder="Largo (X)"
+                        placeholder="ej: 100"
                         value={(form.watch("specifications") as any)?.dimensionX || ""}
                         onChange={(e) =>
                           form.setValue("specifications", {
@@ -302,13 +317,27 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                           })
                         }
                         data-testid="input-dimension-x"
+                        className="font-mono"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Eje X</p>
+                      {form.formState.errors.specifications && (
+                        <p className="text-xs text-red-600 mt-1">Requerido</p>
+                      )}
                     </div>
                     <div>
+                      <label className="text-xs font-semibold flex items-center gap-1.5 mb-2">
+                        Y (Ancho)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Dimensión a lo ancho del eje Y (adelante-atrás)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
                       <Input
                         type="number"
-                        placeholder="Ancho (Y)"
+                        placeholder="ej: 100"
                         value={(form.watch("specifications") as any)?.dimensionY || ""}
                         onChange={(e) =>
                           form.setValue("specifications", {
@@ -317,13 +346,27 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                           })
                         }
                         data-testid="input-dimension-y"
+                        className="font-mono"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Eje Y</p>
+                      {form.formState.errors.specifications && (
+                        <p className="text-xs text-red-600 mt-1">Requerido</p>
+                      )}
                     </div>
                     <div>
+                      <label className="text-xs font-semibold flex items-center gap-1.5 mb-2">
+                        Z (Alto)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Dimensión altura del eje Z (arriba-abajo)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
                       <Input
                         type="number"
-                        placeholder="Alto (Z)"
+                        placeholder="ej: 100"
                         value={(form.watch("specifications") as any)?.dimensionZ || ""}
                         onChange={(e) =>
                           form.setValue("specifications", {
@@ -332,8 +375,11 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                           })
                         }
                         data-testid="input-dimension-z"
+                        className="font-mono"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Eje Z</p>
+                      {form.formState.errors.specifications && (
+                        <p className="text-xs text-red-600 mt-1">Requerido</p>
+                      )}
                     </div>
                   </div>
                 </div>

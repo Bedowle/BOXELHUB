@@ -367,7 +367,11 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   userId: true, // Added by server from authenticated user
 }).extend({
   material: z.string().min(1, "Material is required"),
-  specifications: z.record(z.any()).optional(),
+  specifications: z.object({
+    dimensionX: z.string().refine(val => val && !isNaN(Number(val)), "Dimensión X es requerida y debe ser un número"),
+    dimensionY: z.string().refine(val => val && !isNaN(Number(val)), "Dimensión Y es requerida y debe ser un número"),
+    dimensionZ: z.string().refine(val => val && !isNaN(Number(val)), "Dimensión Z es requerida y debe ser un número"),
+  }).required("Las dimensiones son requeridas"),
 });
 
 export const insertBidSchema = createInsertSchema(bids).omit({

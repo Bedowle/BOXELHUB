@@ -8,14 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { ArrowLeft, Search, TrendingUp, Sliders } from "lucide-react";
+import { ArrowLeft, Search, TrendingUp, Sliders, HelpCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Project, MakerProfile } from "@shared/schema";
 
-const DIMENSION_OPTIONS = ["50", "100", "150", "200", "250", "300", "400", "500"];
 const MATERIAL_OPTIONS = ["PLA", "PETG", "ABS", "TPU", "Nylon", "Resin", "Flexible", "Madera", "Metal", "Cerámica"];
 
 export default function ExploreProjects() {
@@ -30,9 +30,9 @@ export default function ExploreProjects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
   const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
-  const [minDimensionX, setMinDimensionX] = useState<string>("0");
-  const [minDimensionY, setMinDimensionY] = useState<string>("0");
-  const [minDimensionZ, setMinDimensionZ] = useState<string>("0");
+  const [maxDimensionX, setMaxDimensionX] = useState<string>("");
+  const [maxDimensionY, setMaxDimensionY] = useState<string>("");
+  const [maxDimensionZ, setMaxDimensionZ] = useState<string>("");
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
 
   const { data: profile, isLoading: profileLoading } = useQuery<MakerProfile>({
@@ -94,18 +94,20 @@ export default function ExploreProjects() {
       (multicolorFilter === "yes" && profile?.hasMulticolor) ||
       (multicolorFilter === "no" && !profile?.hasMulticolor);
 
-    // Filter by individual dimensions - check if maker's max dimensions are >= minimum dimensions
+    // Filter by dimensions - show projects with dimensions BELOW the maximum specified
+    // (project dimensions must be smaller than or equal to maker's maximum)
     let matchesDimensions = true;
-    if (profile && (minDimensionX !== "0" || minDimensionY !== "0" || minDimensionZ !== "0")) {
-      const makerMaxX = profile.maxPrintDimensionX || 0;
-      const makerMaxY = profile.maxPrintDimensionY || 0;
-      const makerMaxZ = profile.maxPrintDimensionZ || 0;
+    if (maxDimensionX || maxDimensionY || maxDimensionZ) {
+      const projectSpecs = (project as any).specifications || {};
+      const projX = parseInt(projectSpecs.dimensionX) || 0;
+      const projY = parseInt(projectSpecs.dimensionY) || 0;
+      const projZ = parseInt(projectSpecs.dimensionZ) || 0;
       
-      const reqX = parseInt(minDimensionX) || 0;
-      const reqY = parseInt(minDimensionY) || 0;
-      const reqZ = parseInt(minDimensionZ) || 0;
+      const filterX = parseInt(maxDimensionX) || Infinity;
+      const filterY = parseInt(maxDimensionY) || Infinity;
+      const filterZ = parseInt(maxDimensionZ) || Infinity;
       
-      matchesDimensions = makerMaxX >= reqX && makerMaxY >= reqY && makerMaxZ >= reqZ;
+      matchesDimensions = projX <= filterX && projY <= filterY && projZ <= filterZ;
     }
 
     // Filter by materials
@@ -120,9 +122,9 @@ export default function ExploreProjects() {
   const activeFiltersCount = [
     printerTypeFilter !== "all" ? 1 : 0,
     multicolorFilter !== "all" ? 1 : 0,
-    minDimensionX !== "0" ? 1 : 0,
-    minDimensionY !== "0" ? 1 : 0,
-    minDimensionZ !== "0" ? 1 : 0,
+    maxDimensionX ? 1 : 0,
+    maxDimensionY ? 1 : 0,
+    maxDimensionZ ? 1 : 0,
     selectedMaterials.length > 0 ? 1 : 0
   ].reduce((a, b) => a + b, 0);
 
@@ -221,50 +223,71 @@ export default function ExploreProjects() {
 
                   {/* Dimension X */}
                   <div>
-                    <label className="text-sm font-semibold mb-2 block">Dimensión X Mínima (mm)</label>
-                    <Select value={minDimensionX} onValueChange={setMinDimensionX}>
-                      <SelectTrigger data-testid="select-dimension-x">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Sin requerimiento</SelectItem>
-                        {DIMENSION_OPTIONS.map(opt => (
-                          <SelectItem key={`x-${opt}`} value={opt}>{opt}mm</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <label className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      Dimensión X Máxima (mm)
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Largo - Mostrar solo proyectos más pequeños que este valor</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="Sin límite"
+                      value={maxDimensionX}
+                      onChange={(e) => setMaxDimensionX(e.target.value)}
+                      min="0"
+                      data-testid="input-max-dimension-x"
+                    />
                   </div>
 
                   {/* Dimension Y */}
                   <div>
-                    <label className="text-sm font-semibold mb-2 block">Dimensión Y Mínima (mm)</label>
-                    <Select value={minDimensionY} onValueChange={setMinDimensionY}>
-                      <SelectTrigger data-testid="select-dimension-y">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Sin requerimiento</SelectItem>
-                        {DIMENSION_OPTIONS.map(opt => (
-                          <SelectItem key={`y-${opt}`} value={opt}>{opt}mm</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <label className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      Dimensión Y Máxima (mm)
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Ancho - Mostrar solo proyectos más pequeños que este valor</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="Sin límite"
+                      value={maxDimensionY}
+                      onChange={(e) => setMaxDimensionY(e.target.value)}
+                      min="0"
+                      data-testid="input-max-dimension-y"
+                    />
                   </div>
 
                   {/* Dimension Z */}
                   <div>
-                    <label className="text-sm font-semibold mb-2 block">Dimensión Z Mínima (mm)</label>
-                    <Select value={minDimensionZ} onValueChange={setMinDimensionZ}>
-                      <SelectTrigger data-testid="select-dimension-z">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Sin requerimiento</SelectItem>
-                        {DIMENSION_OPTIONS.map(opt => (
-                          <SelectItem key={`z-${opt}`} value={opt}>{opt}mm</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <label className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      Dimensión Z Máxima (mm)
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Alto - Mostrar solo proyectos más pequeños que este valor</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="Sin límite"
+                      value={maxDimensionZ}
+                      onChange={(e) => setMaxDimensionZ(e.target.value)}
+                      min="0"
+                      data-testid="input-max-dimension-z"
+                    />
                   </div>
 
                   {/* Materials */}
@@ -299,9 +322,9 @@ export default function ExploreProjects() {
                     onClick={() => {
                       setPrinterTypeFilter("all");
                       setMulticolorFilter("all");
-                      setMinDimensionX("0");
-                      setMinDimensionY("0");
-                      setMinDimensionZ("0");
+                      setMaxDimensionX("");
+                      setMaxDimensionY("");
+                      setMaxDimensionZ("");
                       setSelectedMaterials([]);
                     }}
                     className="w-full"
@@ -338,7 +361,7 @@ export default function ExploreProjects() {
               icon={Search}
               title="Sin resultados"
               description={
-                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimensionX !== "0" || minDimensionY !== "0" || minDimensionZ !== "0" || selectedMaterials.length > 0
+                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" || maxDimensionX || maxDimensionY || maxDimensionZ || selectedMaterials.length > 0
                   ? "Intenta ajustar tus filtros de búsqueda"
                   : "No hay proyectos disponibles en este momento"
               }
