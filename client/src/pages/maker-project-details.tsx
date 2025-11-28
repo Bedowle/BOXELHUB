@@ -112,19 +112,15 @@ export default function MakerProjectDetails() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b px-4 py-4 sticky top-0 z-50 bg-gradient-to-r from-secondary/10 via-transparent to-primary/10 dark:from-secondary/20 dark:via-slate-900/50 dark:to-primary/20 backdrop-blur-md border-secondary/20">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex items-center justify-start">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => window.history.back()}
-              className="hover-elevate"
-              data-testid="button-back"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => window.history.back()}
+          className="hover-elevate"
+          data-testid="button-back"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">

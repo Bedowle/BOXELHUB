@@ -241,19 +241,15 @@ export default function ProjectDetails() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b px-4 py-4 sticky top-0 z-50 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 dark:from-primary/20 dark:via-slate-900/50 dark:to-secondary/20 backdrop-blur-md border-primary/20">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => window.history.back()}
-              className="hover-elevate"
-              data-testid="button-back"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => window.history.back()}
+          className="hover-elevate"
+          data-testid="button-back"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
