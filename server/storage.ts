@@ -224,8 +224,13 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
 
+  async getProjectIncludeDeleted(id: string): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
+  }
+
   async getProjects(filters?: { userId?: string; status?: string }): Promise<Project[]> {
-    let query = db.select().from(projects);
+    let query = db.select().from(projects).where(isNull(projects.deletedAt));
 
     if (filters?.userId) {
       query = query.where(eq(projects.userId, filters.userId));
@@ -252,7 +257,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProject(id: string): Promise<void> {
-    await db.delete(projects).where(eq(projects.id, id));
+    // Soft delete: mark project as deleted instead of removing it
+    // This keeps chats and messages intact
+    await db
+      .update(projects)
+      .set({ deletedAt: new Date(), updatedAt: new Date() })
+      .where(eq(projects.id, id));
   }
 
   async getProjectCount(userId: string): Promise<number> {

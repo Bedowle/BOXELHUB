@@ -17,6 +17,7 @@ interface ChatListItemProps {
   designName?: string;
   projectImage?: string;
   designImage?: string;
+  isProjectDeleted?: boolean;
 }
 
 export function ChatListItem({
@@ -32,6 +33,7 @@ export function ChatListItem({
   designName,
   projectImage,
   designImage,
+  isProjectDeleted = false,
 }: ChatListItemProps) {
   const [, setLocation] = useLocation();
   const userInitial = userName?.[0].toUpperCase() || "U";
@@ -51,7 +53,9 @@ export function ChatListItem({
     <div
       onClick={onClick}
       className={`flex items-center gap-3 p-4 border-b cursor-pointer transition-colors ${
-        isActive
+        isProjectDeleted
+          ? "opacity-50 bg-muted/30 hover:bg-muted/40"
+          : isActive
           ? "bg-primary/10 border-primary/30"
           : "hover:bg-muted/50 border-border/50"
       }`}
@@ -96,11 +100,13 @@ export function ChatListItem({
           )}
         </div>
         <p className={`text-sm line-clamp-1 ${
-          isUnread
+          isProjectDeleted 
+            ? "text-muted-foreground italic"
+            : isUnread
             ? "text-foreground font-medium"
             : "text-muted-foreground"
         }`}>
-          {lastMessage || "Sin mensajes aún"}
+          {isProjectDeleted ? `${lastMessage || "Sin mensajes aún"} (Proyecto eliminado)` : lastMessage || "Sin mensajes aún"}
         </p>
       </div>
 

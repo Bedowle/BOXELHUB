@@ -125,6 +125,7 @@ export default function ChatsSplitPage() {
             ) : (
               filteredConversations.map((conv: Conversation) => {
                 const uniqueKey = `${conv.userId}-${conv.projectId || ''}-${conv.marketplaceDesignId || ''}`;
+                const isProjectDeleted = conv.projectId && conv.project?.deletedAt;
                 return (
                 <ChatListItem
                   key={uniqueKey}
@@ -143,6 +144,7 @@ export default function ChatsSplitPage() {
                     selectedConvKey?.projectId === conv.projectId &&
                     selectedConvKey?.marketplaceDesignId === conv.marketplaceDesignId
                   }
+                  isProjectDeleted={isProjectDeleted}
                   onClick={() =>
                     setSelectedConvKey({
                       userId: conv.userId,

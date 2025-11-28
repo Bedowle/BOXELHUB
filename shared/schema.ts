@@ -113,11 +113,13 @@ export const projects = pgTable("projects", {
   material: varchar("material").notNull(),
   specifications: jsonb("specifications"),
   status: projectStatusEnum("status").default("active").notNull(),
+  deletedAt: timestamp("deleted_at"), // Soft delete - NULL means active
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [
   index("idx_projects_user_id").on(table.userId),
   index("idx_projects_status").on(table.status),
+  index("idx_projects_deleted_at").on(table.deletedAt),
 ]);
 
 // Bids table

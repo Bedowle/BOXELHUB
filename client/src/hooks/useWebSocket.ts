@@ -21,8 +21,8 @@ export function useWebSocket() {
       const isSecure = window.location.protocol === "https:";
       const protocol = isSecure ? "wss:" : "ws:";
       
-      // Use relative URL to avoid issues with hostname/port in Vite dev server
-      const wsUrl = `${protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/ws`;
+      // Use window.location.host which includes port if present
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
       
       console.log("[WebSocket] Connecting to:", wsUrl);
       const ws = new WebSocket(wsUrl);
