@@ -58,7 +58,7 @@ export default function ClientBidsList() {
             variant="ghost"
             size="sm"
             onClick={() => window.history.back()}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover-elevate"
             data-testid="button-back"
           >
             <ArrowLeft className="h-4 w-4" />

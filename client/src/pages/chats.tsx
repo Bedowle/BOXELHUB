@@ -78,7 +78,7 @@ export default function ChatsPage() {
             variant="ghost"
             size="sm"
             onClick={() => setLocation(user.userType === "client" ? "/client" : "/maker")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover-elevate"
             data-testid="button-back-to-dashboard"
           >
             <ArrowLeft className="h-4 w-4" />

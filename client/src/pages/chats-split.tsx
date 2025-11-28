@@ -83,28 +83,24 @@ export default function ChatsSplitPage() {
     <div className="h-screen flex flex-col bg-gradient-to-br from-background via-blue-50/30 dark:via-slate-900/50 to-background">
       {/* Header */}
       <header className="border-b px-4 py-4 sticky top-0 z-50 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 dark:from-primary/20 dark:via-slate-900/50 dark:to-secondary/20 backdrop-blur-md border-primary/20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => window.history.back()}
-              data-testid="button-back"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Mensajes</h1>
-              {user && (
-                <p className="text-xs text-muted-foreground">
-                  {user.firstName || user.email}
-                </p>
-              )}
-            </div>
-          </div>
-          <Button variant="outline" asChild size="sm">
-            <a href="/api/logout">Cerrar Sesión</a>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.history.back()}
+            className="hover-elevate"
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Mensajes</h1>
+            {user && (
+              <p className="text-xs text-muted-foreground">
+                {user.firstName || user.email}
+              </p>
+            )}
+          </div>
         </div>
       </header>
 
