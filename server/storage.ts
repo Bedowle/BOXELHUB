@@ -49,6 +49,7 @@ export interface IStorage {
   getProjectsWithMakerBids(makerId: string): Promise<Project[]>;
   createProject(project: InsertProject): Promise<Project>;
   updateProjectStatus(id: string, status: Project["status"]): Promise<void>;
+  deleteProject(id: string): Promise<void>;
   getProjectCount(userId: string): Promise<number>;
   getActiveProjectCount(userId: string): Promise<number>;
 
