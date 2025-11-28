@@ -186,7 +186,7 @@ export default function MakerHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
           <Card 
-            className="border-2 border-primary/60 hover-elevate cursor-pointer bg-gradient-to-br from-primary/20 to-blue-100/30 dark:from-primary/30 dark:to-blue-900/20 shadow-md"
+            className="border-2 border-secondary/60 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/20 to-purple-100/30 dark:from-secondary/30 dark:to-purple-900/20 shadow-md"
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
@@ -194,8 +194,8 @@ export default function MakerHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Ofertas Activas</span>
-                  <div className="bg-primary/40 dark:bg-primary/50 p-2 rounded-lg">
-                    <Gavel className="h-5 w-5 text-primary" />
+                  <div className="bg-secondary/40 dark:bg-secondary/50 p-2 rounded-lg">
+                    <Gavel className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
@@ -230,7 +230,7 @@ export default function MakerHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/60 hover-elevate cursor-pointer bg-gradient-to-br from-accent/20 to-orange-100/30 dark:from-accent/30 dark:to-orange-900/20 shadow-md"
+            className="border-2 border-secondary/60 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/20 to-purple-100/30 dark:from-secondary/30 dark:to-purple-900/20 shadow-md"
             onClick={() => setLocation("/maker/completed-projects")}
             data-testid="card-stats-completed-projects"
           >
@@ -238,8 +238,8 @@ export default function MakerHome() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">Proyectos Completados</span>
-                  <div className="bg-accent/40 dark:bg-accent/50 p-2 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-accent" />
+                  <div className="bg-secondary/40 dark:bg-secondary/50 p-2 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
