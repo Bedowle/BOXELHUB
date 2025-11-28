@@ -186,13 +186,23 @@ export default function MakerProjectDetails() {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 md:flex-row">
                 <Button 
                   onClick={handleDownloadSTL}
+                  variant="default"
                   data-testid="button-download-stl"
+                  className="md:order-first"
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Descargar STL
+                </Button>
+                <Button 
+                  onClick={() => setRebidDialogOpen(true)}
+                  variant="outline"
+                  data-testid="button-send-offer"
+                  className="md:flex-1"
+                >
+                  ✓ Enviar Oferta
                 </Button>
                 {projectOwner && (
                   <Button 
@@ -201,7 +211,7 @@ export default function MakerProjectDetails() {
                     data-testid="button-contact-client"
                   >
                     <MessageCircle className="mr-2 h-4 w-4" />
-                    Contactar Cliente
+                    Contactar
                   </Button>
                 )}
               </div>
