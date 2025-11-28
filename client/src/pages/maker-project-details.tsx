@@ -11,6 +11,7 @@ import { ChatDialog } from "@/components/ChatDialog";
 import { BidEditDialog } from "@/components/BidEditDialog";
 import { BidSubmissionDialog } from "@/components/BidSubmissionDialog";
 import { ArrowLeft, Calendar, FileText, Package, Download, MessageCircle, Edit2 } from "lucide-react";
+import JSZip from "jszip";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project, User } from "@shared/schema";
@@ -89,7 +90,6 @@ export default function MakerProjectDetails() {
   const handleDownloadSTL = async () => {
     try {
       console.log("[Download] Starting STL download for project:", projectId);
-      // First get filename
       const checkResponse = await fetch(`/api/projects/${projectId}/download-stl`, {
         credentials: "include",
       });
@@ -99,38 +99,72 @@ export default function MakerProjectDetails() {
       const fileInfo = await checkResponse.json();
       console.log("[Download] File info:", fileInfo);
       
-      // Now get the actual STL content
-      const contentResponse = await fetch(`/api/projects/${projectId}/stl-content`, {
-        credentials: "include",
-      });
-      if (!contentResponse.ok) {
-        throw new Error("Failed to download STL content");
+      const stlCount = (project as any).stlFileNames?.length || 1;
+      console.log("[Download] Number of STL files:", stlCount);
+      
+      if (stlCount > 1) {
+        // Download multiple files as ZIP
+        const zip = new JSZip();
+        
+        for (let i = 0; i < stlCount; i++) {
+          try {
+            const contentResponse = await fetch(`/api/projects/${projectId}/stl-content?index=${i}`, {
+              credentials: "include",
+            });
+            if (!contentResponse.ok) continue;
+            
+            const blob = await contentResponse.blob();
+            const fileName = (project as any).stlFileNames?.[i] || `archivo_${i + 1}.stl`;
+            zip.file(fileName, blob);
+            console.log("[Download] Added to ZIP:", fileName);
+          } catch (e) {
+            console.error("[Download] Error downloading STL", i, ":", e);
+          }
+        }
+        
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const url = window.URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `proyecto_${projectId}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Descargado",
+          description: `${stlCount} archivos STL descargados como ZIP`,
+        });
+      } else {
+        // Single file download
+        const contentResponse = await fetch(`/api/projects/${projectId}/stl-content`, {
+          credentials: "include",
+        });
+        if (!contentResponse.ok) {
+          throw new Error("Failed to download STL content");
+        }
+        
+        const blob = await contentResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileInfo.fileName || `proyecto_${projectId}.stl`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Descargado",
+          description: `STL descargado: ${fileInfo.fileName}`,
+        });
       }
-      
-      const blob = await contentResponse.blob();
-      console.log("[Download] Blob size:", blob.size);
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileInfo.fileName || `proyecto_${projectId}.stl`;
-      console.log("[Download] Downloading as:", link.download);
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Descargado",
-        description: `STL descargado: ${fileInfo.fileName}`,
-      });
     } catch (error) {
       console.error("[Download] Error:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "No se pudo descargar el STL",
+        description: error instanceof Error ? error.message : "No se pudo descargar los STL",
         variant: "destructive",
       });
     }
