@@ -6,10 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Info } from "lucide-react";
+import { Send, Info, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import type { Message, User } from "@shared/schema";
+import type { Message, User, Project, MarketplaceDesign } from "@shared/schema";
 
 interface ChatWindowProps {
   otherUserId: string;
@@ -19,8 +19,8 @@ interface ChatWindowProps {
   marketplaceDesignId?: string;
   designTitle?: string;
   designPrice?: number;
-  project?: any;
-  design?: any;
+  project?: Partial<Project>;
+  design?: Partial<MarketplaceDesign>;
 }
 
 export function ChatWindow({
@@ -40,6 +40,43 @@ export function ChatWindow({
   const queryClient = useQueryClient();
   const markReadTimeoutRef = useRef<NodeJS.Timeout>();
   const [, setLocation] = useLocation();
+
+  // Fetch project if not provided
+  const { data: fetchedProject } = useQuery({
+    queryKey: ["/api/project", projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      try {
+        const res = await fetch(`/api/project/${projectId}`, { credentials: "include" });
+        if (!res.ok) return null;
+        return res.json();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!projectId && !project,
+  });
+
+  // Fetch design if not provided
+  const { data: fetchedDesign } = useQuery({
+    queryKey: ["/api/marketplace-design", marketplaceDesignId],
+    queryFn: async () => {
+      if (!marketplaceDesignId) return null;
+      try {
+        const res = await fetch(`/api/marketplace-design/${marketplaceDesignId}`, { credentials: "include" });
+        if (!res.ok) return null;
+        return res.json();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!marketplaceDesignId && !design,
+  });
+
+  const displayProject = project || fetchedProject;
+  const displayDesign = design || fetchedDesign;
+  const isProjectDeleted = displayProject && displayProject.deletedAt;
+  const isDesignDeleted = displayDesign && displayDesign.deletedAt;
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", projectId, marketplaceDesignId, otherUserId],
@@ -186,40 +223,50 @@ export function ChatWindow({
           }
         }}>
           {/* Product/Project Context */}
-          {project && (
+          {displayProject && (
             <div 
-              className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              className={`flex-shrink-0 relative ${isProjectDeleted ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-80"} transition-opacity`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (projectId) {
+                if (projectId && !isProjectDeleted) {
                   setLocation(`/project/${projectId}`);
                 }
               }}
             >
               <Avatar className="flex-shrink-0">
-                <AvatarImage src={project.stlImageUrl} />
+                <AvatarImage src={displayProject.stlImageUrl} />
                 <AvatarFallback className="bg-muted text-xs">
-                  {project.name?.[0]?.toUpperCase() || "P"}
+                  {displayProject.name?.[0]?.toUpperCase() || "P"}
                 </AvatarFallback>
               </Avatar>
+              {isProjectDeleted && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
+                  <Lock className="h-3 w-3 text-white" />
+                </div>
+              )}
             </div>
           )}
-          {design && (
+          {displayDesign && (
             <div 
-              className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              className={`flex-shrink-0 relative ${isDesignDeleted ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-80"} transition-opacity`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (marketplaceDesignId) {
+                if (marketplaceDesignId && !isDesignDeleted) {
                   setLocation(`/marketplace-design/${marketplaceDesignId}`);
                 }
               }}
             >
               <Avatar className="flex-shrink-0">
-                <AvatarImage src={design.imageUrl} />
+                <AvatarImage src={displayDesign.imageUrl} />
                 <AvatarFallback className="bg-muted text-xs">
-                  {design.title?.[0]?.toUpperCase() || "D"}
+                  {displayDesign.title?.[0]?.toUpperCase() || "D"}
                 </AvatarFallback>
               </Avatar>
+              {isDesignDeleted && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
+                  <Lock className="h-3 w-3 text-white" />
+                </div>
+              )}
             </div>
           )}
           
@@ -227,8 +274,9 @@ export function ChatWindow({
             <p className="font-semibold truncate group-hover:underline">
               {otherUser?.username || otherUser?.email}
             </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {project?.name || design?.title || "Sin contexto"}
+            <p className={`text-xs truncate ${isProjectDeleted || isDesignDeleted ? "text-muted-foreground/60" : "text-muted-foreground"}`}>
+              {displayProject?.name || displayDesign?.title || "Sin contexto"}
+              {(isProjectDeleted || isDesignDeleted) && " (Eliminado)"}
             </p>
           </div>
         </div>
