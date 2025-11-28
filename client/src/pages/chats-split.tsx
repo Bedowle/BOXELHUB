@@ -139,6 +139,7 @@ export default function ChatsSplitPage() {
                   designImage={conv.design?.imageUrl}
                   projectId={conv.projectId}
                   designId={conv.marketplaceDesignId}
+                  projectStatus={conv.project?.status}
                   lastMessage={conv.lastMessage?.content || undefined}
                   lastMessageTime={conv.lastMessage?.createdAt || undefined}
                   unreadCount={conv.unreadCount || 0}

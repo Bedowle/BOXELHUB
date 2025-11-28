@@ -21,6 +21,7 @@ interface ChatListItemProps {
   isDesignDeleted?: boolean;
   projectId?: string;
   designId?: string;
+  projectStatus?: string;
 }
 
 export function ChatListItem({
@@ -40,6 +41,7 @@ export function ChatListItem({
   isDesignDeleted = false,
   projectId,
   designId,
+  projectStatus,
 }: ChatListItemProps) {
   const [, setLocation] = useLocation();
   const userInitial = userName?.[0].toUpperCase() || "U";
@@ -48,6 +50,8 @@ export function ChatListItem({
   const contextImage = projectImage || designImage;
   const contextInitial = contextName?.[0]?.toUpperCase() || "C";
   const isDeleted = isProjectDeleted || isDesignDeleted;
+  const isCompleted = projectStatus === "completed";
+  const isDimmed = isDeleted || isCompleted;
 
   const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,7 +73,7 @@ export function ChatListItem({
     <div
       onClick={onClick}
       className={`flex items-center gap-3 p-4 border-b cursor-pointer transition-colors ${
-        isDeleted
+        isDimmed
           ? "opacity-50 bg-muted/30 hover:bg-muted/40"
           : isActive
           ? "bg-primary/10 border-primary/30"
@@ -79,7 +83,7 @@ export function ChatListItem({
     >
       {/* Product/Project Avatar */}
       {contextName && (
-        <Avatar className={`flex-shrink-0 h-8 w-8 ${isDeleted ? "opacity-60" : ""}`}>
+        <Avatar className={`flex-shrink-0 h-8 w-8 ${isDimmed ? "opacity-60" : ""}`}>
           <AvatarImage src={contextImage} />
           <AvatarFallback className="text-xs bg-muted">
             {contextInitial}
@@ -106,12 +110,12 @@ export function ChatListItem({
             {contextName && (
               <button
                 onClick={handleViewProject}
-                className={`text-xs truncate text-left font-medium hover-elevate transition-colors ${
-                  isDeleted
+                className={`text-xs font-medium hover-elevate transition-colors inline-block ${
+                  isDimmed
                     ? "text-muted-foreground/60 cursor-not-allowed"
                     : "text-muted-foreground hover:text-primary"
                 }`}
-                disabled={isDeleted}
+                disabled={isDimmed}
                 data-testid="button-view-project"
               >
                 {contextName}
@@ -125,13 +129,13 @@ export function ChatListItem({
           )}
         </div>
         <p className={`text-sm line-clamp-1 ${
-          isDeleted 
+          isDimmed 
             ? "text-muted-foreground italic"
             : isUnread
             ? "text-foreground font-medium"
             : "text-muted-foreground"
         }`}>
-          {isDeleted ? `${lastMessage || "Sin mensajes aún"} (Eliminado)` : lastMessage || "Sin mensajes aún"}
+          {isDimmed ? `${lastMessage || "Sin mensajes aún"} ${isCompleted ? "(Completado)" : "(Eliminado)"}` : lastMessage || "Sin mensajes aún"}
         </p>
       </div>
 

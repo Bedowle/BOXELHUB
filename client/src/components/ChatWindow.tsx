@@ -277,21 +277,26 @@ export function ChatWindow({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (projectId && !isProjectDeleted) {
+                const isProjectCompleted = displayProject?.status === "completed";
+                const isDesignCompleted = false;
+                const isDisabled = isProjectDeleted || isDesignDeleted || isProjectCompleted || isDesignCompleted;
+                if (projectId && !isDisabled) {
                   setLocation(`/project/${projectId}`);
-                } else if (marketplaceDesignId && !isDesignDeleted) {
+                } else if (marketplaceDesignId && !isDisabled) {
                   setLocation(`/marketplace-design/${marketplaceDesignId}`);
                 }
               }}
-              className={`text-xs truncate text-left w-full font-medium hover-elevate transition-colors block ${
-                isProjectDeleted || isDesignDeleted
+              className={`text-xs font-medium hover-elevate transition-colors inline-block ${
+                isProjectDeleted || isDesignDeleted || displayProject?.status === "completed"
                   ? "text-muted-foreground/60 cursor-not-allowed"
                   : "text-muted-foreground hover:text-primary"
               }`}
-              disabled={isProjectDeleted || isDesignDeleted}
+              disabled={isProjectDeleted || isDesignDeleted || displayProject?.status === "completed"}
             >
               {displayProject?.name || displayDesign?.title || "Sin contexto"}
-              {(isProjectDeleted || isDesignDeleted) && " (Eliminado)"}
+              {isProjectDeleted && " (Eliminado)"}
+              {isDesignDeleted && " (Eliminado)"}
+              {displayProject?.status === "completed" && " (Completado)"}
             </button>
           </div>
         </div>
