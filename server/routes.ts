@@ -1169,6 +1169,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Project not found" });
       }
 
+      // Deleted projects cannot have STL downloaded
+      if (project.deletedAt) {
+        return res.status(403).json({ message: "Cannot download STL from deleted projects" });
+      }
+
       res.json({ fileName: project.stlFileName });
     } catch (error) {
       console.error("Error downloading STL:", error);
@@ -1182,6 +1187,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Deleted projects cannot have STL served
+      if (project.deletedAt) {
+        return res.status(403).json({ message: "Cannot access STL from deleted projects" });
       }
 
       if (!project.stlFileContent) {
