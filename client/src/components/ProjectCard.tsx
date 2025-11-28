@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./StatusBadge";
 import { STLViewer } from "./STLViewer";
-import { Calendar, MessageSquare, Cube } from "lucide-react";
+import { Calendar, MessageSquare, Box } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project } from "@shared/schema";
@@ -60,7 +60,7 @@ export function ProjectCard({ project, onClick, showBidCount = true, unreadBidCo
       <CardFooter className="flex items-center justify-between pt-0">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <Cube className="h-3.5 w-3.5" />
+            <Box className="h-3.5 w-3.5" />
             {project.stlFileNames?.length || 1} STL
           </span>
           <span className="flex items-center gap-1.5">
