@@ -85,7 +85,7 @@ export default function ClientBidsList() {
             {projectsWithBids.map((project) => (
               <Card 
                 key={project.id}
-                className="border-green-200 dark:border-green-900 hover-elevate cursor-pointer"
+                className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/20 hover-elevate cursor-pointer"
                 onClick={() => setLocation(`/project/${project.id}`)}
               >
                 <CardContent className="pt-6 pb-6">
