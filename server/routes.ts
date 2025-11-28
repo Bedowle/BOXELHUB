@@ -2073,7 +2073,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/marketplace/designs/:id', async (req: any, res) => {
     try {
       const { id } = req.params;
-      const design = await storage.getMarketplaceDesign(id);
+      const userId = getAuthenticatedUserId(req);
+      
+      // First try to get active design
+      let design = await storage.getMarketplaceDesign(id);
+      
+      // If not found, try to get deleted design (only owner can view deleted designs)
+      if (!design) {
+        const deletedDesign = await storage.getMarketplaceDesignIncludeDeleted(id);
+        if (deletedDesign && deletedDesign.deletedAt && deletedDesign.makerId === userId) {
+          // Owner can view their deleted design (read-only from chat)
+          design = deletedDesign;
+        }
+      }
+      
       if (!design) {
         return res.status(404).json({ message: "Design not found" });
       }
