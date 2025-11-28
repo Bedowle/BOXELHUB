@@ -16,12 +16,7 @@ export default function MakerBidsList() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  const { data: myBidProjects } = useQuery<(Project & { bidCount: number })[]>({
-    queryKey: ["/api/projects/my-bids"],
-    enabled: !!user,
-  });
-
-  const { data: myBids, isLoading: bidsLoading } = useQuery<{ projectId: string; status: string }[]>({
+  const { data: myBids, isLoading: bidsLoading } = useQuery<(any & { project?: Project })[]>({
     queryKey: ["/api/bids/my-bids"],
     enabled: !!user,
   });
@@ -49,9 +44,9 @@ export default function MakerBidsList() {
     );
   }
 
-  const activeBids = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "pending")) || [];
-  const acceptedBids = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "accepted")) || [];
-  const rejectedBids = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "rejected")) || [];
+  const activeBids = myBids?.filter(b => b.status === "pending") || [];
+  const acceptedBids = myBids?.filter(b => b.status === "accepted") || [];
+  const rejectedBids = myBids?.filter(b => b.status === "rejected") || [];
   const inactiveBids = [...(acceptedBids || []), ...(rejectedBids || [])];
 
   return (
@@ -89,19 +84,19 @@ export default function MakerBidsList() {
           </div>
         ) : activeBids.length > 0 ? (
           <div className="space-y-4">
-            {activeBids.map((project) => (
+            {activeBids.map((bid) => (
               <Card 
-                key={project.id}
+                key={bid.id}
                 className="hover-elevate cursor-pointer"
-                onClick={() => setLocation(`/maker/project/${project.id}`)}
+                onClick={() => setLocation(`/maker/project/${bid.projectId}`)}
               >
                 <CardContent className="pt-6 pb-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg">{project.name}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                      <h3 className="font-bold text-lg">{bid.project?.name}</h3>
+                      <p className="text-muted-foreground text-sm mt-1">{bid.project?.description}</p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                        Publicado {formatDistanceToNow(new Date(bid.project?.createdAt || new Date()), { locale: es, addSuffix: true })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
@@ -126,59 +121,53 @@ export default function MakerBidsList() {
           <div className="mt-12">
             <h2 className="text-2xl font-bold mb-6">Histórico de Ofertas</h2>
             <div className="space-y-4">
-              {acceptedBids?.map((project) => {
-                const bid = myBids?.find(b => b.projectId === project.id && b.status === "accepted");
-                return (
-                  <Card 
-                    key={`accepted-${project.id}`}
-                    className="hover-elevate cursor-pointer opacity-75"
-                    onClick={() => setLocation(`/maker/project/${project.id}`)}
-                  >
-                    <CardContent className="pt-6 pb-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg">{project.name}</h3>
-                          <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
-                          </p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 gap-1">
-                          <CheckCircle className="h-4 w-4" />
-                          Aceptada
-                        </Badge>
+              {acceptedBids?.map((bid) => (
+                <Card 
+                  key={`accepted-${bid.id}`}
+                  className="hover-elevate cursor-pointer opacity-75"
+                  onClick={() => setLocation(`/maker/project/${bid.projectId}`)}
+                >
+                  <CardContent className="pt-6 pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg">{bid.project?.name}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{bid.project?.description}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Publicado {formatDistanceToNow(new Date(bid.project?.createdAt || new Date()), { locale: es, addSuffix: true })}
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 gap-1">
+                        <CheckCircle className="h-4 w-4" />
+                        Aceptada
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-              {rejectedBids?.map((project) => {
-                const bid = myBids?.find(b => b.projectId === project.id && b.status === "rejected");
-                return (
-                  <Card 
-                    key={`rejected-${project.id}`}
-                    className="hover-elevate cursor-pointer opacity-75"
-                    onClick={() => setLocation(`/maker/project/${project.id}`)}
-                  >
-                    <CardContent className="pt-6 pb-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg">{project.name}</h3>
-                          <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className="gap-1">
-                          <XCircle className="h-4 w-4" />
-                          Rechazada
-                        </Badge>
+              {rejectedBids?.map((bid) => (
+                <Card 
+                  key={`rejected-${bid.id}`}
+                  className="hover-elevate cursor-pointer opacity-75"
+                  onClick={() => setLocation(`/maker/project/${bid.projectId}`)}
+                >
+                  <CardContent className="pt-6 pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg">{bid.project?.name}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{bid.project?.description}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Publicado {formatDistanceToNow(new Date(bid.project?.createdAt || new Date()), { locale: es, addSuffix: true })}
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      <Badge variant="secondary" className="gap-1">
+                        <XCircle className="h-4 w-4" />
+                        Rechazada
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         )}

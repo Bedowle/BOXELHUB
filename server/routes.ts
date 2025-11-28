@@ -1571,8 +1571,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const bids = await storage.getBidsByMaker(userId);
-      console.log(`[/api/bids/my-bids] User ${userId.slice(0, 8)}... has ${bids.length} bids:`, bids.map(b => ({ projectId: b.projectId, status: b.status })));
-      res.json(bids);
+      
+      // Enrich bids with project data (including deleted projects)
+      const enrichedBids = await Promise.all(
+        bids.map(async (bid) => {
+          const project = await storage.getProjectIncludeDeleted(bid.projectId);
+          return {
+            ...bid,
+            project,
+          };
+        })
+      );
+      
+      console.log(`[/api/bids/my-bids] User ${userId.slice(0, 8)}... has ${enrichedBids.length} bids:`, enrichedBids.map(b => ({ projectId: b.projectId, status: b.status, deleted: b.project?.deletedAt ? true : false })));
+      res.json(enrichedBids);
     } catch (error) {
       console.error("Error fetching bids:", error);
       res.status(500).json({ message: "Failed to fetch bids" });
