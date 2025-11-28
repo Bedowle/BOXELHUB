@@ -87,23 +87,23 @@ export default function ClientHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Projects in Progress */}
           <Card 
-            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/8 to-transparent dark:from-primary/12 dark:to-transparent"
+            className="border-0 hover-elevate cursor-pointer bg-gradient-to-br from-primary/25 via-primary/15 to-secondary/10 dark:from-primary/35 dark:via-primary/20 dark:to-secondary/15 shadow-md"
             onClick={() => setLocation("/client/projects-active")}
             data-testid="card-stats-in-progress"
           >
-            <CardContent className="pt-4 pb-4">
-              <div className="space-y-2">
+            <CardContent className="pt-5 pb-5">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-foreground">Proyectos en Progreso</span>
-                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
+                  <span className="text-sm font-bold text-foreground">Proyectos en Progreso</span>
+                  <div className="bg-gradient-to-br from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30 p-2.5 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">
+                  <p className="text-5xl font-black bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">
                     {activeProjects.length + inProgressProjects.length}
                   </p>
-                  <p className="text-xs text-muted-foreground">activos y aceptados</p>
+                  <p className="text-xs text-muted-foreground font-medium">activos y aceptados</p>
                 </div>
               </div>
             </CardContent>
@@ -111,21 +111,21 @@ export default function ClientHome() {
 
           {/* Pending Bids */}
           <Card 
-            className="border-2 border-secondary/40 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/8 to-transparent dark:from-secondary/12 dark:to-transparent"
+            className="border-0 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/25 via-secondary/15 to-primary/10 dark:from-secondary/35 dark:via-secondary/20 dark:to-primary/15 shadow-md"
             onClick={() => setLocation("/client/bids")}
             data-testid="card-stats-pending-bids"
           >
-            <CardContent className="pt-4 pb-4">
-              <div className="space-y-2">
+            <CardContent className="pt-5 pb-5">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-foreground">Ofertas Pendientes</span>
-                  <div className="bg-secondary/20 dark:bg-secondary/30 p-2 rounded-lg">
+                  <span className="text-sm font-bold text-foreground">Ofertas Pendientes</span>
+                  <div className="bg-gradient-to-br from-secondary/40 to-secondary/20 dark:from-secondary/50 dark:to-secondary/30 p-2.5 rounded-lg">
                     <Gavel className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">{stats?.pendingBids || 0}</p>
-                  <p className="text-xs text-muted-foreground">{totalBids} total</p>
+                  <p className="text-5xl font-black bg-gradient-to-r from-secondary via-secondary to-primary bg-clip-text text-transparent">{stats?.pendingBids || 0}</p>
+                  <p className="text-xs text-muted-foreground font-medium">{totalBids} total</p>
                 </div>
               </div>
             </CardContent>
@@ -133,21 +133,21 @@ export default function ClientHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/8 to-transparent dark:from-accent/12 dark:to-transparent"
+            className="border-0 hover-elevate cursor-pointer bg-gradient-to-br from-accent/25 via-accent/15 to-secondary/10 dark:from-accent/35 dark:via-accent/20 dark:to-secondary/15 shadow-md"
             onClick={() => setLocation("/client/projects-completed")}
             data-testid="card-stats-completed-projects"
           >
-            <CardContent className="pt-4 pb-4">
-              <div className="space-y-2">
+            <CardContent className="pt-5 pb-5">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-foreground">Proyectos Terminados</span>
-                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
+                  <span className="text-sm font-bold text-foreground">Proyectos Terminados</span>
+                  <div className="bg-gradient-to-br from-accent/40 to-accent/20 dark:from-accent/50 dark:to-accent/30 p-2.5 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold bg-gradient-to-r from-accent via-accent to-secondary bg-clip-text text-transparent">{completedProjects.length}</p>
-                  <p className="text-xs text-muted-foreground">completados</p>
+                  <p className="text-5xl font-black bg-gradient-to-r from-accent via-accent to-secondary bg-clip-text text-transparent">{completedProjects.length}</p>
+                  <p className="text-xs text-muted-foreground font-medium">completados</p>
                 </div>
               </div>
             </CardContent>
