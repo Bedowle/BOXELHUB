@@ -7,12 +7,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
 import { ArrowLeft, Search, TrendingUp, Sliders } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Project, MakerProfile } from "@shared/schema";
+
+const DIMENSION_OPTIONS = ["50", "100", "150", "200", "250", "300", "400", "500"];
+const MATERIAL_OPTIONS = ["PLA", "PETG", "ABS", "TPU", "Nylon", "Resin", "Flexible", "Madera", "Metal", "Cerámica"];
 
 export default function ExploreProjects() {
   const { toast } = useToast();
@@ -26,7 +30,10 @@ export default function ExploreProjects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [printerTypeFilter, setPrinterTypeFilter] = useState<string>("all");
   const [multicolorFilter, setMulticolorFilter] = useState<string>("all");
-  const [minDimension, setMinDimension] = useState<number>(0);
+  const [minDimensionX, setMinDimensionX] = useState<string>("0");
+  const [minDimensionY, setMinDimensionY] = useState<string>("0");
+  const [minDimensionZ, setMinDimensionZ] = useState<string>("0");
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
 
   const { data: profile, isLoading: profileLoading } = useQuery<MakerProfile>({
     queryKey: ["/api/maker-profile"],
@@ -87,20 +94,37 @@ export default function ExploreProjects() {
       (multicolorFilter === "yes" && profile?.hasMulticolor) ||
       (multicolorFilter === "no" && !profile?.hasMulticolor);
 
-    // Filter by dimensions - check if maker's max dimensions are >= minimum dimension
+    // Filter by individual dimensions - check if maker's max dimensions are >= minimum dimensions
     let matchesDimensions = true;
-    if (minDimension > 0 && profile) {
+    if (profile && (minDimensionX !== "0" || minDimensionY !== "0" || minDimensionZ !== "0")) {
       const makerMaxX = profile.maxPrintDimensionX || 0;
       const makerMaxY = profile.maxPrintDimensionY || 0;
       const makerMaxZ = profile.maxPrintDimensionZ || 0;
-      const minMax = Math.min(makerMaxX, makerMaxY, makerMaxZ);
-      matchesDimensions = minMax >= minDimension;
+      
+      const reqX = parseInt(minDimensionX) || 0;
+      const reqY = parseInt(minDimensionY) || 0;
+      const reqZ = parseInt(minDimensionZ) || 0;
+      
+      matchesDimensions = makerMaxX >= reqX && makerMaxY >= reqY && makerMaxZ >= reqZ;
     }
 
-    return matchesSearch && matchesPrinter && matchesMulticolor && matchesDimensions;
+    // Filter by materials
+    let matchesMaterial = true;
+    if (selectedMaterials.length > 0) {
+      matchesMaterial = selectedMaterials.includes(project.material);
+    }
+
+    return matchesSearch && matchesPrinter && matchesMulticolor && matchesDimensions && matchesMaterial;
   });
 
-  const hasActiveFilters = printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimension > 0;
+  const activeFiltersCount = [
+    printerTypeFilter !== "all" ? 1 : 0,
+    multicolorFilter !== "all" ? 1 : 0,
+    minDimensionX !== "0" ? 1 : 0,
+    minDimensionY !== "0" ? 1 : 0,
+    minDimensionZ !== "0" ? 1 : 0,
+    selectedMaterials.length > 0 ? 1 : 0
+  ].reduce((a, b) => a + b, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,15 +178,16 @@ export default function ExploreProjects() {
                 >
                   <Sliders className="h-4 w-4" />
                   Filtros
-                  {hasActiveFilters && (
+                  {activeFiltersCount > 0 && (
                     <span className="ml-2 inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                      {[printerTypeFilter !== "all", multicolorFilter !== "all", minDimension > 0].filter(Boolean).length}
+                      {activeFiltersCount}
                     </span>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="end" data-testid="popover-filters">
+              <PopoverContent className="w-96 p-4 max-h-96 overflow-y-auto" align="end" data-testid="popover-filters">
                 <div className="space-y-4">
+                  {/* Printer Type */}
                   <div>
                     <label className="text-sm font-semibold mb-2 block">Tipo de Impresora</label>
                     <Select value={printerTypeFilter} onValueChange={setPrinterTypeFilter}>
@@ -173,10 +198,13 @@ export default function ExploreProjects() {
                         <SelectItem value="all">Todas las impresoras</SelectItem>
                         <SelectItem value="Ender3">Ender 3</SelectItem>
                         <SelectItem value="BambooLab">Bambu Lab</SelectItem>
+                        <SelectItem value="PrusaMK3S">Prusa MK3S</SelectItem>
+                        <SelectItem value="Ultimaker">Ultimaker</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
+                  {/* Color/Multicolor */}
                   <div>
                     <label className="text-sm font-semibold mb-2 block">Color</label>
                     <Select value={multicolorFilter} onValueChange={setMulticolorFilter}>
@@ -191,26 +219,78 @@ export default function ExploreProjects() {
                     </Select>
                   </div>
 
+                  {/* Dimension X */}
                   <div>
-                    <label className="text-sm font-semibold mb-3 block">Dimensión Mínima (mm)</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min="0"
-                        max="300"
-                        step="10"
-                        value={minDimension}
-                        onChange={(e) => setMinDimension(Number(e.target.value))}
-                        className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
-                        data-testid="slider-min-dimension"
-                      />
-                      <span className="text-sm font-semibold bg-muted px-3 py-1 rounded-md w-16 text-center">
-                        {minDimension}
-                      </span>
+                    <label className="text-sm font-semibold mb-2 block">Dimensión X Mínima (mm)</label>
+                    <Select value={minDimensionX} onValueChange={setMinDimensionX}>
+                      <SelectTrigger data-testid="select-dimension-x">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">Sin requerimiento</SelectItem>
+                        {DIMENSION_OPTIONS.map(opt => (
+                          <SelectItem key={`x-${opt}`} value={opt}>{opt}mm</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Dimension Y */}
+                  <div>
+                    <label className="text-sm font-semibold mb-2 block">Dimensión Y Mínima (mm)</label>
+                    <Select value={minDimensionY} onValueChange={setMinDimensionY}>
+                      <SelectTrigger data-testid="select-dimension-y">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">Sin requerimiento</SelectItem>
+                        {DIMENSION_OPTIONS.map(opt => (
+                          <SelectItem key={`y-${opt}`} value={opt}>{opt}mm</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Dimension Z */}
+                  <div>
+                    <label className="text-sm font-semibold mb-2 block">Dimensión Z Mínima (mm)</label>
+                    <Select value={minDimensionZ} onValueChange={setMinDimensionZ}>
+                      <SelectTrigger data-testid="select-dimension-z">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">Sin requerimiento</SelectItem>
+                        {DIMENSION_OPTIONS.map(opt => (
+                          <SelectItem key={`z-${opt}`} value={opt}>{opt}mm</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Materials */}
+                  <div>
+                    <label className="text-sm font-semibold mb-3 block">Materiales</label>
+                    <div className="space-y-2">
+                      {MATERIAL_OPTIONS.map(material => (
+                        <div key={material} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`material-${material}`}
+                            checked={selectedMaterials.includes(material)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedMaterials([...selectedMaterials, material]);
+                              } else {
+                                setSelectedMaterials(selectedMaterials.filter(m => m !== material));
+                              }
+                            }}
+                            data-testid={`checkbox-material-${material}`}
+                          />
+                          <label htmlFor={`material-${material}`} className="text-sm cursor-pointer">
+                            {material}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Solo mostrar proyectos donde tu impresora pueda imprimir al menos {minDimension}mm en todos los lados
-                    </p>
                   </div>
 
                   <Button
@@ -219,7 +299,10 @@ export default function ExploreProjects() {
                     onClick={() => {
                       setPrinterTypeFilter("all");
                       setMulticolorFilter("all");
-                      setMinDimension(0);
+                      setMinDimensionX("0");
+                      setMinDimensionY("0");
+                      setMinDimensionZ("0");
+                      setSelectedMaterials([]);
                     }}
                     className="w-full"
                     data-testid="button-reset-filters"
@@ -255,7 +338,7 @@ export default function ExploreProjects() {
               icon={Search}
               title="Sin resultados"
               description={
-                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimension > 0
+                searchQuery || printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimensionX !== "0" || minDimensionY !== "0" || minDimensionZ !== "0" || selectedMaterials.length > 0
                   ? "Intenta ajustar tus filtros de búsqueda"
                   : "No hay proyectos disponibles en este momento"
               }
