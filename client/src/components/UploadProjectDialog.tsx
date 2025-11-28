@@ -180,7 +180,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                 <FormItem>
                   <FormLabel>Archivos STL</FormLabel>
                   <FormControl>
-                    <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    <div className="border-2 border-dashed border-primary/40 rounded-lg p-6 text-center hover:border-primary transition-colors bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent">
                       <input
                         type="file"
                         accept=".stl"
