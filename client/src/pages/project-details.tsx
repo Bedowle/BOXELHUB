@@ -16,7 +16,7 @@ import { ChatDialog } from "@/components/ChatDialog";
 import { RatingDialog } from "@/components/RatingDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BidCardSkeleton } from "@/components/LoadingSkeleton";
-import { ArrowLeft, Calendar, FileText, Package, MessageCircle } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Package, MessageCircle, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project, Bid, User, MakerProfile } from "@shared/schema";
@@ -34,6 +34,7 @@ export default function ProjectDetails() {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedMaker, setSelectedMaker] = useState<User | null>(null);
   const [selectedBidForRating, setSelectedBidForRating] = useState<string | null>(null);
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false);
 
   const projectId = params?.id;
 
@@ -110,6 +111,31 @@ export default function ProjectDetails() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "my-bid"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "unread-bid-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/projects/total-unread-bids"] });
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/projects/${projectId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Proyecto eliminado",
+        description: "Tu proyecto ha sido eliminado correctamente",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/my-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/stats"] });
+      setTimeout(() => {
+        setLocation("/client/projects-active");
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar el proyecto",
+        variant: "destructive",
+      });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -308,6 +334,38 @@ export default function ProjectDetails() {
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Chatear con {acceptedBid.maker.username || acceptedBid.maker.email}
                     </Button>
+                  )}
+                  {isOwner && !deleteConfirmed && (
+                    <Button 
+                      size="lg"
+                      variant="destructive"
+                      onClick={() => setDeleteConfirmed(true)}
+                      data-testid="button-delete-project"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar Proyecto
+                    </Button>
+                  )}
+                  {isOwner && deleteConfirmed && (
+                    <div className="flex gap-2">
+                      <Button 
+                        size="lg"
+                        variant="destructive"
+                        onClick={() => deleteProjectMutation.mutate()}
+                        disabled={deleteProjectMutation.isPending}
+                        data-testid="button-confirm-delete"
+                      >
+                        Confirmar Eliminación
+                      </Button>
+                      <Button 
+                        size="lg"
+                        variant="outline"
+                        onClick={() => setDeleteConfirmed(false)}
+                        data-testid="button-cancel-delete"
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardContent>

@@ -251,6 +251,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projects.id, id));
   }
 
+  async deleteProject(id: string): Promise<void> {
+    await db.delete(projects).where(eq(projects.id, id));
+  }
+
   async getProjectCount(userId: string): Promise<number> {
     const [result] = await db
       .select({ count: count() })

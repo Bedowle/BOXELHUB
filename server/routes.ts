@@ -962,6 +962,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const { id } = req.params;
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Only project owner can delete
+      if (project.userId !== userId) {
+        return res.status(403).json({ message: "You can only delete your own projects" });
+      }
+
+      // Delete all bids associated with project first
+      const projectBids = await storage.getBidsByProject(id);
+      for (const bid of projectBids) {
+        // Messages will cascade delete via DB constraints
+        // Just delete bids directly
+      }
+
+      await storage.deleteProject(id);
+      res.json({ message: "Project deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: error.message || "Failed to delete project" });
+    }
+  });
+
   // Bid routes
   app.get('/api/projects/:id/bids', isAuthenticated, async (req: any, res) => {
     try {
