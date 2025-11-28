@@ -230,17 +230,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProjects(filters?: { userId?: string; status?: string }): Promise<Project[]> {
-    let query = db.select().from(projects).where(isNull(projects.deletedAt));
+    const conditions: any[] = [isNull(projects.deletedAt)];
 
     if (filters?.userId) {
-      query = query.where(eq(projects.userId, filters.userId));
+      conditions.push(eq(projects.userId, filters.userId));
     }
 
     if (filters?.status) {
-      query = query.where(eq(projects.status, filters.status as any));
+      conditions.push(eq(projects.status, filters.status as any));
     }
 
-    const results = await query.orderBy(desc(projects.createdAt));
+    const results = await db
+      .select()
+      .from(projects)
+      .where(conditions.length > 1 ? and(...conditions) : conditions[0])
+      .orderBy(desc(projects.createdAt));
     return results;
   }
 
