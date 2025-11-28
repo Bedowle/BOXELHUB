@@ -20,14 +20,15 @@ interface BidCardProps {
   isMyBid?: boolean;
   currentUserId?: string;
   isPending?: boolean;
+  isProjectDeleted?: boolean;
 }
 
-export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, onRebid, isClient, isMyBid, currentUserId, isPending }: BidCardProps) {
+export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery, onEdit, onRebid, isClient, isMyBid, currentUserId, isPending, isProjectDeleted }: BidCardProps) {
   const [, setLocation] = useLocation();
   const profile = bid.maker?.makerProfile;
   const initials = (bid.maker?.username || bid.maker?.email)?.[0].toUpperCase() || "M";
   
-  const canEditBid = isMyBid && bid.status === "pending" && currentUserId === bid.makerId;
+  const canEditBid = isMyBid && bid.status === "pending" && currentUserId === bid.makerId && !isProjectDeleted;
 
   const handleCardClick = () => {
     if (isClient && onContact) {
