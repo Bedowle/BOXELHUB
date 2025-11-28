@@ -16,7 +16,7 @@ import { ChatDialog } from "@/components/ChatDialog";
 import { RatingDialog } from "@/components/RatingDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { BidCardSkeleton } from "@/components/LoadingSkeleton";
-import { ArrowLeft, Calendar, FileText, Package, MessageCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Package, MessageCircle, Trash2, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project, Bid, User, MakerProfile } from "@shared/schema";
@@ -186,6 +186,54 @@ export default function ProjectDetails() {
     },
   });
 
+  const handleDownloadSTL = async () => {
+    if (!projectId) return;
+    try {
+      console.log("[ProjectDetails] Starting STL download for project:", projectId);
+      const checkResponse = await fetch(`/api/projects/${projectId}/download-stl`, {
+        credentials: "include",
+      });
+      if (!checkResponse.ok) {
+        throw new Error("Failed to get STL info");
+      }
+      const fileInfo = await checkResponse.json();
+      console.log("[ProjectDetails] File info:", fileInfo);
+      
+      const contentResponse = await fetch(`/api/projects/${projectId}/stl-content`, {
+        credentials: "include",
+      });
+      if (!contentResponse.ok) {
+        throw new Error("Failed to download STL content");
+      }
+      
+      const blob = await contentResponse.blob();
+      console.log("[ProjectDetails] Blob size:", blob.size);
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileInfo.fileName || `proyecto_${projectId}.stl`;
+      console.log("[ProjectDetails] Downloading as:", link.download);
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Descargado",
+        description: `STL descargado: ${fileInfo.fileName}`,
+      });
+    } catch (error) {
+      console.error("[ProjectDetails] Download error:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "No se pudo descargar el STL",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -303,6 +351,17 @@ export default function ProjectDetails() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-4">
+                  {isMaker && !isDeleted && project?.status !== "completed" && (
+                    <Button 
+                      size="lg"
+                      variant="default"
+                      onClick={handleDownloadSTL}
+                      data-testid="button-download-stl"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Descargar STL
+                    </Button>
+                  )}
                   {canBid && !isDeleted && (
                     <Button 
                       size="lg"
