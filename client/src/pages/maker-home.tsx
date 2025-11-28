@@ -168,10 +168,8 @@ export default function MakerHome() {
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
-        <div className="container mx-auto px-4 py-4 max-w-7xl space-y-4">
-          </div>
-      </header>
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b" />
+
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
