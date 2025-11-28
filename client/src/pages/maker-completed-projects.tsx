@@ -196,7 +196,7 @@ export default function MakerCompletedProjects() {
               return (
                 <Card 
                   key={project.id}
-                  className="border-green-200 dark:border-green-900"
+                  className="border-green-200 dark:border-green-900 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40"
                   data-testid={`card-completed-project-${project.id}`}
                 >
                   <CardContent className="pt-6 pb-6">
