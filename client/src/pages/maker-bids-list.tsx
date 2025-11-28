@@ -85,7 +85,7 @@ export default function MakerBidsList() {
             {activeBids.map((bid) => (
               <Card 
                 key={bid.id}
-                className="hover-elevate cursor-pointer"
+                className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent"
                 onClick={() => setLocation(`/project/${bid.projectId}`)}
               >
                 <CardContent className="pt-6 pb-6">
@@ -122,7 +122,7 @@ export default function MakerBidsList() {
               {acceptedBids?.map((bid) => (
                 <Card 
                   key={`accepted-${bid.id}`}
-                  className="hover-elevate cursor-pointer opacity-75"
+                  className="border-2 border-primary/40 hover-elevate cursor-pointer opacity-75 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent"
                   onClick={() => setLocation(`/project/${bid.projectId}`)}
                 >
                   <CardContent className="pt-6 pb-6">
@@ -146,7 +146,7 @@ export default function MakerBidsList() {
               {rejectedBids?.map((bid) => (
                 <Card 
                   key={`rejected-${bid.id}`}
-                  className="hover-elevate cursor-pointer opacity-75"
+                  className="border-2 border-primary/40 hover-elevate cursor-pointer opacity-75 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent"
                   onClick={() => setLocation(`/project/${bid.projectId}`)}
                 >
                   <CardContent className="pt-6 pb-6">
