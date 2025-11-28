@@ -299,7 +299,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="z-50">
+                          <TooltipContent side="top" className="z-[9999]">
                             <p>Dimensión a lo largo del eje X (izquierda-derecha)</p>
                           </TooltipContent>
                         </Tooltip>
@@ -328,7 +328,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="z-50">
+                          <TooltipContent side="top" className="z-[9999]">
                             <p>Dimensión a lo ancho del eje Y (adelante-atrás)</p>
                           </TooltipContent>
                         </Tooltip>
@@ -357,7 +357,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                           <TooltipTrigger asChild>
                             <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="z-50">
+                          <TooltipContent side="top" className="z-[9999]">
                             <p>Dimensión altura del eje Z (arriba-abajo)</p>
                           </TooltipContent>
                         </Tooltip>
