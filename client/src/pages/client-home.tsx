@@ -68,8 +68,6 @@ export default function ClientHome() {
   const inProgressProjects = projects?.filter(p => p.status === "reserved") || [];
   const completedProjects = projects?.filter(p => p.status === "completed") || [];
   const canUploadMore = activeProjects.length < 10;
-  const projectsWithBids = projects?.filter(p => p.bidCount > 0).length || 0;
-  const totalProjects = projects?.length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/50 dark:via-slate-900/50 to-background">
@@ -125,8 +123,8 @@ export default function ClientHome() {
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold">{projectsWithBids}</p>
-                  <p className="text-xs text-muted-foreground">{totalProjects} proyectos</p>
+                  <p className="text-4xl font-bold">{stats?.pendingBids || 0}</p>
+                  <p className="text-xs text-muted-foreground">{projects?.length || 0} proyectos</p>
                 </div>
               </div>
             </CardContent>

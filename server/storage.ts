@@ -643,21 +643,46 @@ export class DatabaseStorage implements IStorage {
     pendingBids: number;
     acceptedOffers: number;
   }> {
-    // Single combined query for all stats - much faster
-    const [result] = await db
-      .select({
-        activeProjects: count(sql`CASE WHEN ${projects.status} = 'active' THEN 1 END`),
-        pendingBids: count(sql`CASE WHEN ${bids.status} = 'pending' THEN 1 END`),
-        acceptedOffers: count(sql`CASE WHEN ${bids.status} = 'accepted' THEN 1 END`),
-      })
-      .from(projects)
-      .leftJoin(bids, eq(projects.id, bids.projectId))
-      .where(eq(projects.userId, userId));
+    // Count projects with pending/accepted bids (not total bids)
+    const userProjects = await this.getProjects({ userId });
+    
+    let projectsWithPendingBids = 0;
+    let projectsWithAcceptedBids = 0;
+    
+    if (userProjects.length > 0) {
+      const projectIds = userProjects.map(p => p.id);
+      
+      // Count DISTINCT projects with pending bids
+      const [pendingResult] = await db
+        .select({ count: count(sql`DISTINCT ${bids.projectId}`) })
+        .from(bids)
+        .where(
+          and(
+            inArray(bids.projectId, projectIds),
+            eq(bids.status, "pending")
+          )
+        );
+      projectsWithPendingBids = pendingResult?.count || 0;
+      
+      // Count DISTINCT projects with accepted bids
+      const [acceptedResult] = await db
+        .select({ count: count(sql`DISTINCT ${bids.projectId}`) })
+        .from(bids)
+        .where(
+          and(
+            inArray(bids.projectId, projectIds),
+            eq(bids.status, "accepted")
+          )
+        );
+      projectsWithAcceptedBids = acceptedResult?.count || 0;
+    }
+    
+    const activeProjects = userProjects.filter(p => p.status === "active").length;
 
     return {
-      activeProjects: result?.activeProjects || 0,
-      pendingBids: result?.pendingBids || 0,
-      acceptedOffers: result?.acceptedOffers || 0,
+      activeProjects,
+      pendingBids: projectsWithPendingBids,
+      acceptedOffers: projectsWithAcceptedBids,
     };
   }
 
