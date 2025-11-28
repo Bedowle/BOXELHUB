@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -5,7 +6,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
-import { ArrowLeft, Gavel } from "lucide-react";
+import { ArrowLeft, Gavel, ChevronDown, ChevronUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project } from "@shared/schema";
@@ -19,6 +20,7 @@ export default function ClientBidsList() {
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const [showOldBids, setShowOldBids] = useState(false);
 
   const { data: projects, isLoading: projectsLoading } = useQuery<ProjectWithBids[]>({
     queryKey: ["/api/projects/my-projects"],
@@ -49,6 +51,7 @@ export default function ClientBidsList() {
   }
 
   const projectsWithBids = projects?.filter(p => p.bidCount > 0 && p.status === 'active') || [];
+  const completedProjectsWithBids = projects?.filter(p => p.bidCount > 0 && p.status === 'completed') || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,32 +84,89 @@ export default function ClientBidsList() {
             ))}
           </div>
         ) : projectsWithBids.length > 0 ? (
-          <div className="space-y-4">
-            {projectsWithBids.map((project) => (
-              <Card 
-                key={project.id}
-                className="border-2 border-amber-300/50 bg-gradient-to-br from-amber-100 to-amber-50/50 dark:from-amber-900/40 dark:to-amber-950/20 hover-elevate cursor-pointer"
-                onClick={() => setLocation(`/project/${project.id}`)}
-              >
-                <CardContent className="pt-6 pb-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg">{project.name}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
-                      </p>
+          <div className="space-y-6">
+            {/* Active Offers */}
+            <div className="space-y-4">
+              {projectsWithBids.map((project) => (
+                <Card 
+                  key={project.id}
+                  className="border-2 border-amber-300/50 bg-gradient-to-br from-amber-100 to-amber-50/50 dark:from-amber-900/40 dark:to-amber-950/20 hover-elevate cursor-pointer"
+                  onClick={() => setLocation(`/project/${project.id}`)}
+                >
+                  <CardContent className="pt-6 pb-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg">{project.name}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                        </p>
+                      </div>
+                      <div className="bg-amber-100/60 dark:bg-amber-950/40 px-3 py-2 rounded-lg">
+                        <p className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                          <Gavel className="h-3 w-3" />
+                          {project.bidCount} ofertas
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-amber-100/60 dark:bg-amber-950/40 px-3 py-2 rounded-lg">
-                      <p className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                        <Gavel className="h-3 w-3" />
-                        {project.bidCount} ofertas
-                      </p>
-                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Old Offers Toggle */}
+            {completedProjectsWithBids.length > 0 && (
+              <div className="mt-8">
+                <Button
+                  onClick={() => setShowOldBids(!showOldBids)}
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2"
+                  data-testid="button-toggle-old-offers"
+                >
+                  {showOldBids ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Ocultar ofertas antiguas ({completedProjectsWithBids.length})
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      Mostrar ofertas antiguas ({completedProjectsWithBids.length})
+                    </>
+                  )}
+                </Button>
+
+                {showOldBids && (
+                  <div className="space-y-4 mt-4">
+                    {completedProjectsWithBids.map((project) => (
+                      <Card 
+                        key={project.id}
+                        className="border-2 border-green-300/40 bg-gradient-to-br from-green-100/40 to-green-50/30 dark:from-green-900/30 dark:to-green-950/20 hover-elevate cursor-pointer opacity-75"
+                        onClick={() => setLocation(`/project/${project.id}`)}
+                      >
+                        <CardContent className="pt-6 pb-6">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-lg">{project.name}</h3>
+                              <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Completado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                              </p>
+                            </div>
+                            <div className="bg-green-100/60 dark:bg-green-950/40 px-3 py-2 rounded-lg">
+                              <p className="text-sm font-bold text-green-700 dark:text-green-300 flex items-center gap-1">
+                                <Gavel className="h-3 w-3" />
+                                {project.bidCount} ofertas
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <EmptyState
