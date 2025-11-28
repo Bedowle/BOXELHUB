@@ -70,9 +70,9 @@ export default function ChatsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 dark:via-slate-900/50 to-background">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 dark:from-primary/20 dark:via-slate-900/50 dark:to-secondary/20 backdrop-blur-md border-b border-primary/20">
         <div className="container mx-auto px-4 py-3 max-w-4xl">
           <Button
             variant="ghost"
@@ -89,15 +89,15 @@ export default function ChatsPage() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Content Header */}
-        <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 flex items-center gap-3">
+        <div className="mb-8 bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-2xl p-8 border border-primary/20 dark:border-primary/30">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 flex items-center gap-3 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
           <MessageCircle className="h-10 w-10 text-primary" />
           Mis Chats
         </h1>
         <p className="text-lg text-muted-foreground">
           {conversations?.length || 0} conversación{(conversations?.length || 0) !== 1 ? "es" : ""}
           {totalUnread > 0 && (
-            <span className="ml-3 font-semibold text-primary">
+            <span className="ml-3 font-semibold text-accent">
               ({totalUnread} mensaje{totalUnread !== 1 ? "s" : ""} sin leer)
             </span>
           )}
@@ -116,7 +116,7 @@ export default function ChatsPage() {
             {conversations.map((conv) => (
               <Card
                 key={`${conv.userId}-${conv.projectId}`}
-                className="hover-elevate cursor-pointer transition-all"
+                className="hover-elevate cursor-pointer transition-all border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent dark:from-primary/15 dark:to-transparent"
                 onClick={() => conv.user && openChat(conv.user, conv.projectId)}
                 data-testid={`card-chat-${conv.userId}-${conv.projectId}`}
               >
