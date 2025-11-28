@@ -220,7 +220,7 @@ export class DatabaseStorage implements IStorage {
 
   // Project operations
   async getProject(id: string): Promise<Project | undefined> {
-    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    const [project] = await db.select().from(projects).where(and(eq(projects.id, id), isNull(projects.deletedAt)));
     return project;
   }
 
@@ -269,7 +269,7 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db
       .select({ count: count() })
       .from(projects)
-      .where(eq(projects.userId, userId));
+      .where(and(eq(projects.userId, userId), isNull(projects.deletedAt)));
     return result.count;
   }
 
@@ -277,7 +277,7 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db
       .select({ count: count() })
       .from(projects)
-      .where(and(eq(projects.userId, userId), eq(projects.status, "active")));
+      .where(and(eq(projects.userId, userId), eq(projects.status, "active"), isNull(projects.deletedAt)));
     return result.count;
   }
 
@@ -295,7 +295,7 @@ export class DatabaseStorage implements IStorage {
     const results = await db
       .select()
       .from(projects)
-      .where(sql`${projects.id} IN (${sql.join(projectIdList)})`)
+      .where(and(sql`${projects.id} IN (${sql.join(projectIdList)})`, isNull(projects.deletedAt)))
       .orderBy(desc(projects.createdAt));
     
     return results;

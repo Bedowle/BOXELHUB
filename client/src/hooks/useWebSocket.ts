@@ -17,10 +17,10 @@ export function useWebSocket() {
     }
 
     const connect = () => {
-      // Construct WebSocket URL using URL API to avoid host issues
-      const url = new URL("/ws", window.location.href);
-      url.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = url.toString();
+      // Construct WebSocket URL - let browser handle the protocol/host correctly
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const host = window.location.host || "localhost:5000";
+      const wsUrl = `${protocol}//${host}/ws`;
       
       console.log("[WebSocket] Connecting to:", wsUrl);
       const ws = new WebSocket(wsUrl);
