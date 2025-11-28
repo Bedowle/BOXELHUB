@@ -113,6 +113,13 @@ export function BidCard({ bid, onAccept, onReject, onContact, onConfirmDelivery,
 
             {/* Actions */}
             <div className="flex flex-col gap-2 items-end">
+              {/* Pending bid status badge */}
+              {(bid.status === "pending" || bid.status === undefined || bid.status === null) && (
+                <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100" data-testid={`badge-pending-${bid.id}`}>
+                  Pendiente
+                </Badge>
+              )}
+
               {/* Chat button - Available for clients only if project not deleted */}
               {isClient && !isProjectDeleted && (
                 <Button
