@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
-import { ArrowLeft, Hammer } from "lucide-react";
+import { ArrowLeft, Gavel } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project } from "@shared/schema";
@@ -97,9 +97,9 @@ export default function ClientBidsList() {
                         Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900/30 px-3 py-2 rounded-lg">
-                      <Hammer className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                      <span className="font-bold text-yellow-700 dark:text-yellow-200">{project.bidCount}</span>
+                    <div className="flex items-center gap-2 bg-amber-500/20 dark:bg-amber-600/30 px-3 py-2 rounded-lg">
+                      <Gavel className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      <span className="font-bold text-amber-700 dark:text-amber-200">{project.bidCount}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -108,7 +108,7 @@ export default function ClientBidsList() {
           </div>
         ) : (
           <EmptyState
-            icon={Hammer}
+            icon={Gavel}
             title="No hay ofertas"
             description="Aún no has recibido ofertas en tus proyectos"
           />
