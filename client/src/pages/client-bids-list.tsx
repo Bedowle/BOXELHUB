@@ -141,24 +141,16 @@ export default function ClientBidsList() {
                     {completedProjectsWithBids.map((project) => (
                       <Card 
                         key={project.id}
-                        className="border-2 border-green-400/60 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/50 dark:to-green-950/30 hover-elevate cursor-pointer"
+                        className="border-2 border-amber-200/50 bg-gradient-to-br from-amber-50 to-amber-25 dark:from-amber-900/30 dark:to-amber-950/15 hover-elevate cursor-pointer opacity-60"
                         onClick={() => setLocation(`/project/${project.id}`)}
                       >
                         <CardContent className="pt-6 pb-6">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-lg">{project.name}</h3>
-                              <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                              <p className="text-xs text-muted-foreground mt-2">
-                                Completado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
-                              </p>
-                            </div>
-                            <div className="bg-green-100/60 dark:bg-green-950/40 px-3 py-2 rounded-lg">
-                              <p className="text-sm font-bold text-green-700 dark:text-green-300 flex items-center gap-1">
-                                <Gavel className="h-3 w-3" />
-                                {project.bidCount} ofertas
-                              </p>
-                            </div>
+                          <div>
+                            <h3 className="font-bold text-lg">{project.name}</h3>
+                            <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Completado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
