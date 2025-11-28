@@ -85,7 +85,7 @@ export default function ClientBidsList() {
             {projectsWithBids.map((project) => (
               <Card 
                 key={project.id}
-                className="border-2 border-primary/40 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent hover-elevate cursor-pointer"
+                className="border-2 border-amber-300/50 bg-gradient-to-br from-amber-50/30 to-transparent dark:from-amber-950/20 dark:to-transparent hover-elevate cursor-pointer"
                 onClick={() => setLocation(`/project/${project.id}`)}
               >
                 <CardContent className="pt-6 pb-6">
@@ -97,8 +97,8 @@ export default function ClientBidsList() {
                         Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
                       </p>
                     </div>
-                    <div className="bg-primary/10 dark:bg-primary/20 px-3 py-2 rounded-lg">
-                      <p className="text-sm font-bold text-primary flex items-center gap-1">
+                    <div className="bg-amber-100/60 dark:bg-amber-950/40 px-3 py-2 rounded-lg">
+                      <p className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
                         <Gavel className="h-3 w-3" />
                         {project.bidCount} ofertas
                       </p>
