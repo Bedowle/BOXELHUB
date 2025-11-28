@@ -19,7 +19,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, showBid
   const handleClick = useCallback(() => onClick?.(), [onClick]);
   return (
     <Card 
-      className="border-2 border-amber-300/50 bg-gradient-to-br from-amber-100 to-amber-50/50 dark:from-amber-900/40 dark:to-amber-950/20 hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
+      className="border-2 border-blue-300/50 bg-gradient-to-br from-blue-100 to-blue-50/50 dark:from-blue-900/40 dark:to-blue-950/20 hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
       onClick={handleClick}
       data-testid={`card-project-${project.id}`}
     >
