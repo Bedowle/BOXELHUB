@@ -1454,6 +1454,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.confirmBidDelivery(id);
       await storage.updateProjectStatus(bid.projectId, 'completed');
 
+      // Reject all other pending bids for this project
+      const allBids = await storage.getBidsByProject(bid.projectId);
+      for (const otherBid of allBids) {
+        if (otherBid.id !== id && otherBid.status === 'pending') {
+          await storage.updateBidStatus(otherBid.id, 'rejected');
+          
+          // Notify other makers via WebSocket
+          const makerWs = wsClients.get(otherBid.makerId);
+          if (makerWs && makerWs.readyState === WebSocket.OPEN) {
+            makerWs.send(JSON.stringify({
+              type: 'bid_rejected',
+              projectId: bid.projectId,
+              bidId: otherBid.id,
+            }));
+          }
+        }
+      }
+
       // Notify maker via WebSocket
       const makerWs = wsClients.get(bid.makerId);
       if (makerWs && makerWs.readyState === WebSocket.OPEN) {
