@@ -188,20 +188,20 @@ export default function MakerHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
           <Card 
-            className="border-2 border-primary/20 hover-elevate cursor-pointer"
+            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/8 to-transparent dark:from-primary/12 dark:to-transparent"
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
-                  <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Ofertas Activas</span>
+                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
                     <Gavel className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold">{stats?.activeBids || 0}</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">{stats?.activeBids || 0}</p>
                   <p className="text-xs text-muted-foreground">en progreso</p>
                 </div>
               </div>
@@ -210,20 +210,20 @@ export default function MakerHome() {
 
           {/* Won Projects */}
           <Card 
-            className="border-2 border-secondary/20 hover-elevate cursor-pointer"
+            className="border-2 border-secondary/40 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/8 to-transparent dark:from-secondary/12 dark:to-transparent"
             onClick={() => setLocation("/maker/won-projects")}
             data-testid="card-stats-won-projects"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
-                  <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Proyectos Ganados</span>
+                  <div className="bg-secondary/20 dark:bg-secondary/30 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold">{stats?.wonProjects || 0}</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">{stats?.wonProjects || 0}</p>
                   <p className="text-xs text-muted-foreground">completados</p>
                 </div>
               </div>
@@ -232,20 +232,20 @@ export default function MakerHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/20 hover-elevate cursor-pointer"
+            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/8 to-transparent dark:from-accent/12 dark:to-transparent"
             onClick={() => setLocation("/maker/completed-projects")}
             data-testid="card-stats-completed-projects"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
-                  <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Proyectos Completados</span>
+                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold">{stats?.completedProjects || 0}</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-accent via-accent to-secondary bg-clip-text text-transparent">{stats?.completedProjects || 0}</p>
                   <p className="text-xs text-muted-foreground">entregados</p>
                 </div>
               </div>
