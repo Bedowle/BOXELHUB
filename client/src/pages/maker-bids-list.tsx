@@ -44,7 +44,7 @@ export default function MakerBidsList() {
     );
   }
 
-  const activeBids = myBids?.filter(b => b.status === "pending") || [];
+  const activeBids = myBids?.filter(b => b.status === "pending" && !b.project?.deletedAt) || [];
   const acceptedBids = myBids?.filter(b => b.status === "accepted") || [];
   const rejectedBids = myBids?.filter(b => b.status === "rejected") || [];
   const inactiveBids = [...(acceptedBids || []), ...(rejectedBids || [])];
