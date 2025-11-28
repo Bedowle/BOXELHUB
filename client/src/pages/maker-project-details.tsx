@@ -111,26 +111,18 @@ export default function MakerProjectDetails() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          <div className="flex items-center justify-between">
+      <header className="border-b px-4 py-4 sticky top-0 z-50 bg-gradient-to-r from-secondary/10 via-transparent to-primary/10 dark:from-secondary/20 dark:via-slate-900/50 dark:to-primary/20 backdrop-blur-md border-secondary/20">
+        <div className="container mx-auto max-w-7xl">
+          <div className="flex items-center justify-start">
             <Button 
               variant="ghost" 
+              size="icon"
               onClick={() => window.history.back()}
               className="hover-elevate"
               data-testid="button-back"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
+              <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                {user.firstName || user.email}
-              </span>
-              <Button variant="outline" asChild size="sm">
-                <a href="/api/logout">Cerrar Sesión</a>
-              </Button>
-            </div>
           </div>
         </div>
       </header>
