@@ -18,6 +18,7 @@ interface ChatListItemProps {
   projectImage?: string;
   designImage?: string;
   isProjectDeleted?: boolean;
+  isDesignDeleted?: boolean;
 }
 
 export function ChatListItem({
@@ -34,6 +35,7 @@ export function ChatListItem({
   projectImage,
   designImage,
   isProjectDeleted = false,
+  isDesignDeleted = false,
 }: ChatListItemProps) {
   const [, setLocation] = useLocation();
   const userInitial = userName?.[0].toUpperCase() || "U";
@@ -41,6 +43,7 @@ export function ChatListItem({
   const contextName = projectName || designName;
   const contextImage = projectImage || designImage;
   const contextInitial = contextName?.[0]?.toUpperCase() || "C";
+  const isDeleted = isProjectDeleted || isDesignDeleted;
 
   const handleViewProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -53,7 +56,7 @@ export function ChatListItem({
     <div
       onClick={onClick}
       className={`flex items-center gap-3 p-4 border-b cursor-pointer transition-colors ${
-        isProjectDeleted
+        isDeleted
           ? "opacity-50 bg-muted/30 hover:bg-muted/40"
           : isActive
           ? "bg-primary/10 border-primary/30"
@@ -63,7 +66,7 @@ export function ChatListItem({
     >
       {/* Product/Project Avatar */}
       {contextName && (
-        <Avatar className="flex-shrink-0 h-8 w-8">
+        <Avatar className={`flex-shrink-0 h-8 w-8 ${isDeleted ? "opacity-60" : ""}`}>
           <AvatarImage src={contextImage} />
           <AvatarFallback className="text-xs bg-muted">
             {contextInitial}
@@ -100,13 +103,13 @@ export function ChatListItem({
           )}
         </div>
         <p className={`text-sm line-clamp-1 ${
-          isProjectDeleted 
+          isDeleted 
             ? "text-muted-foreground italic"
             : isUnread
             ? "text-foreground font-medium"
             : "text-muted-foreground"
         }`}>
-          {isProjectDeleted ? `${lastMessage || "Sin mensajes aún"} (Proyecto eliminado)` : lastMessage || "Sin mensajes aún"}
+          {isDeleted ? `${lastMessage || "Sin mensajes aún"} ${isProjectDeleted ? "(Proyecto" : "(Diseño"} eliminado)` : lastMessage || "Sin mensajes aún"}
         </p>
       </div>
 
