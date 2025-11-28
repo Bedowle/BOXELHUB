@@ -61,8 +61,9 @@ export default function AppHeader() {
           </button>
 
           <div className="flex items-center gap-2">
+            {/* MARKETPLACE BUTTONS HIDDEN */}
             {/* Marketplace button for both clients and makers */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => setLocation("/marketplace")}
@@ -70,7 +71,7 @@ export default function AppHeader() {
             >
               <Sparkles className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Explorar Diseños</span>
-            </Button>
+            </Button> */}
             
             {isClient && (
               <Button
@@ -90,7 +91,8 @@ export default function AppHeader() {
               </Button>
             )}
             
-            {isMaker && (
+            {/* MARKETPLACE HIDDEN - Maker store button disabled */}
+            {/* {isMaker && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -100,9 +102,10 @@ export default function AppHeader() {
                 <Package className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Mi Tienda</span>
               </Button>
-            )}
+            )} */}
 
-            {isMaker && makerBalance && (
+            {/* MARKETPLACE HIDDEN - Maker balance button disabled */}
+            {/* {isMaker && makerBalance && (
               <button
                 onClick={() => setLocation("/maker/balance")}
                 className="hidden sm:flex items-center gap-1 px-3 py-1 bg-muted rounded-md hover-elevate cursor-pointer"
@@ -112,7 +115,7 @@ export default function AppHeader() {
                   {formatBalance(makerBalance.availableBalance)}
                 </span>
               </button>
-            )}
+            )} */}
 
             <Button
               variant="ghost"

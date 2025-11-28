@@ -31,12 +31,13 @@ import ChatsSplitPage from "@/pages/chats-split";
 import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
 import WhatIsSTLPage from "@/pages/what-is-stl";
-import MakerMarketplaceUpload from "@/pages/maker-marketplace-upload";
-import MarketplaceDesignChatsPage from "@/pages/marketplace-design-chats";
-import ClientMarketplace from "@/pages/client-marketplace";
+// MARKETPLACE FEATURES - HIDDEN (uncomment when needed)
+// import MakerMarketplaceUpload from "@/pages/maker-marketplace-upload";
+// import MarketplaceDesignChatsPage from "@/pages/marketplace-design-chats";
+// import ClientMarketplace from "@/pages/client-marketplace";
+// import MarketplaceDesignDetailPage from "@/pages/marketplace-design-detail";
+// import MakerBalance from "@/pages/maker-balance";
 import UserProfilePage from "@/pages/user-profile";
-import MarketplaceDesignDetailPage from "@/pages/marketplace-design-detail";
-import MakerBalance from "@/pages/maker-balance";
 
 function Router() {
   const { user, isAuthenticated, isLoading, isClient, isMaker } = useAuth();
@@ -83,8 +84,9 @@ function Router() {
           <Route path="/chats-old" component={ChatsPage} />
           <Route path="/user/:userId" component={UserProfilePage} />
           <Route path="/user/:userId/reviews" component={MakerReviews} />
-          <Route path="/marketplace" component={ClientMarketplace} />
-          <Route path="/marketplace-design/:designId" component={MarketplaceDesignDetailPage} />
+          {/* MARKETPLACE HIDDEN */}
+          {/* <Route path="/marketplace" component={ClientMarketplace} /> */}
+          {/* <Route path="/marketplace-design/:designId" component={MarketplaceDesignDetailPage} /> */}
 
           {/* Client Routes */}
           {isClient && (
@@ -106,13 +108,15 @@ function Router() {
               <Route path="/maker" component={MakerHome} />
               <Route path="/maker/profile" component={MakerProfile} />
               <Route path="/maker/reviews" component={MakerReviews} />
-              <Route path="/maker/balance" component={MakerBalance} />
+              {/* MARKETPLACE HIDDEN - Balance route disabled */}
+              {/* <Route path="/maker/balance" component={MakerBalance} /> */}
               <Route path="/maker/explore" component={ExploreProjects} />
               <Route path="/maker/bids" component={MakerBidsList} />
               <Route path="/maker/won-projects" component={MakerWonProjects} />
               <Route path="/maker/completed-projects" component={MakerCompletedProjects} />
-              <Route path="/maker/marketplace" component={MakerMarketplaceUpload} />
-              <Route path="/marketplace-design-chats/:designId" component={MarketplaceDesignChatsPage} />
+              {/* MARKETPLACE HIDDEN */}
+              {/* <Route path="/maker/marketplace" component={MakerMarketplaceUpload} /> */}
+              {/* <Route path="/marketplace-design-chats/:designId" component={MarketplaceDesignChatsPage} /> */}
               <Route path="/maker/project/:id" component={MakerProjectDetails} />
               <Route path="/project/:id" component={ProjectDetails} />
               <Route path="/chat/:userId" component={ChatPage} />
