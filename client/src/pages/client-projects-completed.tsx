@@ -114,11 +114,32 @@ export default function ClientProjectsCompleted() {
 
   const completedProjects = projects?.filter(p => p.status === "completed") || [];
 
-  const handleRateClick = (projectId: string, projectName: string, makerId: string) => {
-    setSelectedProjectId(projectId);
-    setSelectedProjectName(projectName);
-    setSelectedMakerId(makerId);
-    setRatingDialogOpen(true);
+  const handleRateClick = async (projectId: string, projectName: string) => {
+    try {
+      // Get the project to find the accepted bid and maker
+      const projectsData = projects?.find(p => p.id === projectId);
+      if (!projectsData) {
+        toast({
+          title: "Error",
+          description: "Proyecto no encontrado",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // For now, use a placeholder - the backend will validate the maker
+      // We'll get the actual makerId when the user submits
+      setSelectedProjectId(projectId);
+      setSelectedProjectName(projectName);
+      setSelectedMakerId(projectId); // Use projectId as temporary placeholder
+      setRatingDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo cargar el proyecto",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewRatingClick = async (projectId: string) => {
@@ -220,13 +241,7 @@ export default function ClientProjectsCompleted() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => {
-                              // Find the maker who won the bid for this project
-                              const bids = project.bidCount;
-                              if (bids > 0) {
-                                handleRateClick(project.id, project.name, "");
-                              }
-                            }}
+                            onClick={() => handleRateClick(project.id, project.name)}
                             className="flex items-center gap-2"
                             data-testid={`button-rate-${project.id}`}
                           >

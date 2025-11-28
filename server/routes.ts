@@ -2095,6 +2095,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get a specific review for a project (from maker to client)
+  app.get('/api/projects/:projectId/review-from-maker', isAuthenticated, async (req: any, res) => {
+    try {
+      const clientId = getAuthenticatedUserId(req);
+      if (!clientId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const { projectId } = req.params;
+      
+      // Get the project to find the client (project creator - should be current user)
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Get the bids to find the accepted one
+      const bids = await storage.getBidsByProject(projectId);
+      const acceptedBid = bids.find(b => b.status === 'accepted');
+      if (!acceptedBid) {
+        return res.status(404).json({ message: "No accepted bid found" });
+      }
+      
+      // Get the review that the maker made to this client
+      const review = await storage.getReviewForProject(projectId, acceptedBid.makerId, clientId);
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      // Enrich with fromUser data
+      const fromUser = await storage.getUser(review.fromUserId);
+      
+      res.json({
+        ...review,
+        fromUser,
+      });
+    } catch (error) {
+      console.error("Error fetching review from maker:", error);
+      res.status(500).json({ message: "Failed to fetch review" });
+    }
+  });
+
+  // Check if client has rated a maker for a project
+  app.get('/api/projects/:projectId/check-rating-by-client', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Check if project is completed
+      if (project.status !== 'completed') {
+        return res.json({ hasRated: false, deliveryConfirmed: false });
+      }
+
+      // Get accepted bid to find maker
+      const bids = await storage.getBidsByProject(projectId);
+      const acceptedBid = bids.find(b => b.status === 'accepted');
+      if (!acceptedBid) {
+        return res.json({ hasRated: false, deliveryConfirmed: false });
+      }
+
+      // Check if client has rated this maker
+      const review = await storage.getReviewForProject(projectId, userId, acceptedBid.makerId);
+      res.json({ hasRated: !!review, deliveryConfirmed: true });
+    } catch (error) {
+      console.error("Error checking rating:", error);
+      res.status(500).json({ message: "Failed to check rating" });
+    }
+  });
+
+  // Client rates maker for a project
+  app.put('/api/projects/:projectId/rate-maker-as-client', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const { makerId, rating, comment } = req.body;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (user?.userType !== 'client') {
+        return res.status(403).json({ message: "Only clients can rate makers" });
+      }
+
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      if (project.userId !== userId) {
+        return res.status(403).json({ message: "You can only rate makers for your own projects" });
+      }
+
+      const bids = await storage.getBidsByProject(projectId);
+      const acceptedBid = bids.find(b => b.status === 'accepted' && b.makerId === makerId);
+      if (!acceptedBid) {
+        return res.status(400).json({ message: "Invalid bid or maker" });
+      }
+
+      const existingReview = await storage.getReviewForProject(projectId, userId, makerId);
+      if (existingReview) {
+        return res.status(400).json({ message: "You have already rated this maker" });
+      }
+
+      await storage.createReview({
+        projectId: projectId,
+        fromUserId: userId,
+        toUserId: makerId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
+
+      res.json({ message: "Maker rated successfully" });
+    } catch (error) {
+      console.error("Error rating maker:", error);
+      res.status(500).json({ message: "Failed to rate maker" });
+    }
+  });
+
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
