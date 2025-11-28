@@ -13,7 +13,7 @@ export async function setupVite(app: Express, server: Server) {
   const viteLogger = createLogger();
   const serverOptions = {
     middlewareMode: true,
-    hmr: { server },
+    hmr: process.env.REPL_ID ? false : { server },
     allowedHosts: true as const,
   };
 
