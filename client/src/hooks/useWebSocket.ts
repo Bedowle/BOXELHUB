@@ -17,12 +17,10 @@ export function useWebSocket() {
     }
 
     const connect = () => {
-      // Use relative URL for WebSocket - works in all environments
+      // Build WebSocket URL safely
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      // Parse current URL to get host properly
-      const urlParts = window.location.href.split('/');
-      const host = urlParts[2]; // Gets hostname:port
-      const wsUrl = `${protocol}//${host}/ws`;
+      const { hostname, port } = window.location;
+      const wsUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/ws`;
       
       console.log("[WebSocket] Connecting to:", wsUrl);
       const ws = new WebSocket(wsUrl);

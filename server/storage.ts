@@ -333,7 +333,8 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db
       .select({ count: count() })
       .from(bids)
-      .where(and(eq(bids.makerId, makerId), eq(bids.status, "pending")));
+      .innerJoin(projects, eq(bids.projectId, projects.id))
+      .where(and(eq(bids.makerId, makerId), eq(bids.status, "pending"), isNull(projects.deletedAt)));
     return result.count;
   }
 
