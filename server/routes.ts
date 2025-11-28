@@ -996,11 +996,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Completed projects cannot be deleted - they serve as proof of completion" });
       }
 
-      // Delete all bids associated with project first
+      // Reject all pending bids associated with the project
       const projectBids = await storage.getBidsByProject(id);
       for (const bid of projectBids) {
-        // Messages will cascade delete via DB constraints
-        // Just delete bids directly
+        if (bid.status === 'pending') {
+          await storage.updateBidStatus(bid.id, 'rejected');
+          
+          // Notify maker via WebSocket about bid rejection
+          const makerWs = wsClients.get(bid.makerId);
+          if (makerWs && makerWs.readyState === WebSocket.OPEN) {
+            makerWs.send(JSON.stringify({
+              type: 'bid_rejected',
+              projectId: bid.projectId,
+              bidId: bid.id,
+            }));
+          }
+        }
       }
 
       await storage.deleteProject(id);
