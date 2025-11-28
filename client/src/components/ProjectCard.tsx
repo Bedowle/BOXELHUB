@@ -26,6 +26,8 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, showBid
     e.stopPropagation();
     try {
       setIsDownloading(true);
+      console.log("[Card] Starting download for project:", project.id);
+      
       const response = await fetch(`/api/projects/${project.id}/download-stl`, {
         credentials: "include",
       });
@@ -33,31 +35,39 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, showBid
         throw new Error("Failed to download STL");
       }
       const data = await response.json();
+      console.log("[Card] File info:", data);
       
-      // Trigger actual download
+      // Get actual STL content
       const stlResponse = await fetch(`/api/projects/${project.id}/stl-content`, {
         credentials: "include",
       });
-      if (stlResponse.ok) {
-        const blob = await stlResponse.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = data.fileName || `proyecto_${project.id}.stl`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        toast({
-          title: "Descargado",
-          description: `STL descargado: ${data.fileName}`,
-        });
+      if (!stlResponse.ok) {
+        throw new Error("Failed to get STL content");
       }
+      
+      const blob = await stlResponse.blob();
+      console.log("[Card] Blob size:", blob.size);
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = data.fileName || `proyecto_${project.id}.stl`;
+      console.log("[Card] Downloading as:", a.download);
+      
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Descargado",
+        description: `STL descargado: ${data.fileName}`,
+      });
     } catch (error) {
+      console.error("[Card] Download error:", error);
       toast({
         title: "Error",
-        description: "No se pudo descargar el STL",
+        description: error instanceof Error ? error.message : "No se pudo descargar el STL",
         variant: "destructive",
       });
     } finally {

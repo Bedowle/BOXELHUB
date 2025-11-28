@@ -88,22 +88,49 @@ export default function MakerProjectDetails() {
 
   const handleDownloadSTL = async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/download-stl`, {
+      console.log("[Download] Starting STL download for project:", projectId);
+      // First get filename
+      const checkResponse = await fetch(`/api/projects/${projectId}/download-stl`, {
         credentials: "include",
       });
-      if (!response.ok) {
-        throw new Error("Failed to download STL");
+      if (!checkResponse.ok) {
+        throw new Error("Failed to get STL info");
       }
-      const data = await response.json();
+      const fileInfo = await checkResponse.json();
+      console.log("[Download] File info:", fileInfo);
+      
+      // Now get the actual STL content
+      const contentResponse = await fetch(`/api/projects/${projectId}/stl-content`, {
+        credentials: "include",
+      });
+      if (!contentResponse.ok) {
+        throw new Error("Failed to download STL content");
+      }
+      
+      const blob = await contentResponse.blob();
+      console.log("[Download] Blob size:", blob.size);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileInfo.fileName || `proyecto_${projectId}.stl`;
+      console.log("[Download] Downloading as:", link.download);
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       
       toast({
-        title: "STL Listo",
-        description: `Archivo: ${data.fileName}`,
+        title: "Descargado",
+        description: `STL descargado: ${fileInfo.fileName}`,
       });
     } catch (error) {
+      console.error("[Download] Error:", error);
       toast({
         title: "Error",
-        description: "No se pudo descargar el STL",
+        description: error instanceof Error ? error.message : "No se pudo descargar el STL",
         variant: "destructive",
       });
     }
