@@ -311,8 +311,8 @@ export default function MakerProfile() {
               </Card>
             )}
 
-            {/* Balance Card */}
-            {balance && (
+            {/* Balance Card - Hidden for now */}
+            {false && balance && (
               <Card className="md:col-span-2">
                 <CardContent className="pt-6 pb-6">
                   <div className="space-y-4">
@@ -340,107 +340,109 @@ export default function MakerProfile() {
               </Card>
             )}
 
-            {/* Payout Configuration Card */}
-            <Card className="md:col-span-2">
-              <CardContent className="pt-6 pb-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                    <h2 className="text-lg font-semibold">Configurar Pagos</h2>
-                  </div>
-
+            {/* Payout Configuration Card - Hidden for now */}
+            {false && (
+              <Card className="md:col-span-2">
+                <CardContent className="pt-6 pb-6">
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Método de Pago</label>
-                      <select
-                        value={payoutMethod}
-                        onChange={(e) => {
-                          setPayoutMethod(e.target.value);
-                          setStripeEmail("");
-                          setPaypalEmail("");
-                          setBankIban("");
-                          setBankName("");
-                        }}
-                        className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-                        data-testid="select-payout-method"
-                      >
-                        <option value="">Selecciona un método...</option>
-                        <option value="stripe">Stripe (7 días de retención, mín. €10)</option>
-                        <option value="paypal">PayPal (7 días de retención, mín. €10)</option>
-                        <option value="bank">Transferencia Bancaria (15 días, mín. €20)</option>
-                      </select>
+                    <div className="flex items-center gap-2 mb-4">
+                      <DollarSign className="h-5 w-5 text-primary" />
+                      <h2 className="text-lg font-semibold">Configurar Pagos</h2>
                     </div>
 
-                    {payoutMethod === "stripe" && (
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Email de Stripe</label>
-                        <input
-                          type="email"
-                          value={stripeEmail}
-                          onChange={(e) => setStripeEmail(e.target.value)}
-                          placeholder="tu-email@example.com"
+                        <label className="block text-sm font-medium mb-2">Método de Pago</label>
+                        <select
+                          value={payoutMethod}
+                          onChange={(e) => {
+                            setPayoutMethod(e.target.value);
+                            setStripeEmail("");
+                            setPaypalEmail("");
+                            setBankIban("");
+                            setBankName("");
+                          }}
                           className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-                          data-testid="input-stripe-email"
-                        />
+                          data-testid="select-payout-method"
+                        >
+                          <option value="">Selecciona un método...</option>
+                          <option value="stripe">Stripe (7 días de retención, mín. €10)</option>
+                          <option value="paypal">PayPal (7 días de retención, mín. €10)</option>
+                          <option value="bank">Transferencia Bancaria (15 días, mín. €20)</option>
+                        </select>
                       </div>
-                    )}
 
-                    {payoutMethod === "paypal" && (
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Email de PayPal</label>
-                        <input
-                          type="email"
-                          value={paypalEmail}
-                          onChange={(e) => setPaypalEmail(e.target.value)}
-                          placeholder="tu-email@example.com"
-                          className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-                          data-testid="input-paypal-email"
-                        />
-                      </div>
-                    )}
-
-                    {payoutMethod === "bank" && (
-                      <>
+                      {payoutMethod === "stripe" && (
                         <div>
-                          <label className="block text-sm font-medium mb-2">IBAN</label>
+                          <label className="block text-sm font-medium mb-2">Email de Stripe</label>
                           <input
-                            type="text"
-                            value={bankIban}
-                            onChange={(e) => setBankIban(e.target.value)}
-                            placeholder="ES91 2100 0418 4502 0005 1332"
+                            type="email"
+                            value={stripeEmail}
+                            onChange={(e) => setStripeEmail(e.target.value)}
+                            placeholder="tu-email@example.com"
                             className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-                            data-testid="input-bank-iban"
+                            data-testid="input-stripe-email"
                           />
                         </div>
+                      )}
+
+                      {payoutMethod === "paypal" && (
                         <div>
-                          <label className="block text-sm font-medium mb-2">Titular de la Cuenta</label>
+                          <label className="block text-sm font-medium mb-2">Email de PayPal</label>
                           <input
-                            type="text"
-                            value={bankName}
-                            onChange={(e) => setBankName(e.target.value)}
-                            placeholder="Tu nombre"
+                            type="email"
+                            value={paypalEmail}
+                            onChange={(e) => setPaypalEmail(e.target.value)}
+                            placeholder="tu-email@example.com"
                             className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-                            data-testid="input-bank-name"
+                            data-testid="input-paypal-email"
                           />
                         </div>
-                      </>
-                    )}
+                      )}
 
-                    <Button
-                      onClick={handleUpdatePayoutMethod}
-                      disabled={updatePayoutMethodMutation.isPending}
-                      className="w-full"
-                      data-testid="button-save-payout-method"
-                    >
-                      {updatePayoutMethodMutation.isPending ? "Guardando..." : "Guardar Método"}
-                    </Button>
+                      {payoutMethod === "bank" && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">IBAN</label>
+                            <input
+                              type="text"
+                              value={bankIban}
+                              onChange={(e) => setBankIban(e.target.value)}
+                              placeholder="ES91 2100 0418 4502 0005 1332"
+                              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
+                              data-testid="input-bank-iban"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Titular de la Cuenta</label>
+                            <input
+                              type="text"
+                              value={bankName}
+                              onChange={(e) => setBankName(e.target.value)}
+                              placeholder="Tu nombre"
+                              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
+                              data-testid="input-bank-name"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      <Button
+                        onClick={handleUpdatePayoutMethod}
+                        disabled={updatePayoutMethodMutation.isPending}
+                        className="w-full"
+                        data-testid="button-save-payout-method"
+                      >
+                        {updatePayoutMethodMutation.isPending ? "Guardando..." : "Guardar Método"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Payout History */}
-            {payouts && payouts.length > 0 && (
+            {/* Payout History - Hidden for now */}
+            {false && payouts && payouts.length > 0 && (
               <Card className="md:col-span-2">
                 <CardContent className="pt-6 pb-6">
                   <div className="space-y-4">
