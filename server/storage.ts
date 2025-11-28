@@ -643,35 +643,21 @@ export class DatabaseStorage implements IStorage {
     pendingBids: number;
     acceptedOffers: number;
   }> {
-    // Get user projects first
-    const userProjects = await db
-      .select({ id: projects.id })
+    // Single combined query for all stats - much faster
+    const [result] = await db
+      .select({
+        activeProjects: count(sql`CASE WHEN ${projects.status} = 'active' THEN 1 END`),
+        pendingBids: count(sql`CASE WHEN ${bids.status} = 'pending' THEN 1 END`),
+        acceptedOffers: count(sql`CASE WHEN ${bids.status} = 'accepted' THEN 1 END`),
+      })
       .from(projects)
-      .where(and(eq(projects.userId, userId), eq(projects.status, 'active')));
-    
-    const projectIds = userProjects.map(p => p.id);
-    
-    let pendingBids = 0;
-    let acceptedOffers = 0;
-    
-    if (projectIds.length > 0) {
-      const [pendingResult] = await db
-        .select({ count: count() })
-        .from(bids)
-        .where(and(inArray(bids.projectId, projectIds), eq(bids.status, 'pending')));
-      pendingBids = pendingResult?.count || 0;
-
-      const [acceptedResult] = await db
-        .select({ count: count() })
-        .from(bids)
-        .where(and(inArray(bids.projectId, projectIds), eq(bids.status, 'accepted')));
-      acceptedOffers = acceptedResult?.count || 0;
-    }
+      .leftJoin(bids, eq(projects.id, bids.projectId))
+      .where(eq(projects.userId, userId));
 
     return {
-      activeProjects: projectIds.length,
-      pendingBids,
-      acceptedOffers,
+      activeProjects: result?.activeProjects || 0,
+      pendingBids: result?.pendingBids || 0,
+      acceptedOffers: result?.acceptedOffers || 0,
     };
   }
 
