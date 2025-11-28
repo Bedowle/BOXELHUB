@@ -71,7 +71,7 @@ export default function ClientHome() {
   const totalBids = projects?.reduce((sum, p) => sum + p.bidCount, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-100/40 dark:via-blue-950/40 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-blue-100/60 dark:via-blue-950/60 to-background">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
         <div className="mb-12 bg-gradient-to-r from-blue-600/15 via-primary/15 to-secondary/15 dark:from-blue-500/25 dark:via-primary/25 dark:to-secondary/25 rounded-2xl p-8 border-2 border-primary/50 dark:border-primary/60 shadow-lg">

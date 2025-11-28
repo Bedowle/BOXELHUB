@@ -156,7 +156,7 @@ export default function MakerCompletedProjects() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/40 dark:via-purple-950/40 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/20 dark:via-purple-950/20 to-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
           <Button
