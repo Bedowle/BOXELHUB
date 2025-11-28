@@ -198,7 +198,7 @@ export default function ClientProjectsCompleted() {
               return (
                 <Card 
                   key={project.id}
-                  className="border-green-200 dark:border-green-900"
+                  className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/20"
                   data-testid={`card-completed-project-${project.id}`}
                 >
                   <CardContent className="pt-6 pb-6">
