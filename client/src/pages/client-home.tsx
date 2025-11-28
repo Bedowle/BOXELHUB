@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Upload, Package, Zap, TrendingUp, Plus, FileUp, ArrowLeft, CheckCircle } from "lucide-react";
+import { Upload, Package, Gavel, TrendingUp, Plus, FileUp, ArrowLeft, CheckCircle } from "lucide-react";
 import { UploadProjectDialog } from "@/components/UploadProjectDialog";
 import { useLocation } from "wouter";
 import type { Project } from "@shared/schema";
@@ -120,7 +120,7 @@ export default function ClientHome() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Ofertas Pendientes</span>
                   <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
-                    <Zap className="h-5 w-5 text-secondary" />
+                    <Gavel className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">

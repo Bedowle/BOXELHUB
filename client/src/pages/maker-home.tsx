@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { Printer, Package, CheckCircle, Zap, Search, TrendingUp, MessageCircle, ArrowLeft, Sparkles } from "lucide-react";
+import { Printer, Package, CheckCircle, Gavel, Search, TrendingUp, MessageCircle, ArrowLeft, Sparkles } from "lucide-react";
 import { MakerProfileDialog } from "@/components/MakerProfileDialog";
 import { ChatDialog } from "@/components/ChatDialog";
 import { MakerRatingDialog } from "@/components/MakerRatingDialog";
@@ -197,7 +197,7 @@ export default function MakerHome() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
                   <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
-                    <Zap className="h-5 w-5 text-primary" />
+                    <Gavel className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
