@@ -224,7 +224,7 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
 
-  async getProjectIncludeDeleted(id: string): Promise<Project | undefined> {
+  async getProjectIncludeDeleted(id: string): Promise<(Project & { deletedAt: Date | null }) | undefined> {
     const [project] = await db.select().from(projects).where(eq(projects.id, id));
     return project;
   }

@@ -233,8 +233,9 @@ export default function ProjectDetails() {
   }
 
   const isOwner = isClient && project.userId === user.id;
+  const isDeleted = project.deletedAt;
   const canBid = isMaker && project.status === "active" && (!myBid || myBid.status === "rejected");
-  const canDelete = isOwner && project.status !== "completed";
+  const canDelete = isOwner && project.status !== "completed" && !isDeleted;
 
   return (
     <div className="min-h-screen bg-background">
@@ -265,6 +266,13 @@ export default function ProjectDetails() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {isDeleted && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-sm text-destructive font-medium">
+              Este proyecto ha sido eliminado. Estás viendo una versión de solo lectura.
+            </p>
+          </div>
+        )}
         {/* Project Layout - Description Left, 3D Viewer Right */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 items-start lg:items-stretch">
           {/* Left - Project Details */}

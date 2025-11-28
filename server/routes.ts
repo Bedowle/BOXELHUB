@@ -922,7 +922,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const project = await storage.getProject(id);
+      const userId = getAuthenticatedUserId(req);
+      
+      // First try to get active project
+      let project = await storage.getProject(id);
+      
+      // If not found, try to get deleted project (only owner can view deleted projects)
+      if (!project) {
+        const deletedProject = await storage.getProjectIncludeDeleted(id);
+        if (deletedProject && deletedProject.deletedAt && deletedProject.userId === userId) {
+          // Owner can view their deleted project (read-only from chat)
+          project = deletedProject;
+        }
+      }
       
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
