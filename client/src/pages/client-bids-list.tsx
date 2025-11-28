@@ -145,12 +145,20 @@ export default function ClientBidsList() {
                         onClick={() => setLocation(`/project/${project.id}`)}
                       >
                         <CardContent className="pt-6 pb-6">
-                          <div>
-                            <h3 className="font-bold text-lg">{project.name}</h3>
-                            <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Completado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
-                            </p>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-lg">{project.name}</h3>
+                              <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Completado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                              </p>
+                            </div>
+                            <div className="bg-amber-100/60 dark:bg-amber-950/40 px-3 py-2 rounded-lg">
+                              <p className="text-sm font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                                <Gavel className="h-3 w-3" />
+                                {project.bidCount} ofertas
+                              </p>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
