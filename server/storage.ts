@@ -810,6 +810,11 @@ export class DatabaseStorage implements IStorage {
     return design;
   }
 
+  async getMarketplaceDesignIncludeDeleted(id: string): Promise<(MarketplaceDesign & { deletedAt: Date | null }) | undefined> {
+    const [design] = await db.select().from(marketplaceDesigns).where(eq(marketplaceDesigns.id, id));
+    return design;
+  }
+
   async getMarketplaceDesigns(filters?: { makerId?: string; status?: string }): Promise<MarketplaceDesign[]> {
     let query = db.select().from(marketplaceDesigns);
 
