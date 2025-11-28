@@ -287,7 +287,7 @@ export default function MakerCompletedProjects() {
           onOpenChange={setViewRatingDialogOpen}
           rating={parseFloat(String(selectedReview.rating))}
           comment={selectedReview.comment || undefined}
-          fromUserName="Cliente"
+          fromUser={(selectedReview as any).fromUser || undefined}
         />
       )}
     </div>

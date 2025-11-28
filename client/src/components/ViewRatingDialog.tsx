@@ -1,4 +1,6 @@
 import { Star } from "lucide-react";
+import { useLocation } from "wouter";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -6,13 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { User } from "@shared/schema";
 
 interface ViewRatingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   rating?: number;
   comment?: string;
-  fromUserName?: string;
+  fromUser?: User | null;
   isLoading?: boolean;
 }
 
@@ -21,20 +24,49 @@ export function ViewRatingDialog({
   onOpenChange,
   rating = 0,
   comment,
-  fromUserName = "Cliente",
+  fromUser,
   isLoading = false,
 }: ViewRatingDialogProps) {
+  const [, setLocation] = useLocation();
+  
+  const handleUserClick = () => {
+    if (fromUser?.id) {
+      setLocation(`/user/${fromUser.id}`);
+      onOpenChange(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="dialog-view-rating">
         <DialogHeader>
           <DialogTitle>Calificación Recibida</DialogTitle>
           <DialogDescription>
-            Calificación de {fromUserName}
+            De {fromUser?.username || fromUser?.firstName || "Cliente"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
+          {fromUser && (
+            <button
+              onClick={handleUserClick}
+              className="flex items-center gap-3 hover-elevate p-2 rounded-lg transition-colors"
+              data-testid="button-view-user-profile"
+            >
+              <Avatar className="h-12 w-12 flex-shrink-0">
+                <AvatarImage src={fromUser.profileImageUrl || ""} alt={fromUser.username || "Usuario"} />
+                <AvatarFallback>
+                  {(fromUser.username || fromUser.firstName || "U").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-left">
+                <p className="font-semibold hover:text-primary">{fromUser.username || fromUser.firstName || "Usuario"}</p>
+                {fromUser.showFullName && fromUser.firstName && fromUser.lastName && (
+                  <p className="text-sm text-muted-foreground">{fromUser.firstName} {fromUser.lastName}</p>
+                )}
+              </div>
+            </button>
+          )}
           <div>
             <label className="block text-sm font-medium mb-3">
               Puntuación

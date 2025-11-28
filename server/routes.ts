@@ -2082,7 +2082,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Review not found" });
       }
       
-      res.json(review);
+      // Enrich with fromUser data
+      const fromUser = await storage.getUser(review.fromUserId);
+      
+      res.json({
+        ...review,
+        fromUser,
+      });
     } catch (error) {
       console.error("Error fetching review from client:", error);
       res.status(500).json({ message: "Failed to fetch review" });
