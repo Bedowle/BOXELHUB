@@ -450,10 +450,12 @@ export default function ProjectDetails() {
           ) : (
             <EmptyState
               icon={Package}
-              title={isOwner ? "No hay ofertas aún" : "Este proyecto no tiene ofertas"}
+              title={isOwner ? "No hay ofertas aún" : isMaker && myBid ? "Ya has hecho una oferta" : "Este proyecto no tiene ofertas"}
               description={isOwner 
                 ? "Los makers comenzarán a enviar ofertas pronto. Te notificaremos cuando lleguen."
-                : canBid 
+                : isMaker && myBid
+                  ? "Tu oferta está pendiente de revisión"
+                  : canBid 
                   ? "Sé el primero en enviar una oferta para este proyecto"
                   : "Este proyecto ya tiene ofertas de otros makers"}
               actionLabel={canBid ? "Enviar Oferta" : undefined}
