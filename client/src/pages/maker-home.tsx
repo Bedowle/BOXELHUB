@@ -168,7 +168,7 @@ export default function MakerHome() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-purple-50/50 dark:via-slate-900/50 to-background">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b" />
+      <header className="border-b px-4 py-4 sticky top-0 z-50 bg-gradient-to-r from-secondary/10 via-transparent to-primary/10 dark:from-secondary/20 dark:via-slate-900/50 dark:to-primary/20 backdrop-blur-md border-secondary/20" />
 
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
