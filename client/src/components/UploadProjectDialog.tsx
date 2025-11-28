@@ -32,7 +32,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload, CheckCircle } from "lucide-react";
+import { Upload, CheckCircle, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface UploadProjectDialogProps {
   open: boolean;
@@ -291,8 +292,16 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                   <p className="text-sm text-muted-foreground">Las medidas máximas del objeto más grande</p>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="text-xs font-semibold mb-2 block">
+                      <label className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                         X (Largo)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="z-50">
+                            <p>Dimensión a lo largo del eje X (izquierda-derecha)</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </label>
                       <Input
                         type="number"
@@ -312,8 +321,16 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                       )}
                     </div>
                     <div>
-                      <label className="text-xs font-semibold mb-2 block">
+                      <label className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                         Y (Ancho)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="z-50">
+                            <p>Dimensión a lo ancho del eje Y (adelante-atrás)</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </label>
                       <Input
                         type="number"
@@ -333,8 +350,16 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                       )}
                     </div>
                     <div>
-                      <label className="text-xs font-semibold mb-2 block">
+                      <label className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                         Z (Alto)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="z-50">
+                            <p>Dimensión altura del eje Z (arriba-abajo)</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </label>
                       <Input
                         type="number"
