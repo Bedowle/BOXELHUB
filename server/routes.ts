@@ -2061,6 +2061,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get a specific review for a project (from client to maker)
+  app.get('/api/projects/:projectId/review-from-client', isAuthenticated, async (req: any, res) => {
+    try {
+      const makerId = getAuthenticatedUserId(req);
+      if (!makerId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const { projectId } = req.params;
+      
+      // Get the project to find the client (project creator)
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Get the review that the client (project.userId) made to this maker
+      const review = await storage.getReviewForProject(projectId, project.userId, makerId);
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      res.json(review);
+    } catch (error) {
+      console.error("Error fetching review from client:", error);
+      res.status(500).json({ message: "Failed to fetch review" });
+    }
+  });
+
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
