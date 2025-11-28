@@ -35,6 +35,7 @@ export default function ProjectDetails() {
   const [selectedMaker, setSelectedMaker] = useState<User | null>(null);
   const [selectedBidForRating, setSelectedBidForRating] = useState<string | null>(null);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+  const [stlIndex, setStlIndex] = useState(0);
 
   const projectId = params?.id;
 
@@ -366,7 +367,14 @@ export default function ProjectDetails() {
             <div className="lg:col-span-1">
               <Card className="h-full flex flex-col">
                 <CardContent className="py-6 px-4 flex items-center justify-center flex-1">
-                  <STLViewer projectId={project.id} width={280} height={240} />
+                  <STLViewer 
+                    projectId={project.id} 
+                    width={280} 
+                    height={240}
+                    stlIndex={stlIndex}
+                    onIndexChange={setStlIndex}
+                    totalStls={(project?.stlFileNames?.length || project?.stlFileName ? Math.max(project?.stlFileNames?.length || 0, 1) : 1)}
+                  />
                 </CardContent>
               </Card>
             </div>

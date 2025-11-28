@@ -42,7 +42,7 @@ interface UploadProjectDialogProps {
 export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [fileName, setFileName] = useState("");
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<InsertProject>({
@@ -51,6 +51,8 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
       name: "",
       stlFileName: "",
       stlFileContent: undefined,
+      stlFileNames: [],
+      stlFileContents: [],
       description: "",
       material: "",
       specifications: {
@@ -116,24 +118,39 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-      form.setValue("stlFileName", file.name);
-      
-      // Read file as base64
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result as string;
-        // Extract base64 from data URL
-        const base64Content = content.split(',')[1] || content;
-        form.setValue("stlFileContent", base64Content);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const newFileNames: string[] = [];
+      const newFileContents: string[] = [];
+      const validFiles = Array.from(files).slice(0, 10); // Max 10 files
+      let loadedCount = 0;
+
+      validFiles.forEach((file) => {
+        newFileNames.push(file.name);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target?.result as string;
+          const base64Content = content.split(',')[1] || content;
+          newFileContents.push(base64Content);
+          loadedCount++;
+
+          if (loadedCount === validFiles.length) {
+            setFileNames(newFileNames);
+            form.setValue("stlFileNames", newFileNames);
+            form.setValue("stlFileContents", newFileContents);
+            // Keep legacy fields for backwards compatibility
+            if (newFileNames.length > 0) {
+              form.setValue("stlFileName", newFileNames[0]);
+              form.setValue("stlFileContent", newFileContents[0]);
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
 
-  const isSubmitDisabled = mutation.isPending || !fileName || !form.formState.isValid;
+  const isSubmitDisabled = mutation.isPending || fileNames.length === 0 || !form.formState.isValid;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,7 +178,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* File Upload */}
                 <FormItem>
-                  <FormLabel>Archivo STL</FormLabel>
+                  <FormLabel>Archivos STL</FormLabel>
                   <FormControl>
                     <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
                       <input
@@ -170,6 +187,7 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                         onChange={handleFileChange}
                         className="hidden"
                         id="stl-file-input"
+                        multiple
                         data-testid="input-stl-file"
                       />
                       <label
@@ -178,13 +196,25 @@ export function UploadProjectDialog({ open, onOpenChange }: UploadProjectDialogP
                       >
                         <Upload className="h-10 w-10 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
-                          {fileName || "Haz clic para seleccionar un archivo STL"}
+                          {fileNames.length > 0 
+                            ? `${fileNames.length} archivo${fileNames.length !== 1 ? 's' : ''} seleccionado${fileNames.length !== 1 ? 's' : ''}`
+                            : "Haz clic para seleccionar hasta 10 archivos STL"
+                          }
                         </span>
                       </label>
+                      {fileNames.length > 0 && (
+                        <div className="mt-4 text-left">
+                          <ul className="text-xs text-muted-foreground space-y-1">
+                            {fileNames.map((name, idx) => (
+                              <li key={idx}>✓ {name}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Formatos aceptados: .stl (máximo 50MB)
+                    Formatos aceptados: .stl (máximo 10 archivos, 50MB cada uno)
                   </FormDescription>
                 </FormItem>
 

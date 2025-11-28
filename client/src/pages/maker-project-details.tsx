@@ -24,6 +24,7 @@ export default function MakerProjectDetails() {
   const [editBidDialogOpen, setEditBidDialogOpen] = useState(false);
   const [rebidDialogOpen, setRebidDialogOpen] = useState(false);
   const [projectOwner, setProjectOwner] = useState<User | null>(null);
+  const [stlIndex, setStlIndex] = useState(0);
 
   const projectId = params?.id;
 

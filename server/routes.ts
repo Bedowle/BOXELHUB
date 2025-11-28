@@ -965,6 +965,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const validated = insertProjectSchema.parse(req.body);
+      
+      // Ensure arrays exist for multi-STL support
+      if (!validated.stlFileNames) {
+        validated.stlFileNames = [];
+      }
+      if (!validated.stlFileContents) {
+        validated.stlFileContents = [];
+      }
+      
+      // If legacy fields are set but arrays are empty, populate arrays
+      if (validated.stlFileName && validated.stlFileNames.length === 0) {
+        validated.stlFileNames = [validated.stlFileName];
+      }
+      if (validated.stlFileContent && validated.stlFileContents.length === 0) {
+        validated.stlFileContents = [validated.stlFileContent];
+      }
+      
       const project = await storage.createProject({ ...validated, userId });
       res.json(project);
     } catch (error: any) {
@@ -1184,6 +1201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id/stl-content', async (req: any, res) => {
     try {
       const { id } = req.params;
+      const index = parseInt(req.query.index || "0");
       const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
@@ -1194,12 +1212,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot access STL from deleted projects" });
       }
 
-      if (!project.stlFileContent) {
+      // Try to use new multi-STL format first, fall back to legacy format
+      let stlContent: string | undefined;
+      const stlFileContents = (project as any).stlFileContents;
+      
+      if (stlFileContents && Array.isArray(stlFileContents) && stlFileContents.length > 0) {
+        if (index >= 0 && index < stlFileContents.length) {
+          stlContent = stlFileContents[index];
+        } else {
+          stlContent = stlFileContents[0];
+        }
+      } else {
+        // Fallback to legacy single file
+        stlContent = (project as any).stlFileContent;
+      }
+
+      if (!stlContent) {
         return res.status(404).json({ message: "STL file not found" });
       }
 
       // Convert base64 to binary
-      const binaryData = Buffer.from(project.stlFileContent, 'base64');
+      const binaryData = Buffer.from(stlContent, 'base64');
       res.type('application/octet-stream').send(binaryData);
     } catch (error) {
       console.error("Error serving STL content:", error);
