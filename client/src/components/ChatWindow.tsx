@@ -270,14 +270,29 @@ export function ChatWindow({
             </div>
           )}
           
-          <div className="flex-1 min-w-0 hover:opacity-70 transition-opacity">
+          <div className="flex-1 min-w-0">
             <p className="font-semibold truncate group-hover:underline">
               {otherUser?.username || otherUser?.email}
             </p>
-            <p className={`text-xs truncate ${isProjectDeleted || isDesignDeleted ? "text-muted-foreground/60" : "text-muted-foreground"}`}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (projectId && !isProjectDeleted) {
+                  setLocation(`/project/${projectId}`);
+                } else if (marketplaceDesignId && !isDesignDeleted) {
+                  setLocation(`/marketplace-design/${marketplaceDesignId}`);
+                }
+              }}
+              className={`text-xs truncate text-left w-full font-medium hover-elevate transition-colors block ${
+                isProjectDeleted || isDesignDeleted
+                  ? "text-muted-foreground/60 cursor-not-allowed"
+                  : "text-muted-foreground hover:text-primary"
+              }`}
+              disabled={isProjectDeleted || isDesignDeleted}
+            >
               {displayProject?.name || displayDesign?.title || "Sin contexto"}
               {(isProjectDeleted || isDesignDeleted) && " (Eliminado)"}
-            </p>
+            </button>
           </div>
         </div>
         <Button variant="ghost" size="icon" className="flex-shrink-0">

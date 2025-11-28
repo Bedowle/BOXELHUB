@@ -19,6 +19,8 @@ interface ChatListItemProps {
   designImage?: string;
   isProjectDeleted?: boolean;
   isDesignDeleted?: boolean;
+  projectId?: string;
+  designId?: string;
 }
 
 export function ChatListItem({
@@ -36,6 +38,8 @@ export function ChatListItem({
   designImage,
   isProjectDeleted = false,
   isDesignDeleted = false,
+  projectId,
+  designId,
 }: ChatListItemProps) {
   const [, setLocation] = useLocation();
   const userInitial = userName?.[0].toUpperCase() || "U";
@@ -49,6 +53,15 @@ export function ChatListItem({
     e.stopPropagation();
     if (userId) {
       setLocation(`/user/${userId}`);
+    }
+  };
+
+  const handleViewProject = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (projectId && !isProjectDeleted) {
+      setLocation(`/project/${projectId}`);
+    } else if (designId && !isDesignDeleted) {
+      setLocation(`/marketplace-design/${designId}`);
     }
   };
 
@@ -91,9 +104,18 @@ export function ChatListItem({
               {userName}
             </button>
             {contextName && (
-              <p className="text-xs text-muted-foreground truncate">
+              <button
+                onClick={handleViewProject}
+                className={`text-xs truncate text-left font-medium hover-elevate transition-colors ${
+                  isDeleted
+                    ? "text-muted-foreground/60 cursor-not-allowed"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+                disabled={isDeleted}
+                data-testid="button-view-project"
+              >
                 {contextName}
-              </p>
+              </button>
             )}
           </div>
           {lastMessageTime && (
