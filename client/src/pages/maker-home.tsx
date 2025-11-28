@@ -169,6 +169,8 @@ export default function MakerHome() {
     <div className="min-h-screen bg-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4 py-4 max-w-7xl space-y-4">
+          </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -186,21 +188,21 @@ export default function MakerHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
           <Card 
-            className="border-0 hover-elevate cursor-pointer bg-gradient-to-br from-primary/25 via-primary/15 to-secondary/10 dark:from-primary/35 dark:via-primary/20 dark:to-secondary/15 shadow-md"
+            className="border-2 border-primary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
-            <CardContent className="pt-5 pb-5">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-foreground">Ofertas Activas</span>
-                  <div className="bg-gradient-to-br from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30 p-2.5 rounded-lg">
+                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
+                  <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
                     <Gavel className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-5xl font-black bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">{stats?.activeBids || 0}</p>
-                  <p className="text-xs text-muted-foreground font-medium">en progreso</p>
+                  <p className="text-4xl font-bold">{stats?.activeBids || 0}</p>
+                  <p className="text-xs text-muted-foreground">en progreso</p>
                 </div>
               </div>
             </CardContent>
@@ -208,21 +210,21 @@ export default function MakerHome() {
 
           {/* Won Projects */}
           <Card 
-            className="border-0 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/25 via-secondary/15 to-primary/10 dark:from-secondary/35 dark:via-secondary/20 dark:to-primary/15 shadow-md"
+            className="border-2 border-secondary/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/maker/won-projects")}
             data-testid="card-stats-won-projects"
           >
-            <CardContent className="pt-5 pb-5">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-foreground">Proyectos Ganados</span>
-                  <div className="bg-gradient-to-br from-secondary/40 to-secondary/20 dark:from-secondary/50 dark:to-secondary/30 p-2.5 rounded-lg">
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
+                  <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-5xl font-black bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">{stats?.wonProjects || 0}</p>
-                  <p className="text-xs text-muted-foreground font-medium">completados</p>
+                  <p className="text-4xl font-bold">{stats?.wonProjects || 0}</p>
+                  <p className="text-xs text-muted-foreground">completados</p>
                 </div>
               </div>
             </CardContent>
@@ -230,21 +232,21 @@ export default function MakerHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-0 hover-elevate cursor-pointer bg-gradient-to-br from-accent/25 via-accent/15 to-secondary/10 dark:from-accent/35 dark:via-accent/20 dark:to-secondary/15 shadow-md"
+            className="border-2 border-accent/20 hover-elevate cursor-pointer"
             onClick={() => setLocation("/maker/completed-projects")}
             data-testid="card-stats-completed-projects"
           >
-            <CardContent className="pt-5 pb-5">
-              <div className="space-y-3">
+            <CardContent className="pt-4 pb-4">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-foreground">Proyectos Completados</span>
-                  <div className="bg-gradient-to-br from-accent/40 to-accent/20 dark:from-accent/50 dark:to-accent/30 p-2.5 rounded-lg">
+                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
+                  <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-5xl font-black bg-gradient-to-r from-accent via-accent to-secondary bg-clip-text text-transparent">{stats?.completedProjects || 0}</p>
-                  <p className="text-xs text-muted-foreground font-medium">entregados</p>
+                  <p className="text-4xl font-bold">{stats?.completedProjects || 0}</p>
+                  <p className="text-xs text-muted-foreground">entregados</p>
                 </div>
               </div>
             </CardContent>
