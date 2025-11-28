@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
 import { RatingDialog } from "@/components/RatingDialog";
+import { ViewRatingDialog } from "@/components/ViewRatingDialog";
 import { ArrowLeft, CheckCircle, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
-import type { Project } from "@shared/schema";
+import type { Project, Review } from "@shared/schema";
 
 interface RatingCheckResponse {
   deliveryConfirmed: boolean;
@@ -28,8 +29,10 @@ export default function MakerCompletedProjects() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [viewRatingDialogOpen, setViewRatingDialogOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedProjectName, setSelectedProjectName] = useState<string>("");
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [ratingStatuses, setRatingStatuses] = useState<Record<string, boolean>>({});
   const [deliveryConfirmedProjectIds, setDeliveryConfirmedProjectIds] = useState<Set<string>>(new Set());
 
@@ -137,6 +140,21 @@ export default function MakerCompletedProjects() {
     setRatingDialogOpen(true);
   };
 
+  const handleViewRatingClick = async (projectId: string) => {
+    try {
+      const res = await apiRequest("GET", `/api/projects/${projectId}/review-from-client`);
+      const review = await res.json() as Review;
+      setSelectedReview(review);
+      setViewRatingDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo cargar la calificación",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
@@ -207,9 +225,10 @@ export default function MakerCompletedProjects() {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              setLocation(`/project/${project.id}`);
+                              handleViewRatingClick(project.id);
                             }}
                             className="bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors cursor-pointer"
+                            data-testid={`button-view-rating-${project.id}`}
                           >
                             <p className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                               <Star className="h-3 w-3 fill-current" />
@@ -259,6 +278,16 @@ export default function MakerCompletedProjects() {
             });
           }}
           isLoading={ratingMutation.isPending}
+        />
+      )}
+
+      {selectedReview && (
+        <ViewRatingDialog
+          open={viewRatingDialogOpen}
+          onOpenChange={setViewRatingDialogOpen}
+          rating={parseFloat(String(selectedReview.rating))}
+          comment={selectedReview.comment || undefined}
+          fromUserName="Cliente"
         />
       )}
     </div>
