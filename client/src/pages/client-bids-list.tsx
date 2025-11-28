@@ -48,7 +48,7 @@ export default function ClientBidsList() {
     );
   }
 
-  const projectsWithBids = projects?.filter(p => p.bidCount > 0) || [];
+  const projectsWithBids = projects?.filter(p => p.bidCount > 0 && p.status === 'active') || [];
 
   return (
     <div className="min-h-screen bg-background">
