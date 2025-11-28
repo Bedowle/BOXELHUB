@@ -17,7 +17,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, onClick, showBidCount = true, unreadBidCount = 0 }: ProjectCardProps) {
   return (
     <Card 
-      className="hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
+      className="border-2 border-primary/40 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/20 dark:to-transparent hover-elevate active-elevate-2 cursor-pointer transition-all duration-300 relative" 
       onClick={onClick}
       data-testid={`card-project-${project.id}`}
     >
