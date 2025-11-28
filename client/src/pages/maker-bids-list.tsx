@@ -5,10 +5,11 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Zap, CheckCircle, XCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Project } from "@shared/schema";
+import { Badge } from "@/components/ui/badge";
 
 export default function MakerBidsList() {
   const [, setLocation] = useLocation();
@@ -49,6 +50,9 @@ export default function MakerBidsList() {
   }
 
   const activeBids = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "pending")) || [];
+  const acceptedBids = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "accepted")) || [];
+  const rejectedBids = myBidProjects?.filter(p => myBids?.some(b => b.projectId === p.id && b.status === "rejected")) || [];
+  const inactiveBids = [...(acceptedBids || []), ...(rejectedBids || [])];
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,6 +119,68 @@ export default function MakerBidsList() {
             title="No has hecho ninguna oferta"
             description="No tienes ofertas pendientes en este momento"
           />
+        )}
+
+        {/* Inactive Bids History */}
+        {inactiveBids.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Histórico de Ofertas</h2>
+            <div className="space-y-4">
+              {acceptedBids?.map((project) => {
+                const bid = myBids?.find(b => b.projectId === project.id && b.status === "accepted");
+                return (
+                  <Card 
+                    key={`accepted-${project.id}`}
+                    className="hover-elevate cursor-pointer opacity-75"
+                    onClick={() => setLocation(`/maker/project/${project.id}`)}
+                  >
+                    <CardContent className="pt-6 pb-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg">{project.name}</h3>
+                          <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                          </p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          Aceptada
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+
+              {rejectedBids?.map((project) => {
+                const bid = myBids?.find(b => b.projectId === project.id && b.status === "rejected");
+                return (
+                  <Card 
+                    key={`rejected-${project.id}`}
+                    className="hover-elevate cursor-pointer opacity-75"
+                    onClick={() => setLocation(`/maker/project/${project.id}`)}
+                  >
+                    <CardContent className="pt-6 pb-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg">{project.name}</h3>
+                          <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Publicado {formatDistanceToNow(new Date(project.createdAt), { locale: es, addSuffix: true })}
+                          </p>
+                        </div>
+                        <Badge variant="secondary" className="gap-1">
+                          <XCircle className="h-4 w-4" />
+                          Rechazada
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
         )}
       </main>
     </div>
