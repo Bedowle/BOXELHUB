@@ -922,16 +922,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = getAuthenticatedUserId(req);
       
       // First try to get active project
       let project = await storage.getProject(id);
       
-      // If not found, try to get deleted project (only owner can view deleted projects)
+      // If not found, try to get deleted project (anyone can view deleted projects for chat context)
       if (!project) {
         const deletedProject = await storage.getProjectIncludeDeleted(id);
-        if (deletedProject && deletedProject.deletedAt && deletedProject.userId === userId) {
-          // Owner can view their deleted project (read-only from chat)
+        if (deletedProject && deletedProject.deletedAt) {
+          // Anyone can view deleted project from chat context (read-only)
           project = deletedProject;
         }
       }
@@ -2073,16 +2072,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/marketplace/designs/:id', async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = getAuthenticatedUserId(req);
       
       // First try to get active design
       let design = await storage.getMarketplaceDesign(id);
       
-      // If not found, try to get deleted design (only owner can view deleted designs)
+      // If not found, try to get deleted design (anyone can view deleted designs for chat context)
       if (!design) {
         const deletedDesign = await storage.getMarketplaceDesignIncludeDeleted(id);
-        if (deletedDesign && deletedDesign.deletedAt && deletedDesign.makerId === userId) {
-          // Owner can view their deleted design (read-only from chat)
+        if (deletedDesign && deletedDesign.deletedAt) {
+          // Anyone can view deleted design from chat context (read-only)
           design = deletedDesign;
         }
       }
