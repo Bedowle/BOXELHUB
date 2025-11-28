@@ -392,17 +392,16 @@ export default function ProjectDetails() {
               </span>
             )}
           </h2>
-          {!showBids && isOwner && (
-            <button 
-              onClick={() => setShowBids(true)}
-              className="text-primary hover:underline mb-4 text-sm font-medium"
-              data-testid="button-load-bids"
-            >
-              📊 Cargar ofertas
-            </button>
-          )}
 
-          {bidsLoading ? (
+          {!showBids && isOwner ? (
+            <EmptyState
+              icon={Package}
+              title="Ofertas Pendientes"
+              description="Carga las ofertas que han recibido tus proyectos"
+              actionLabel="Cargar ofertas"
+              onAction={() => setShowBids(true)}
+            />
+          ) : bidsLoading ? (
             <div className="space-y-4">
               <BidCardSkeleton />
               <BidCardSkeleton />
