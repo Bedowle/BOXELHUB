@@ -112,10 +112,9 @@ export function ChatListItem({
                 onClick={handleViewProject}
                 className={`text-xs font-medium hover-elevate transition-colors inline-block ${
                   isDimmed
-                    ? "text-muted-foreground/60 cursor-not-allowed"
+                    ? "text-muted-foreground/60"
                     : "text-muted-foreground hover:text-primary"
                 }`}
-                disabled={isDimmed}
                 data-testid="button-view-project"
               >
                 {contextName}
@@ -135,8 +134,13 @@ export function ChatListItem({
             ? "text-foreground font-medium"
             : "text-muted-foreground"
         }`}>
-          {isDimmed ? `${lastMessage || "Sin mensajes aún"} ${isCompleted ? "(Completado)" : "(Eliminado)"}` : lastMessage || "Sin mensajes aún"}
+          {lastMessage || "Sin mensajes aún"}
         </p>
+        {isDimmed && (
+          <p className="text-xs text-muted-foreground/60 italic">
+            {isCompleted ? "(Completado)" : "(Eliminado)"}
+          </p>
+        )}
       </div>
 
       {isUnread && (

@@ -274,30 +274,32 @@ export function ChatWindow({
             <p className="font-semibold truncate group-hover:underline">
               {otherUser?.username || otherUser?.email}
             </p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const isProjectCompleted = displayProject?.status === "completed";
-                const isDesignCompleted = false;
-                const isDisabled = isProjectDeleted || isDesignDeleted || isProjectCompleted || isDesignCompleted;
-                if (projectId && !isDisabled) {
-                  setLocation(`/project/${projectId}`);
-                } else if (marketplaceDesignId && !isDisabled) {
-                  setLocation(`/marketplace-design/${marketplaceDesignId}`);
-                }
-              }}
-              className={`text-xs font-medium hover-elevate transition-colors inline-block ${
-                isProjectDeleted || isDesignDeleted || displayProject?.status === "completed"
-                  ? "text-muted-foreground/60 cursor-not-allowed"
-                  : "text-muted-foreground hover:text-primary"
-              }`}
-              disabled={isProjectDeleted || isDesignDeleted || displayProject?.status === "completed"}
-            >
-              {displayProject?.name || displayDesign?.title || "Sin contexto"}
-              {isProjectDeleted && " (Eliminado)"}
-              {isDesignDeleted && " (Eliminado)"}
-              {displayProject?.status === "completed" && " (Completado)"}
-            </button>
+            <div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (projectId) {
+                    setLocation(`/project/${projectId}`);
+                  } else if (marketplaceDesignId) {
+                    setLocation(`/marketplace-design/${marketplaceDesignId}`);
+                  }
+                }}
+                className={`text-xs font-medium hover-elevate transition-colors inline-block ${
+                  isProjectDeleted || isDesignDeleted || displayProject?.status === "completed"
+                    ? "text-muted-foreground/60"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                {displayProject?.name || displayDesign?.title || "Sin contexto"}
+              </button>
+              {(isProjectDeleted || isDesignDeleted || displayProject?.status === "completed") && (
+                <div className="text-xs text-muted-foreground/60 italic">
+                  {isProjectDeleted && "(Eliminado)"}
+                  {isDesignDeleted && "(Eliminado)"}
+                  {displayProject?.status === "completed" && "(Completado)"}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <Button variant="ghost" size="icon" className="flex-shrink-0">
