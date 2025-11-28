@@ -368,7 +368,7 @@ export function MakerProfileDialog({ open, onOpenChange, profile }: MakerProfile
               name="capabilities"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Capacidades y Experiencia</FormLabel>
+                  <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe tu experiencia, tipos de proyectos en los que te especializas, acabados que ofreces, etc."

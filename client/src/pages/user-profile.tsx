@@ -634,7 +634,7 @@ export default function UserProfilePage() {
                     name="capabilities"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Capacidades/Notas</FormLabel>
+                        <FormLabel>Descripción</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Ej: Impresión rápida, acabados de calidad..."
@@ -805,7 +805,7 @@ export default function UserProfilePage() {
 
                     {makerProfile.capabilities && (
                       <div>
-                        <p className="text-sm font-medium">Capacidades</p>
+                        <p className="text-sm font-medium">Descripción</p>
                         <p className="text-sm text-muted-foreground">{makerProfile.capabilities}</p>
                       </div>
                     )}

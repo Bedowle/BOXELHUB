@@ -304,7 +304,7 @@ export default function MakerProfile() {
               <Card>
                 <CardContent className="pt-6 pb-6">
                   <div className="space-y-4">
-                    <h2 className="text-lg font-semibold">Capacidades</h2>
+                    <h2 className="text-lg font-semibold">Descripción</h2>
                     <p className="text-sm text-muted-foreground">{profile.capabilities}</p>
                   </div>
                 </CardContent>
