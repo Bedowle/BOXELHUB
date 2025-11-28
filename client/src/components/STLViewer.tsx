@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo, useCallback } from "react";
 import * as THREE from "three";
 
 // STLLoader implementation
@@ -120,21 +120,23 @@ interface STLViewerProps {
   totalStls?: number;
 }
 
-export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, onIndexChange, totalStls = 1 }: STLViewerProps) {
+const STLViewerComponent = ({ projectId, width = 400, height = 250, stlIndex = 0, onIndexChange, totalStls = 1 }: STLViewerProps) => {
   const containerRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const meshRef = useRef<THREE.Mesh | null>(null);
   const rotationRef = useRef({ x: 0, y: 0 });
   const mouseRef = useRef({ x: 0, y: 0, isDown: false });
+  const animationIdRef = useRef<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Initialize scene once on mount
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || sceneRef.current) return;
 
     try {
-      // Scene setup
+      // Scene setup - only once
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a0a0a);
       sceneRef.current = scene;
@@ -149,53 +151,17 @@ export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, 
         antialias: true, 
         alpha: true 
       });
-      // Use pixelRatio of 1 to ensure canvas size matches CSS size exactly
       renderer.setPixelRatio(1);
       renderer.setSize(width, height);
       rendererRef.current = renderer;
 
-      // Lighting
+      // Lighting - only once
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambientLight);
 
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
       directionalLight.position.set(50, 100, 50);
       scene.add(directionalLight);
-
-      // Load STL
-      const loader = new STLLoader();
-      const fileUrl = `/api/projects/${projectId}/stl-content?index=${stlIndex}`;
-
-      loader.load(
-        fileUrl,
-        (geometry: THREE.BufferGeometry) => {
-          geometry.computeBoundingBox();
-          
-          if (!geometry.boundingBox) return;
-
-          const center = new THREE.Vector3();
-          geometry.boundingBox.getCenter(center);
-          geometry.translate(-center.x, -center.y, -center.z);
-
-          const material = new THREE.MeshPhongMaterial({
-            color: 0x6366f1,
-            specular: 0x111111,
-            shininess: 200,
-            emissive: 0x1e1b4b,
-          });
-
-          const mesh = new THREE.Mesh(geometry, material);
-          meshRef.current = mesh;
-          scene.add(mesh);
-          setIsLoading(false);
-        },
-        undefined,
-        (error: any) => {
-          console.error("Error loading STL:", error);
-          setError("No se pudo cargar el modelo STL");
-          setIsLoading(false);
-        }
-      );
 
       // Mouse events - rotate on hover without clicking
       const onMouseEnter = () => {
@@ -212,9 +178,7 @@ export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, 
         const deltaX = e.clientX - mouseRef.current.x;
         const deltaY = e.clientY - mouseRef.current.y;
 
-        // Rotación en eje Y por movimiento horizontal
         rotationRef.current.y += deltaX * 0.025;
-        // Rotación en eje X por movimiento vertical
         rotationRef.current.x += deltaY * 0.025;
 
         meshRef.current.rotation.y = rotationRef.current.y;
@@ -232,7 +196,7 @@ export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, 
 
       // Animation loop
       const animate = () => {
-        requestAnimationFrame(animate);
+        animationIdRef.current = requestAnimationFrame(animate);
         renderer.render(scene, camera);
       };
       animate();
@@ -243,25 +207,80 @@ export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, 
           containerRef.current.removeEventListener("mouseleave", onMouseLeave, false);
           containerRef.current.removeEventListener("mousemove", onMouseMove, false);
         }
+        if (animationIdRef.current) {
+          cancelAnimationFrame(animationIdRef.current);
+        }
         renderer.dispose();
       };
     } catch (err) {
       setError("Error inicializando el visor 3D");
       setIsLoading(false);
     }
-  }, [projectId, width, height, stlIndex]);
+  }, [width, height]);
 
-  const handlePrevious = () => {
+  // Load STL when index changes - only change mesh, don't rebuild scene
+  useEffect(() => {
+    if (!sceneRef.current || !projectId) return;
+
+    // Remove old mesh
+    if (meshRef.current) {
+      sceneRef.current.remove(meshRef.current);
+      (meshRef.current.geometry as THREE.BufferGeometry).dispose();
+      (meshRef.current.material as THREE.Material).dispose();
+      meshRef.current = null;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const loader = new STLLoader();
+    const fileUrl = `/api/projects/${projectId}/stl-content?index=${stlIndex}`;
+
+    loader.load(
+      fileUrl,
+      (geometry: THREE.BufferGeometry) => {
+        if (!sceneRef.current) return;
+
+        geometry.computeBoundingBox();
+        
+        if (!geometry.boundingBox) return;
+
+        const center = new THREE.Vector3();
+        geometry.boundingBox.getCenter(center);
+        geometry.translate(-center.x, -center.y, -center.z);
+
+        const material = new THREE.MeshPhongMaterial({
+          color: 0x6366f1,
+          specular: 0x111111,
+          shininess: 200,
+          emissive: 0x1e1b4b,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        meshRef.current = mesh;
+        sceneRef.current.add(mesh);
+        setIsLoading(false);
+      },
+      undefined,
+      (error: any) => {
+        console.error("Error loading STL:", error);
+        setError("No se pudo cargar el modelo STL");
+        setIsLoading(false);
+      }
+    );
+  }, [projectId, stlIndex]);
+
+  const handlePrevious = useCallback(() => {
     if (stlIndex > 0 && onIndexChange) {
       onIndexChange(stlIndex - 1);
     }
-  };
+  }, [stlIndex, onIndexChange]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (stlIndex < totalStls - 1 && onIndexChange) {
       onIndexChange(stlIndex + 1);
     }
-  };
+  }, [stlIndex, totalStls, onIndexChange]);
 
   return (
     <div className="bg-background rounded-lg pointer-events-auto relative" style={{ width: `${width}px`, height: `${height}px`, overflow: 'hidden', display: 'block' }}>
@@ -319,4 +338,6 @@ export function STLViewer({ projectId, width = 400, height = 250, stlIndex = 0, 
       )}
     </div>
   );
-}
+};
+
+export const STLViewer = memo(STLViewerComponent);
