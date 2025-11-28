@@ -112,8 +112,8 @@ export default function MakerBidsList() {
         ) : (
           <EmptyState
             icon={Zap}
-            title="No hay ofertas activas"
-            description="Aún no tienes ofertas activas"
+            title="No has hecho ninguna oferta"
+            description="No tienes ofertas pendientes en este momento"
           />
         )}
       </main>

@@ -98,6 +98,48 @@ export function BidEditDialog({
     mutation.mutate(data);
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/bids/${bidId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Oferta eliminada",
+        description: "Tu oferta ha sido eliminada",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/bids/my-bids"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects/my-bids"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/bids/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "my-bid"] });
+      onOpenChange(false);
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "No autorizado",
+          description: "Iniciando sesión...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar la oferta",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDelete = () => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta oferta?")) {
+      deleteMutation.mutate();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
