@@ -166,15 +166,15 @@ export default function MakerHome() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-50/50 dark:via-slate-900/50 to-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b" />
 
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+        <div className="mb-12 bg-gradient-to-r from-secondary/10 to-primary/10 dark:from-secondary/20 dark:to-primary/20 rounded-2xl p-8 border border-secondary/20 dark:border-secondary/30">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-transparent">
             Tu Panel de Maker
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -186,15 +186,15 @@ export default function MakerHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Active Bids */}
           <Card 
-            className="border-2 border-primary/20 hover-elevate cursor-pointer"
+            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/5 to-transparent dark:from-primary/15 dark:to-transparent"
             onClick={() => setLocation("/maker/bids")}
             data-testid="card-stats-active-bids"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Activas</span>
-                  <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Ofertas Activas</span>
+                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
                     <Gavel className="h-5 w-5 text-primary" />
                   </div>
                 </div>
@@ -208,15 +208,15 @@ export default function MakerHome() {
 
           {/* Won Projects */}
           <Card 
-            className="border-2 border-secondary/20 hover-elevate cursor-pointer"
+            className="border-2 border-secondary/40 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/5 to-transparent dark:from-secondary/15 dark:to-transparent"
             onClick={() => setLocation("/maker/won-projects")}
             data-testid="card-stats-won-projects"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Ganados</span>
-                  <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Proyectos Ganados</span>
+                  <div className="bg-secondary/20 dark:bg-secondary/30 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
@@ -230,15 +230,15 @@ export default function MakerHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-accent/20 hover-elevate cursor-pointer"
+            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/5 to-transparent dark:from-accent/15 dark:to-transparent"
             onClick={() => setLocation("/maker/completed-projects")}
             data-testid="card-stats-completed-projects"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Completados</span>
-                  <div className="bg-accent/10 dark:bg-accent/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Proyectos Completados</span>
+                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>

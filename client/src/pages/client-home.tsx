@@ -71,11 +71,11 @@ export default function ClientHome() {
   const totalBids = projects?.reduce((sum, p) => sum + p.bidCount, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/50 dark:via-slate-900/50 to-background">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+        <div className="mb-12 bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-2xl p-8 border border-primary/20 dark:border-primary/30">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
             Bienvenido a tu Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -87,15 +87,15 @@ export default function ClientHome() {
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {/* Projects in Progress */}
           <Card 
-            className="border-2 border-primary/20 hover-elevate cursor-pointer"
+            className="border-2 border-primary/40 hover-elevate cursor-pointer bg-gradient-to-br from-primary/5 to-transparent dark:from-primary/15 dark:to-transparent"
             onClick={() => setLocation("/client/projects-active")}
             data-testid="card-stats-in-progress"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos en Progreso</span>
-                  <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Proyectos en Progreso</span>
+                  <div className="bg-primary/20 dark:bg-primary/30 p-2 rounded-lg">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
                 </div>
@@ -111,15 +111,15 @@ export default function ClientHome() {
 
           {/* Pending Bids */}
           <Card 
-            className="border-2 border-secondary/20 hover-elevate cursor-pointer"
+            className="border-2 border-secondary/40 hover-elevate cursor-pointer bg-gradient-to-br from-secondary/5 to-transparent dark:from-secondary/15 dark:to-transparent"
             onClick={() => setLocation("/client/bids")}
             data-testid="card-stats-pending-bids"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Ofertas Pendientes</span>
-                  <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-lg">
+                  <span className="text-sm font-semibold text-foreground">Ofertas Pendientes</span>
+                  <div className="bg-secondary/20 dark:bg-secondary/30 p-2 rounded-lg">
                     <Gavel className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
@@ -133,16 +133,16 @@ export default function ClientHome() {
 
           {/* Completed Projects */}
           <Card 
-            className="border-2 border-green-500/20 hover-elevate cursor-pointer"
+            className="border-2 border-accent/40 hover-elevate cursor-pointer bg-gradient-to-br from-accent/5 to-transparent dark:from-accent/15 dark:to-transparent"
             onClick={() => setLocation("/client/projects-completed")}
             data-testid="card-stats-completed-projects"
           >
             <CardContent className="pt-4 pb-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-muted-foreground">Proyectos Terminados</span>
-                  <div className="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm font-semibold text-foreground">Proyectos Terminados</span>
+                  <div className="bg-accent/20 dark:bg-accent/30 p-2 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-accent" />
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
