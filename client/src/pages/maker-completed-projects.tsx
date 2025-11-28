@@ -204,12 +204,18 @@ export default function MakerCompletedProjects() {
                           <p className="text-sm font-bold text-green-600 dark:text-green-400">Entregado</p>
                         </div>
                         {hasRated ? (
-                          <div className="bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-lg" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLocation(`/user/${project.userId}/reviews`);
+                            }}
+                            className="bg-blue-100 dark:bg-blue-900/30 px-3 py-2 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors cursor-pointer"
+                          >
                             <p className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                               <Star className="h-3 w-3 fill-current" />
                               Calificado
                             </p>
-                          </div>
+                          </button>
                         ) : (
                           <Button
                             size="sm"
