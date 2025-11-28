@@ -792,7 +792,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only clients can access this endpoint" });
       }
 
-      const projects = await storage.getProjects({ userId });
+      // Only get active projects (filter out completed projects)
+      const projects = await storage.getProjects({ userId, status: 'active' });
       
       // Add bid count for each project
       const projectsWithBids = await Promise.all(
