@@ -10,7 +10,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Gradient */}
-      <section className="relative bg-gradient-to-br from-primary via-secondary to-primary py-24 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 dark:from-blue-800 dark:via-blue-700 dark:to-indigo-800 py-24 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
         
         {/* Login Button - Top Right */}
