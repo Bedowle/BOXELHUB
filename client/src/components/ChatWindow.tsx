@@ -43,11 +43,11 @@ export function ChatWindow({
 
   // Fetch project if not provided
   const { data: fetchedProject } = useQuery({
-    queryKey: ["/api/project", projectId],
+    queryKey: ["/api/projects", projectId],
     queryFn: async () => {
       if (!projectId) return null;
       try {
-        const res = await fetch(`/api/project/${projectId}`, { credentials: "include" });
+        const res = await fetch(`/api/projects/${projectId}`, { credentials: "include" });
         if (!res.ok) return null;
         return res.json();
       } catch {
@@ -59,11 +59,11 @@ export function ChatWindow({
 
   // Fetch design if not provided
   const { data: fetchedDesign } = useQuery({
-    queryKey: ["/api/marketplace-design", marketplaceDesignId],
+    queryKey: ["/api/marketplace/designs", marketplaceDesignId],
     queryFn: async () => {
       if (!marketplaceDesignId) return null;
       try {
-        const res = await fetch(`/api/marketplace-design/${marketplaceDesignId}`, { credentials: "include" });
+        const res = await fetch(`/api/marketplace/designs/${marketplaceDesignId}`, { credentials: "include" });
         if (!res.ok) return null;
         return res.json();
       } catch {
