@@ -394,7 +394,7 @@ export default function ProjectDetails() {
           </h2>
 
           {!showBids && isOwner ? (
-            <div className="bg-yellow-50 dark:bg-yellow-950/20 border-2 border-yellow-200 dark:border-yellow-900 rounded-lg p-8">
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-50/50 dark:from-yellow-950/20 dark:to-yellow-950/10 border-2 border-yellow-200 dark:border-yellow-900 rounded-lg p-8">
               <EmptyState
                 icon={Package}
                 title="Ofertas Pendientes"
@@ -460,7 +460,7 @@ export default function ProjectDetails() {
               ))}
             </div>
           ) : (
-            <div className={isOwner ? "bg-yellow-50 dark:bg-yellow-950/20 border-2 border-yellow-200 dark:border-yellow-900 rounded-lg p-8" : ""}>
+            <div className={isOwner ? "bg-gradient-to-br from-yellow-50 to-yellow-50/50 dark:from-yellow-950/20 dark:to-yellow-950/10 border-2 border-yellow-200 dark:border-yellow-900 rounded-lg p-8" : ""}>
               <EmptyState
                 icon={Package}
                 title={isOwner ? "No hay ofertas aún" : isMaker && myBid ? "Ya has hecho una oferta" : isMaker ? "Todavía no has hecho ninguna oferta" : "Este proyecto no tiene ofertas"}
