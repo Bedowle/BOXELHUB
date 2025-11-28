@@ -643,39 +643,22 @@ export class DatabaseStorage implements IStorage {
     pendingBids: number;
     acceptedOffers: number;
   }> {
-    const activeProjects = await this.getActiveProjectCount(userId);
-    
-    const userProjects = await this.getProjects({ userId });
-    const projectIds = userProjects.map(p => p.id);
-    
-    let pendingBids = 0;
-    let acceptedOffers = 0;
-    
-    if (projectIds.length > 0) {
-      const [pendingResult] = await db
-        .select({ count: count() })
-        .from(bids)
-        .where(
-          and(
-            sql`${bids.projectId} IN (${sql.join(projectIds.map(id => sql`${id}`), sql`, `)})`,
-            eq(bids.status, "pending")
-          )
-        );
-      pendingBids = pendingResult.count;
+    // Single combined query for all stats - much faster
+    const [result] = await db
+      .select({
+        activeProjects: count(sql`CASE WHEN ${projects.status} = 'active' THEN 1 END`),
+        pendingBids: count(sql`CASE WHEN ${bids.status} = 'pending' THEN 1 END`),
+        acceptedOffers: count(sql`CASE WHEN ${bids.status} = 'accepted' THEN 1 END`),
+      })
+      .from(projects)
+      .leftJoin(bids, eq(projects.id, bids.projectId))
+      .where(eq(projects.userId, userId));
 
-      const [acceptedResult] = await db
-        .select({ count: count() })
-        .from(bids)
-        .where(
-          and(
-            sql`${bids.projectId} IN (${sql.join(projectIds.map(id => sql`${id}`), sql`, `)})`,
-            eq(bids.status, "accepted")
-          )
-        );
-      acceptedOffers = acceptedResult.count;
-    }
-
-    return { activeProjects, pendingBids, acceptedOffers };
+    return {
+      activeProjects: result?.activeProjects || 0,
+      pendingBids: result?.pendingBids || 0,
+      acceptedOffers: result?.acceptedOffers || 0,
+    };
   }
 
   // Review operations

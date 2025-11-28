@@ -920,6 +920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const stats = await storage.getClientStats(userId);
+      res.set('Cache-Control', 'public, max-age=30');
       res.json(stats);
     } catch (error) {
       console.error("Error fetching stats:", error);

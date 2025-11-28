@@ -392,13 +392,13 @@ export default function ProjectDetails() {
               </span>
             )}
           </h2>
-          {!showBids && (
+          {!showBids && isOwner && (
             <button 
               onClick={() => setShowBids(true)}
-              className="text-primary hover:underline mb-4 text-sm"
+              className="text-primary hover:underline mb-4 text-sm font-medium"
               data-testid="button-load-bids"
             >
-              Cargar ofertas...
+              📊 Cargar ofertas
             </button>
           )}
 
