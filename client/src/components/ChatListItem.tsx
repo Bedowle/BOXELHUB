@@ -109,7 +109,7 @@ export function ChatListItem({
             ? "text-foreground font-medium"
             : "text-muted-foreground"
         }`}>
-          {isDeleted ? `${lastMessage || "Sin mensajes aún"} ${isProjectDeleted ? "(Proyecto" : "(Diseño"} eliminado)` : lastMessage || "Sin mensajes aún"}
+          {isDeleted ? `${lastMessage || "Sin mensajes aún"} (Eliminado)` : lastMessage || "Sin mensajes aún"}
         </p>
       </div>
 
