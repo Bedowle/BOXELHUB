@@ -118,7 +118,7 @@ export default function MakerWonProjects() {
   }) || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/40 dark:via-purple-950/40 to-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
           <Button
@@ -135,8 +135,8 @@ export default function MakerWonProjects() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Mis Proyectos Ganados</h1>
+        <div className="mb-8 bg-gradient-to-r from-purple-600/15 via-secondary/15 to-primary/15 dark:from-purple-500/25 dark:via-secondary/25 dark:to-primary/25 rounded-2xl p-8 border-2 border-secondary/50 dark:border-secondary/60">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 via-secondary to-primary bg-clip-text text-transparent dark:from-purple-300 dark:via-secondary dark:to-primary">Mis Proyectos Ganados</h1>
           <p className="text-muted-foreground">
             {wonProjects.length} proyecto{wonProjects.length !== 1 ? "s" : ""}
           </p>
@@ -159,7 +159,7 @@ export default function MakerWonProjects() {
               return (
                 <Card 
                   key={project.id}
-                  className="hover-elevate cursor-pointer transition-all border-amber-200 dark:border-amber-900"
+                  className="border-2 border-secondary/60 hover-elevate cursor-pointer transition-all bg-gradient-to-br from-secondary/20 to-purple-100/30 dark:from-secondary/30 dark:to-purple-900/20 shadow-md"
                   onClick={() => setLocation(`/maker/project/${project.id}`)}
                   data-testid={`card-won-project-${project.id}`}
                 >

@@ -80,7 +80,7 @@ export default function ClientProjectsActive() {
   const allProjects = [...activeProjects, ...inProgressProjects];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-blue-100/40 dark:via-blue-950/40 to-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-4 max-w-7xl flex items-center justify-between">
           <Button
@@ -106,8 +106,8 @@ export default function ClientProjectsActive() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-12">
-          <h1 className="text-3xl font-bold mb-2">Proyectos Activos y en Ejecución</h1>
+        <div className="mb-12 bg-gradient-to-r from-blue-600/15 via-primary/15 to-secondary/15 dark:from-blue-500/25 dark:via-primary/25 dark:to-secondary/25 rounded-2xl p-8 border-2 border-primary/50 dark:border-primary/60">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-primary to-secondary bg-clip-text text-transparent dark:from-blue-300 dark:via-primary dark:to-secondary">Proyectos Activos y en Ejecución</h1>
           <p className="text-muted-foreground">
             {allProjects.length} proyecto{allProjects.length !== 1 ? "s" : ""}
           </p>

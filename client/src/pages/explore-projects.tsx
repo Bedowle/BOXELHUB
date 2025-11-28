@@ -103,7 +103,7 @@ export default function ExploreProjects() {
   const hasActiveFilters = printerTypeFilter !== "all" || multicolorFilter !== "all" || minDimension > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/40 dark:via-purple-950/40 to-background">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-3 max-w-7xl">
@@ -122,7 +122,7 @@ export default function ExploreProjects() {
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
-        <div className="mb-12">
+        <div className="mb-12 bg-gradient-to-r from-purple-600/15 via-secondary/15 to-primary/15 dark:from-purple-500/25 dark:via-secondary/25 dark:to-primary/25 rounded-2xl p-8 border-2 border-secondary/50 dark:border-secondary/60">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 flex items-center gap-3">
             <TrendingUp className="h-10 w-10 text-primary" />
             Explora Proyectos
