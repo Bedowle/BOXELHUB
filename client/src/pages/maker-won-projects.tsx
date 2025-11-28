@@ -156,7 +156,7 @@ export default function MakerWonProjects() {
               return (
                 <Card 
                   key={project.id}
-                  className="hover-elevate cursor-pointer transition-all border-amber-200 dark:border-amber-900"
+                  className="hover-elevate cursor-pointer transition-all border-amber-200 dark:border-amber-900 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40"
                   onClick={() => setLocation(`/maker/project/${project.id}`)}
                   data-testid={`card-won-project-${project.id}`}
                 >
