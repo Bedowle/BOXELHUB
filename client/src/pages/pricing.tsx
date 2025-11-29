@@ -111,7 +111,7 @@ export default function Pricing() {
               Estamos trabajando en una nueva funcionalidad que te permitirá subir tus diseños STL 
               a una biblioteca pública y venderlos directamente a otros usuarios.
             </p>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-sm mb-4">
               <p><strong>Próximamente podrás:</strong></p>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 <li>Crear una tienda personal de diseños 3D</li>
@@ -119,6 +119,13 @@ export default function Pricing() {
                 <li>Recibir pagos automáticos por cada venta</li>
                 <li>Construir ingresos pasivos con tus modelos 3D</li>
               </ul>
+            </div>
+            <div className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-amber-200 dark:border-amber-900">
+              <p className="text-sm text-foreground mb-2">
+                <strong>💬 Tu opinión importa:</strong> Estamos definiendo la estructura de comisiones para esta sección. 
+                Si tienes feedback o sugerencias sobre qué porcentaje debería ser, ¡no dudes en contactarnos! 
+                Tu experiencia es fundamental para construir una plataforma justa para todos.
+              </p>
             </div>
           </CardContent>
         </Card>
