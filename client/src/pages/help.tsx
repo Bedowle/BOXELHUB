@@ -65,7 +65,7 @@ export default function Help() {
                 <h3 className="font-semibold mb-2">¿Cómo reciben pago los makers?</h3>
                 <p className="text-sm text-muted-foreground mb-3">
                   Clientes y makers se ponen de acuerdo en el precio a través del chat. 
-                  Una vez que ambos quedan conformes, el pago se realiza a través de la plataforma.
+                  Una vez que quedan conformes, se contactan directamente para coordinar los detalles y realizar el pago.
                 </p>
                 <p className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 p-2 rounded">
                   <strong>En desarrollo:</strong> Estamos trabajando en un sistema de envíos integrado 
