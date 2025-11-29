@@ -1230,45 +1230,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/projects/:id/stl-content', async (req: any, res) => {
-    try {
-      const { id } = req.params;
-      const index = parseInt(req.query.index || "0");
-      const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-
-      // Deleted projects cannot have STL served
-      if (project.deletedAt) {
-        return res.status(403).json({ message: "Cannot access STL from deleted projects" });
-      }
-
-      // Try to use new multi-STL format first, fall back to legacy format
-      let stlContent: string | undefined;
-      const stlFileContents = (project as any).stlFileContents;
-      
-      if (stlFileContents && Array.isArray(stlFileContents) && stlFileContents.length > 0) {
-        if (index >= 0 && index < stlFileContents.length) {
-          stlContent = stlFileContents[index];
-        } else {
-          stlContent = stlFileContents[0];
-        }
-      } else {
-        // Fallback to legacy single file
-        stlContent = (project as any).stlFileContent;
-      }
-
-      if (!stlContent) {
-        return res.status(404).json({ message: "STL file not found" });
-      }
-
-      // Convert base64 to binary
-      const binaryData = Buffer.from(stlContent, 'base64');
-      res.type('application/octet-stream').send(binaryData);
-    } catch (error) {
-      console.error("Error serving STL content:", error);
-      res.status(500).json({ message: "Failed to serve STL" });
-    }
+    // STL content download disabled - users coordinate file transfer directly in P2P model
+    return res.status(503).json({ message: "STL download currently unavailable. Coordinate file transfer directly with the maker via chat." });
   });
 
   app.put('/api/projects/:id/mark-bids-read', isAuthenticated, async (req: any, res) => {
