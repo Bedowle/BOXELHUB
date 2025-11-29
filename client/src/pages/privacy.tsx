@@ -106,12 +106,6 @@ Asunto: SOLICITUD DERECHOS RGPD`;
                 <p className="text-sm"><strong>Cuándo:</strong> Durante el registro y actualización de perfil. No recogemos GPS en tiempo real.</p>
               </div>
               <div className="border rounded-lg p-4">
-                <h3 className="font-bold mb-2">💳 Datos de Pago</h3>
-                <p className="text-sm mb-2"><strong>Qué recogemos:</strong> Número de cuenta, IBAN, información Stripe/PayPal (procesada por terceros).</p>
-                <p className="text-sm"><strong>Cuándo:</strong> Solo para makers que solicitan pagos.</p>
-                <p className="text-sm text-amber-600 dark:text-amber-400 mt-2"><strong>⚠️ Importante:</strong> VoxelHub NO almacena números de tarjeta completos. Stripe y PayPal procesan datos sensibles con encriptación PCI-DSS.</p>
-              </div>
-              <div className="border rounded-lg p-4">
                 <h3 className="font-bold mb-2">📁 Datos de Proyectos</h3>
                 <p className="text-sm mb-2"><strong>Qué recogemos:</strong> Archivos STL, descripciones de proyectos, especificaciones técnicas, presupuestos, ofertas.</p>
                 <p className="text-sm"><strong>Cuándo:</strong> Al crear proyectos, enviar ofertas o negociar con otros usuarios.</p>
