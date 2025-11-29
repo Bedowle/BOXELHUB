@@ -61,6 +61,23 @@ export default function FAQ() {
       </header>
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">¿Necesitas Ayuda?</h2>
+          <p className="text-muted-foreground mb-6">
+            Estamos aquí para asistirte. Puedes contactarnos a través de:
+          </p>
+          <ul className="space-y-3">
+            <li className="flex gap-3">
+              <span className="text-primary">📧</span>
+              <span><strong>Email:</strong> support@voxelhub.com</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-primary">📱</span>
+              <span><strong>WhatsApp:</strong> +34 XXX XXX XXX</span>
+            </li>
+          </ul>
+        </section>
+
         <div className="space-y-4">
           {faqs.map((faq, idx) => (
             <details key={idx} className="border rounded-lg p-4 hover:bg-muted/50 transition">

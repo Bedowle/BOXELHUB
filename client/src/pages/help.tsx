@@ -27,23 +27,6 @@ export default function Help() {
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="space-y-8">
           <section>
-            <h2 className="text-2xl font-bold mb-4">¿Necesitas Ayuda?</h2>
-            <p className="text-muted-foreground mb-6">
-              Estamos aquí para asistirte. Puedes contactarnos a través de:
-            </p>
-            <ul className="space-y-3">
-              <li className="flex gap-3">
-                <span className="text-primary">📧</span>
-                <span><strong>Email:</strong> support@voxelhub.com</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-primary">📱</span>
-                <span><strong>WhatsApp:</strong> +34 XXX XXX XXX</span>
-              </li>
-            </ul>
-          </section>
-
-          <section>
             <h2 className="text-2xl font-bold mb-4">Temas Frecuentes</h2>
             <div className="space-y-4">
               <div className="p-4 border rounded-lg">
