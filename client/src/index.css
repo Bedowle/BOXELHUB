@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* VoxelHub Icon Styles */
+.voxelhub-icon {
+  color: #007acc;
+  transition: all 150ms ease-out;
+}
+
+.voxelhub-icon:hover {
+  filter: brightness(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voxelhub-icon {
+    transition: none;
+  }
+}
+
+/* Dark mode support */
+.dark .voxelhub-icon {
+  color: #58a6ff;
+}
+
+.dark .voxelhub-icon:hover {
+  color: #79c0ff;
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
