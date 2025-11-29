@@ -15,17 +15,18 @@ export default function CubeIcon() {
       <line x1="80" y1="20" x2="50" y2="5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       <line x1="50" y1="5" x2="20" y2="20" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       
-      {/* Left face edges (where V will float) */}
+      {/* Left face edges */}
       <line x1="20" y1="20" x2="20" y2="60" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       <line x1="50" y1="35" x2="50" y2="75" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       <line x1="20" y1="60" x2="50" y2="75" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       
-      {/* Right face edges (where H will float) */}
+      {/* Right face edges */}
       <line x1="80" y1="20" x2="80" y2="60" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-      <line x1="50" y1="75" x2="80" y2="60" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <line x1="80" y1="60" x2="50" y2="75" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       
-      {/* Bottom back edge */}
-      <line x1="20" y1="60" x2="80" y2="60" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      {/* Bottom front edge connecting to back vertex */}
+      <line x1="20" y1="60" x2="50" y2="75" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <line x1="80" y1="60" x2="50" y2="75" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       
       {/* LEFT FACE - V character */}
       <line x1="26" y1="32" x2="35" y2="55" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
