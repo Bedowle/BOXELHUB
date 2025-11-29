@@ -24,7 +24,6 @@ export default function Help() {
           <h1 className="text-2xl font-bold">Centro de Ayuda</h1>
         </div>
       </header>
-
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="space-y-8">
           <section>
@@ -63,10 +62,7 @@ export default function Help() {
               </div>
               <div className="p-4 border rounded-lg">
                 <h3 className="font-semibold mb-2">¿Cómo reciben pago los makers?</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Clientes y makers se ponen de acuerdo en el precio a través del chat. 
-                  Una vez que quedan conformes, se contactan directamente para coordinar los detalles y realizar el pago.
-                </p>
+                <p className="text-sm text-muted-foreground mb-3">Clientes y makers se ponen de acuerdo en el precio a través del chat. Una vez que quedan conformes, se contactan directamente para coordinar los detalles.</p>
                 <p className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 p-2 rounded">
                   <strong>En desarrollo:</strong> Estamos trabajando en un sistema de envíos integrado 
                   y garantía de pagos a distancia para mayor seguridad y confianza.
