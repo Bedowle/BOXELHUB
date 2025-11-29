@@ -34,7 +34,6 @@ export default function Privacy() {
             </p>
             <ul className="list-disc list-inside space-y-2 mt-2">
               <li>Contacto: support@voxelhub.com</li>
-              <li>Finalidad: Gestión del marketplace P2P de impresión 3D</li>
             </ul>
           </section>
 
