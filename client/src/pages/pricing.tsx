@@ -28,9 +28,9 @@ export default function Pricing() {
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-4">Comisión de VoxelHub</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">100% Transparente</h2>
           <p className="text-center text-muted-foreground text-lg">
-            Ofrecemos el mejor valor para clientes y makers
+            Completamente gratis para clientes y makers. Sin comisiones ocultas.
           </p>
         </section>
 
