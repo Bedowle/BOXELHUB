@@ -52,8 +52,8 @@ export default function Contact() {
               <p className="text-muted-foreground mb-4">
                 Contacta con nosotros directamente
               </p>
-              <p className="text-primary hover:underline font-semibold cursor-pointer">
-                +34 XXX XXX XXX
+              <p className="text-amber-600 dark:text-amber-400 font-semibold">
+                Próximamente
               </p>
             </CardContent>
           </Card>
