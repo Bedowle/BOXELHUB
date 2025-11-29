@@ -9,36 +9,32 @@ export default function CubeIcon() {
       className="text-orange-500"
       data-testid="cube-icon"
     >
-      {/* Three solid edges from top corner vertex - viewed from above */}
-      {/* Top-left edge (going up-left) */}
-      <line x1="50" y1="50" x2="20" y2="20" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+      {/* Top face edges */}
+      <line x1="20" y1="20" x2="50" y2="35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="50" y1="35" x2="80" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="80" y1="20" x2="50" y2="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="50" y1="5" x2="20" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       
-      {/* Top-right edge (going up-right) */}
-      <line x1="50" y1="50" x2="80" y2="20" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+      {/* Left face edges (where V will float) */}
+      <line x1="20" y1="20" x2="20" y2="60" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="50" y1="35" x2="50" y2="75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="20" y1="60" x2="50" y2="75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       
-      {/* Bottom edge (going down) */}
-      <line x1="50" y1="50" x2="50" y2="85" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+      {/* Right face edges (where H will float) */}
+      <line x1="80" y1="20" x2="80" y2="60" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="50" y1="75" x2="80" y2="60" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       
-      {/* Disintegrating edges - fading to pixels */}
-      {/* Left back edge dissolving */}
-      <line x1="20" y1="20" x2="25" y2="40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" opacity="0.7" />
-      <circle cx="25" cy="45" r="2" fill="currentColor" opacity="0.6" />
-      <circle cx="24" cy="52" r="1.5" fill="currentColor" opacity="0.4" />
-      <circle cx="26" cy="58" r="1" fill="currentColor" opacity="0.2" />
+      {/* Bottom back edge */}
+      <line x1="20" y1="60" x2="80" y2="60" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       
-      {/* Right back edge dissolving */}
-      <line x1="80" y1="20" x2="75" y2="40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" opacity="0.7" />
-      <circle cx="75" cy="45" r="2" fill="currentColor" opacity="0.6" />
-      <circle cx="76" cy="52" r="1.5" fill="currentColor" opacity="0.4" />
-      <circle cx="74" cy="58" r="1" fill="currentColor" opacity="0.2" />
+      {/* LEFT FACE - V character */}
+      <line x1="28" y1="35" x2="35" y2="55" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+      <line x1="35" y1="55" x2="42" y2="35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
       
-      {/* Back bottom edge dissolving */}
-      <line x1="25" y1="40" x2="75" y2="40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" opacity="0.6" />
-      <circle cx="30" cy="42" r="1.5" fill="currentColor" opacity="0.5" />
-      <circle cx="40" cy="44" r="1.2" fill="currentColor" opacity="0.3" />
-      <circle cx="50" cy="45" r="1" fill="currentColor" opacity="0.2" />
-      <circle cx="60" cy="44" r="1.2" fill="currentColor" opacity="0.3" />
-      <circle cx="70" cy="42" r="1.5" fill="currentColor" opacity="0.5" />
+      {/* RIGHT FACE - H character */}
+      <line x1="58" y1="35" x2="58" y2="55" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+      <line x1="58" y1="45" x2="72" y2="45" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+      <line x1="72" y1="35" x2="72" y2="55" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
     </svg>
   );
 }
