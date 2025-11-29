@@ -62,11 +62,9 @@ export default function Contact() {
         <Card className="mt-8 bg-primary/5 border-primary/20">
           <CardContent className="pt-8 pb-8">
             <h3 className="text-xl font-bold mb-3">Redes Sociales</h3>
-            <div className="flex gap-4">
-              <a href="#" className="text-primary hover:underline font-semibold">Instagram</a>
-              <a href="#" className="text-primary hover:underline font-semibold">LinkedIn</a>
-              <a href="#" className="text-primary hover:underline font-semibold">Twitter</a>
-            </div>
+            <p className="text-amber-600 dark:text-amber-400 font-semibold">
+              Próximamente
+            </p>
           </CardContent>
         </Card>
       </main>
