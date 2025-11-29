@@ -67,8 +67,9 @@ export default function Pricing() {
             <CardContent className="pt-8 pb-8">
               <h3 className="text-2xl font-bold mb-4">Para Makers</h3>
               <div className="mb-6">
-                <p className="text-4xl font-bold text-primary">6.5%</p>
-                <p className="text-sm text-muted-foreground mt-2">Comisión por proyecto ganado</p>
+                <p className="text-4xl font-bold text-green-600 dark:text-green-400">Gratis</p>
+                <p className="text-sm text-muted-foreground mt-2">Únirse a la plataforma es completamente gratis</p>
+                <p className="text-sm text-muted-foreground mt-1">Solo 6.5% de comisión cuando ganas un proyecto</p>
               </div>
               <ul className="space-y-3 text-sm">
                 <li className="flex gap-3">
@@ -92,13 +93,32 @@ export default function Pricing() {
           </Card>
         </div>
 
-        <Card className="mt-12 bg-primary/5 border-primary/20">
+        <Card className="mt-8 bg-primary/5 border-primary/20">
           <CardContent className="pt-8 pb-8">
             <h3 className="text-xl font-bold mb-3">¿Cómo funciona la comisión?</h3>
             <p className="text-muted-foreground">
               Los makers pagan una comisión de 6.5% sobre cada proyecto ganado. Esta comisión cubre:
               procesamiento de pagos, soporte técnico, garantía de satisfacción y protección del maker.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-8 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900">
+          <CardContent className="pt-8 pb-8">
+            <h3 className="text-xl font-bold mb-3">🚀 Biblioteca de STL - En Desarrollo</h3>
+            <p className="text-muted-foreground mb-4">
+              Estamos trabajando en una nueva funcionalidad que te permitirá subir tus diseños STL 
+              a una biblioteca pública y venderlos directamente a otros usuarios.
+            </p>
+            <div className="space-y-2 text-sm">
+              <p><strong>Próximamente podrás:</strong></p>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>Crear una tienda personal de diseños 3D</li>
+                <li>Vender STL con precios fijos o mínimos</li>
+                <li>Recibir pagos automáticos por cada venta</li>
+                <li>Construir ingresos pasivos con tus modelos 3D</li>
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </main>
