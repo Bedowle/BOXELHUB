@@ -112,7 +112,7 @@ Asunto: SOLICITUD DERECHOS RGPD`;
               </div>
               <div className="border rounded-lg p-4">
                 <h3 className="font-bold mb-2">💬 Datos de Comunicación</h3>
-                <p className="text-sm mb-2"><strong>Qué recogemos:</strong> Mensajes de chat, historial de conversaciones, comentarios y reseñas.</p>
+                <p className="text-sm mb-2"><strong>Qué recogemos:</strong> Historial de conversaciones, comentarios y reseñas.</p>
                 <p className="text-sm"><strong>Cuándo:</strong> Al usar el chat de la plataforma.</p>
               </div>
               <div className="border rounded-lg p-4">
