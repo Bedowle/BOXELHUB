@@ -264,7 +264,6 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Soporte</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => setLocation("/help")} className="hover:text-foreground transition cursor-pointer">Centro de Ayuda</button></li>
                 <li><button onClick={() => setLocation("/contact")} className="hover:text-foreground transition cursor-pointer">Contacto</button></li>
                 <li><button onClick={() => setLocation("/faq")} className="hover:text-foreground transition cursor-pointer">FAQ</button></li>
               </ul>
