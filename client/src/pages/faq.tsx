@@ -5,6 +5,11 @@ import { ArrowLeft } from "lucide-react";
 export default function FAQ() {
   const [, setLocation] = useLocation();
 
+  const handleBack = () => {
+    const previousPath = localStorage.getItem('lastPath') || '/';
+    setLocation(previousPath);
+  };
+
   const faqs = [
     {
       q: "¿Qué es VoxelHub?",
@@ -47,7 +52,7 @@ export default function FAQ() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.history.back()}
+            onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>

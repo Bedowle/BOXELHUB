@@ -3,9 +3,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Upload, Users, CheckCircle, Star, TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useEffect } from "react";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+
+  // Save landing as the current page when it loads
+  useEffect(() => {
+    localStorage.setItem('lastPath', '/');
+  }, []);
 
   return (
     <div className="min-h-screen">

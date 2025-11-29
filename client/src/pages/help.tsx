@@ -5,6 +5,11 @@ import { ArrowLeft, HelpCircle } from "lucide-react";
 export default function Help() {
   const [, setLocation] = useLocation();
 
+  const handleBack = () => {
+    const previousPath = localStorage.getItem('lastPath') || '/';
+    setLocation(previousPath);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur">
@@ -12,7 +17,7 @@ export default function Help() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.history.back()}
+            onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
