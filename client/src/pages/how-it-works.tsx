@@ -102,9 +102,9 @@ export default function HowItWorks() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">4. Paga y Espera</h3>
+                    <h3 className="text-lg font-semibold mb-2">4. Acuerdo Confirmado</h3>
                     <p className="text-muted-foreground">
-                      Coordina el pago directamente con el maker (Stripe, PayPal, transferencia bancaria). Recibe tu proyecto impreso. ¡Así de simple!
+                      Confirman el acuerdo en la plataforma y se coordinan directamente. El maker imprime tu proyecto. ¡Así de simple!
                     </p>
                   </div>
                 </div>
@@ -182,7 +182,7 @@ export default function HowItWorks() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">4. Imprime y Gana</h3>
                     <p className="text-muted-foreground">
-                      Si el cliente confirma, imprime el proyecto. Recibe el pago directamente (sin intermediarios). Construye reputación y gana más proyectos.
+                      Si el cliente confirma, imprime el proyecto. Coordina directamente con el cliente sobre pagos y envío. Construye reputación y gana más proyectos.
                     </p>
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export default function HowItWorks() {
         </div>
 
         {/* VALORES CLAVE */}
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-8">
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-8 mb-8">
           <h2 className="text-2xl font-bold mb-6">¿Por Qué VoxelHub?</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div>
@@ -212,6 +212,24 @@ export default function HowItWorks() {
               <p className="text-sm text-muted-foreground">
                 Chat directo con clientes. Sin bots, sin demoras. Negocia en tiempo real y cierra acuerdos rápido.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* PRÓXIMAS CARACTERÍSTICAS */}
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-8">
+          <h2 className="text-2xl font-bold mb-4">Próximamente: Pagos y Envíos Integrados</h2>
+          <p className="text-muted-foreground mb-4">
+            Estamos trabajando en integrar pagos seguros y gestión de envíos directamente en VoxelHub para hacer el proceso aún más simple.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="font-semibold mb-1">💳 Pagos Integrados</p>
+              <p className="text-muted-foreground">Procesa pagos de forma segura sin salir de la plataforma.</p>
+            </div>
+            <div>
+              <p className="font-semibold mb-1">📦 Envíos Coordinados</p>
+              <p className="text-muted-foreground">Gestiona envíos directamente con seguimiento en tiempo real.</p>
             </div>
           </div>
         </div>
