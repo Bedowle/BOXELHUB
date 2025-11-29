@@ -69,7 +69,6 @@ export default function Pricing() {
               <div className="mb-6">
                 <p className="text-4xl font-bold text-green-600 dark:text-green-400">Gratis</p>
                 <p className="text-sm text-muted-foreground mt-2">Únirse a la plataforma es completamente gratis</p>
-                <p className="text-sm text-muted-foreground mt-1">Solo 6.5% de comisión cuando ganas un proyecto</p>
               </div>
               <ul className="space-y-3 text-sm">
                 <li className="flex gap-3">
@@ -93,12 +92,12 @@ export default function Pricing() {
           </Card>
         </div>
 
-        <Card className="mt-8 bg-primary/5 border-primary/20">
+        <Card className="mt-8 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
           <CardContent className="pt-8 pb-8">
-            <h3 className="text-xl font-bold mb-3">¿Cómo funciona la comisión?</h3>
+            <h3 className="text-xl font-bold mb-3">📦 Sistema de Envíos - En Desarrollo</h3>
             <p className="text-muted-foreground">
-              Los makers pagan una comisión de 6.5% sobre cada proyecto ganado. Esta comisión cubre:
-              procesamiento de pagos, soporte técnico, garantía de satisfacción y protección del maker.
+              Estamos trabajando en un sistema de envíos integrado que te permitirá coordinar entregas 
+              directamente con tus clientes y rastrear paquetes en tiempo real.
             </p>
           </CardContent>
         </Card>
