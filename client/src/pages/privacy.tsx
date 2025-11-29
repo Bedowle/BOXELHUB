@@ -79,12 +79,12 @@ Asunto: SOLICITUD DERECHOS RGPD`;
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-3">1. Responsable del Tratamiento</h2>
             <div className="bg-muted/50 rounded-lg p-4 mb-4 space-y-2 text-sm">
-              <p><strong>Empresa:</strong> [PLACEHOLDER: Razón Social Legal]</p>
-              <p><strong>CIF/NIF:</strong> [PLACEHOLDER: CIF/NIF]</p>
-              <p><strong>Domicilio:</strong> [PLACEHOLDER: Dirección Legal]</p>
+              <p><strong>Nombre del Responsable:</strong> VoxelHub</p>
               <p><strong>Email de Contacto:</strong> support@voxelhub.com</p>
-              <p><strong>Teléfono:</strong> [PLACEHOLDER: Teléfono de contacto]</p>
-              <p><strong>Delegado de Protección de Datos (DPO):</strong> [PLACEHOLDER: Nombre y email] o contacta a support@voxelhub.com con asunto "ATENCIÓN: DPO"</p>
+              <p><strong>Tipo:</strong> Plataforma Web - Marketplace P2P</p>
+              <p><strong>Jurisdicción:</strong> España (regulación RGPD)</p>
+              <p className="mt-3 pt-3 border-t"><strong>Para consultas sobre privacidad o ejercer derechos RGPD:</strong></p>
+              <p>Envía un email a support@voxelhub.com con asunto "SOLICITUD RGPD" incluyendo tu nombre, email y el derecho que solicitas (acceso, rectificación, supresión, etc.). Responderemos en máximo 30 días.</p>
             </div>
           </section>
 
@@ -269,44 +269,67 @@ Asunto: SOLICITUD DERECHOS RGPD`;
             </div>
           </section>
 
-          {/* SECTION 6: COOKIES */}
+          {/* SECTION 6: COOKIES Y TECNOLOGÍAS DE SEGUIMIENTO */}
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-3">6. Cookies y Tecnologías de Seguimiento</h2>
-            <p className="mb-4">
-              VoxelHub utiliza cookies para mejorar tu experiencia. Las clasificamos así:
-            </p>
-            <div className="space-y-3 mb-4">
-              <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-950/20">
-                <h4 className="font-bold">✓ COOKIES ESENCIALES (Siempre Activas)</h4>
-                <p className="text-sm mt-2"><strong>Qué son:</strong> Autenticación, sesión, CSRF, seguridad.</p>
-                <p className="text-sm mt-1"><strong>Duración:</strong> Sesión + 30 días.</p>
-                <p className="text-sm mt-1"><strong>Base legal:</strong> Cumplimiento de contrato.</p>
-                <p className="text-sm mt-1 font-semibold">→ No requieren consentimiento previo.</p>
-              </div>
-              <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-950/20">
-                <h4 className="font-bold">📊 COOKIES ANALÍTICAS (Requieren Consentimiento)</h4>
-                <p className="text-sm mt-2"><strong>Qué son:</strong> Google Analytics, Hotjar (análisis de comportamiento).</p>
-                <p className="text-sm mt-1"><strong>Duración:</strong> 24 meses.</p>
-                <p className="text-sm mt-1"><strong>Base legal:</strong> Consentimiento explícito.</p>
-                <p className="text-sm mt-1"><strong>Ejemplos:</strong> Páginas visitadas, tiempo en sitio, dispositivo usado.</p>
-              </div>
-              <div className="border rounded-lg p-4 bg-purple-50 dark:bg-purple-950/20">
-                <h4 className="font-bold">🎯 COOKIES DE MARKETING (Requieren Consentimiento)</h4>
-                <p className="text-sm mt-2"><strong>Qué son:</strong> Seguimiento de conversiones, retargeting (Facebook Ads, Google Ads).</p>
-                <p className="text-sm mt-1"><strong>Duración:</strong> 12 meses.</p>
-                <p className="text-sm mt-1"><strong>Base legal:</strong> Consentimiento explícito.</p>
-                <p className="text-sm mt-1"><strong>Ejemplos:</strong> Anuncios personalizados basados en tu navegación.</p>
+            
+            <div className="bg-green-50 dark:bg-green-950/30 border-2 border-green-200 dark:border-green-800 rounded-lg p-6 mb-6">
+              <h3 className="font-bold text-lg mb-3 flex items-center gap-2">✓ POLÍTICA: SOLO COOKIES ESENCIALES</h3>
+              <p className="text-sm mb-3">
+                <strong>VoxelHub utiliza únicamente cookies técnicas/esenciales.</strong> No utilizamos cookies analíticas, de marketing, de seguimiento ni de terceros.
+              </p>
+              <div className="space-y-2 text-sm">
+                <p><strong>✓ Qué usamos:</strong> Cookies de autenticación, sesión, seguridad (CSRF)</p>
+                <p><strong>✓ Duración:</strong> Hasta logout (máximo 30 días)</p>
+                <p><strong>✓ Finalidad:</strong> Mantener tu sesión segura, autenticarte y prevenir ataques</p>
+                <p><strong>✓ Consentimiento:</strong> NO requerido (son estrictamente necesarias)</p>
               </div>
             </div>
-            <div className="p-4 bg-muted/50 rounded-lg border">
-              <p className="font-bold mb-2">🍪 Gestionar Cookies</p>
+
+            <h3 className="text-lg font-semibold mb-3">Detalle de Cookies Esenciales</h3>
+            <div className="space-y-3 mb-6">
+              <div className="border rounded-lg p-4">
+                <p className="font-bold text-sm">🔐 session_id</p>
+                <p className="text-sm mt-1"><strong>Propósito:</strong> Identificar tu sesión autenticada</p>
+                <p className="text-sm"><strong>Duración:</strong> Hasta logout o 30 días de inactividad</p>
+              </div>
+              <div className="border rounded-lg p-4">
+                <p className="font-bold text-sm">🛡️ csrf_token</p>
+                <p className="text-sm mt-1"><strong>Propósito:</strong> Proteger contra ataques de falsificación de solicitudes (CSRF)</p>
+                <p className="text-sm"><strong>Duración:</strong> Sesión</p>
+              </div>
+              <div className="border rounded-lg p-4">
+                <p className="font-bold text-sm">📌 theme_preference</p>
+                <p className="text-sm mt-1"><strong>Propósito:</strong> Guardar tu preferencia de tema claro/oscuro</p>
+                <p className="text-sm"><strong>Duración:</strong> 1 año</p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+              <h4 className="font-bold mb-2">🚫 Qué NO hacemos</h4>
               <ul className="text-sm space-y-2">
-                <li><strong>Revocar consentimiento:</strong> [PLACEHOLDER: Link a cookie settings]</li>
-                <li><strong>Rechazar nuevas cookies:</strong> Configuración → Privacidad → Cookies</li>
-                <li><strong>Usar "Do Not Track":</strong> Navegador → Privacidad → Enviar DNT</li>
-                <li><strong>Cookies de terceros:</strong> Gestiona en tu navegador directamente</li>
+                <li>❌ No usamos Google Analytics ni herramientas de analítica</li>
+                <li>❌ No usamos cookies de retargeting o publicidad</li>
+                <li>❌ No compartimos datos con plataformas de publicidad (Meta, Google Ads)</li>
+                <li>❌ No rastreamos tu comportamiento entre sitios</li>
+                <li>❌ No vendemos datos a terceros para marketing</li>
               </ul>
-              <p className="text-sm mt-3"><strong>Política de Cookies detallada:</strong> <span className="text-primary cursor-pointer hover:underline">[PLACEHOLDER: Link a cookies.html]</span></p>
+            </div>
+
+            <h3 className="text-lg font-semibold mb-3">Tu Control sobre Cookies</h3>
+            <div className="p-4 bg-muted/50 rounded-lg border">
+              <ul className="text-sm space-y-2">
+                <li><strong>✓ Limpiar cookies:</strong> Configuración de navegador → Borrar datos de navegación → Cookies</li>
+                <li><strong>✓ Rechazar cookies:</strong> Como las esenciales son obligatorias, no puedes rechazarlas, pero puedes usar modo incógnito</li>
+                <li><strong>✓ Gestión en el navegador:</strong> Chrome/Firefox/Safari → Configuración → Privacidad → Cookies</li>
+              </ul>
+            </div>
+
+            <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-sm font-semibold mb-2">⚠️ Cambios Futuros</p>
+              <p className="text-sm">
+                Si en el futuro activamos cookies analíticas, implementaremos un banner de consentimiento conforme a GDPR. Te notificaremos antes de cualquier cambio.
+              </p>
             </div>
           </section>
 
@@ -391,7 +414,7 @@ Asunto: SOLICITUD DERECHOS RGPD`;
             </div>
           </section>
 
-          {/* SECTION 9: SEGURIDAD */}
+          {/* SECTION 9: MEDIDAS DE SEGURIDAD Y PLAZOS DE CONSERVACIÓN TÉCNICA */}
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-3">9. Medidas de Seguridad (Art. 32 RGPD)</h2>
             <p className="mb-4">
@@ -407,6 +430,15 @@ Asunto: SOLICITUD DERECHOS RGPD`;
                 </ul>
               </div>
               <div className="border-l-4 border-blue-500 pl-4 py-3">
+                <h4 className="font-bold">🛡️ Control de Acceso</h4>
+                <ul className="text-sm mt-2 space-y-1">
+                  <li>• Acceso restringido a datos sensibles</li>
+                  <li>• Autenticación basada en sesiones seguras</li>
+                  <li>• Tokens JWT con expiración</li>
+                  <li>• Validación y sanitización de entrada</li>
+                </ul>
+              </div>
+              <div className="border-l-4 border-purple-500 pl-4 py-3">
                 <h4 className="font-bold">🛡️ Autenticación</h4>
                 <ul className="text-sm mt-2 space-y-1">
                   <li>• Replit Auth (OIDC) - OAuth 2.0 seguro</li>
