@@ -271,7 +271,6 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><button onClick={() => setLocation("/privacy")} className="hover:text-foreground transition cursor-pointer">Privacidad</button></li>
                 <li><button onClick={() => setLocation("/terms")} className="hover:text-foreground transition cursor-pointer">Términos</button></li>
               </ul>
             </div>
