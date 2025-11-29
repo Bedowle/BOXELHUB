@@ -55,7 +55,7 @@ export default function AppHeader() {
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 VoxelHub
               </span>
-              <div className="w-5 h-5 rounded-sm bg-accent flex items-center justify-center text-white text-xs font-bold">
+              <div className="w-5 h-5 rounded-sm bg-accent flex items-center justify-center text-xs font-bold text-[#ff5a1f]">
                 ◼
               </div>
             </div>
