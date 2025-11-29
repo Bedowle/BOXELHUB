@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Printer, Upload, Users, CheckCircle, Star, TrendingUp } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Landing() {
@@ -250,24 +250,24 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Plataforma</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground transition">Acerca de</Link></li>
-                <li><Link href="/how-it-works" className="hover:text-foreground transition">Cómo Funciona</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition">Precios</Link></li>
+                <li><button onClick={() => setLocation("/about")} className="hover:text-foreground transition cursor-pointer">Acerca de</button></li>
+                <li><button onClick={() => setLocation("/how-it-works")} className="hover:text-foreground transition cursor-pointer">Cómo Funciona</button></li>
+                <li><button onClick={() => setLocation("/pricing")} className="hover:text-foreground transition cursor-pointer">Precios</button></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Soporte</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/help" className="hover:text-foreground transition">Centro de Ayuda</Link></li>
-                <li><Link href="/contact" className="hover:text-foreground transition">Contacto</Link></li>
-                <li><Link href="/faq" className="hover:text-foreground transition">FAQ</Link></li>
+                <li><button onClick={() => setLocation("/help")} className="hover:text-foreground transition cursor-pointer">Centro de Ayuda</button></li>
+                <li><button onClick={() => setLocation("/contact")} className="hover:text-foreground transition cursor-pointer">Contacto</button></li>
+                <li><button onClick={() => setLocation("/faq")} className="hover:text-foreground transition cursor-pointer">FAQ</button></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/privacy" className="hover:text-foreground transition">Privacidad</Link></li>
-                <li><Link href="/terms" className="hover:text-foreground transition">Términos</Link></li>
+                <li><button onClick={() => setLocation("/privacy")} className="hover:text-foreground transition cursor-pointer">Privacidad</button></li>
+                <li><button onClick={() => setLocation("/terms")} className="hover:text-foreground transition cursor-pointer">Términos</button></li>
               </ul>
             </div>
           </div>

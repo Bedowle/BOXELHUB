@@ -31,6 +31,13 @@ import ChatsSplitPage from "@/pages/chats-split";
 import VerifyEmailPage from "@/pages/verify-email";
 import ResetPasswordPage from "@/pages/reset-password";
 import WhatIsSTLPage from "@/pages/what-is-stl";
+import About from "@/pages/about";
+import Pricing from "@/pages/pricing";
+import Help from "@/pages/help";
+import Contact from "@/pages/contact";
+import FAQ from "@/pages/faq";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 // MARKETPLACE FEATURES - HIDDEN (uncomment when needed)
 // import MakerMarketplaceUpload from "@/pages/maker-marketplace-upload";
 // import MarketplaceDesignChatsPage from "@/pages/marketplace-design-chats";
@@ -56,6 +63,15 @@ function Router() {
 
       {/* What is STL route (accessible to all) */}
       <Route path="/what-is-stl" component={WhatIsSTLPage} />
+
+      {/* Footer links (accessible to all) */}
+      <Route path="/about" component={About} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/help" component={Help} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/faq" component={FAQ} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
 
       {/* Auth route (accessible to all) */}
       <Route path="/auth" component={AuthPage} />
