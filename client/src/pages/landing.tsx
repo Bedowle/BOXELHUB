@@ -276,7 +276,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 VoxelHub. Todos los derechos reservados.</p>
+            <p>&copy; 2025 VoxelHub. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

@@ -87,7 +87,7 @@ export default function Terms() {
 
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mt-8">
             <p className="text-sm">
-              Última actualización: Noviembre 2024
+              Última actualización: Noviembre 2025
             </p>
             <p className="text-sm mt-2">
               Si tienes preguntas sobre estos términos, contacta a support@voxelhub.com

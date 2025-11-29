@@ -1,0 +1,20 @@
+Genera en español, en formato Markdown, los Términos y Condiciones para una plataforma tipo Wallapop llamada VoxelHub que solo pone en contacto a usuarios. Usa lenguaje claro y preciso, optimizado para España y la UE. Inserta [PLACEHOLDER] donde haya datos variables. Incluye estas secciones mínimas:
+- Encabezado: Título, fecha de entrada en vigor [FECHA], responsable del servicio [RESPONSABLE], email de contacto [EMAIL], dirección o apartado postal [DIRECCIÓN].
+- Resumen ejecutivo: 2–3 frases que expliquen en términos simples qué hace la plataforma y las obligaciones principales del usuario.
+- Ámbito y aceptación: qué servicios cubre la plataforma, cómo se aceptan los términos (registro, tickbox, uso continuado) y requisitos de edad.
+- Definiciones: Usuario, Comprador, Vendedor, Cuenta, Contenido, Servicios.
+- Registro y cuenta: obligaciones del usuario, veracidad de datos, seguridad de credenciales, suspensión y cierre de cuentas.
+- Funcionamiento del servicio: la plataforma solo facilita el contacto; no media ni garantiza transacciones; responsabilidad limitada sobre acuerdos entre usuarios.
+- Contenido y archivos: reglas sobre lo que pueden publicar los usuarios, prohibiciones (ilegal, infractor, peligroso), y responsabilidad del autor del contenido.
+- Propiedad intelectual: titularidad de la plataforma; licencia limitada que los usuarios otorgan para mostrar su contenido en la plataforma.
+- Pagos y transacciones: si aplica, indicar que los pagos se realizan entre usuarios o a través de terceros; lista de pasarelas [PROVEEDORES]; política de reembolsos básica [PLACEHOLDER].
+- Limitación de responsabilidad: exclusiones y límites razonables conforme a la ley aplicable.
+- Protección de datos: enlace a la Política de Privacidad [ENLACE]; breve mención de responsabilidades del usuario sobre datos que comparta.
+- Modificaciones: derecho a modificar términos y cómo se notificará a los usuarios.
+- Duración y terminación: vigencia, causas de terminación y efectos sobre contenido y datos.
+- Ley aplicable y resolución de conflictos: indicar España como jurisdicción por defecto [JURISDICCIÓN] y referencia a ODR si procede.
+- Contacto: cómo presentar reclamaciones o consultas [EMAIL].
+Al final incluye:
+- Un checklist de 8 puntos para revisión legal antes de publicar (por ejemplo: DPA con proveedores, cláusula de exención, política de cookies, formulario de contacto, etc.).
+- Nota final recomendando revisión por abogado local y adaptación fiscal si procede.
+Entrega el documento listo para publicar en Markdown con anclas para cada sección y todos los [PLACEHOLDER] visibles para completar.
