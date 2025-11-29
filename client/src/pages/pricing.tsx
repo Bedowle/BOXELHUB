@@ -28,9 +28,11 @@ export default function Pricing() {
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-4">100% Transparente</h2>
-          <p className="text-center text-muted-foreground text-lg">
-            Completamente gratis para clientes y makers. Sin comisiones ocultas.
+          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            100% Gratis. Siempre.
+          </h2>
+          <p className="text-center text-lg font-semibold text-foreground">
+            Sin comisiones. Sin sorpresas. Sin límites.
           </p>
         </section>
 
