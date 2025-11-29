@@ -47,14 +47,14 @@ export default function Contact() {
             <CardContent className="pt-8 pb-8">
               <div className="flex items-center gap-3 mb-4">
                 <MessageSquare className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-bold">Chat en Vivo</h3>
+                <h3 className="text-xl font-bold">WhatsApp</h3>
               </div>
               <p className="text-muted-foreground mb-4">
-                Soporte inmediato disponible 24/7
+                Contacta con nosotros directamente
               </p>
-              <Button variant="outline" className="w-full">
-                Iniciar Chat
-              </Button>
+              <p className="text-primary hover:underline font-semibold cursor-pointer">
+                +34 XXX XXX XXX
+              </p>
             </CardContent>
           </Card>
         </div>
