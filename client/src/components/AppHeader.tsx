@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { LogOut, MessageCircle, Sparkles, Package, Briefcase } from "lucide-react";
+import CubeIcon from "./CubeIcon";
 
 interface MakerBalance {
   totalBalance: string;
@@ -51,13 +52,11 @@ export default function AppHeader() {
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             data-testid="button-logo"
           >
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 VoxelHub
               </span>
-              <div className="w-5 h-5 rounded-sm bg-accent flex items-center justify-center text-white text-xs font-bold">
-                ◼
-              </div>
+              <CubeIcon />
             </div>
           </button>
 
