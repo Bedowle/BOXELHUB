@@ -38,10 +38,6 @@ export default function Help() {
                 <span><strong>Email:</strong> support@voxelhub.com</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-primary">💬</span>
-                <span><strong>Chat en vivo:</strong> Disponible 24/7</span>
-              </li>
-              <li className="flex gap-3">
                 <span className="text-primary">📱</span>
                 <span><strong>WhatsApp:</strong> +34 XXX XXX XXX</span>
               </li>
