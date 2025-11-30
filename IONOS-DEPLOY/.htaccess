@@ -1,0 +1,31 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # No reescribir archivos existentes
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Reescribir todas las rutas a index.html para SPA
+  RewriteRule ^(?!api/|ws).*$ index.html [L]
+  
+  # Permitir que las peticiones a /api y /ws pasen al backend
+  RewriteCond %{REQUEST_URI} ^/api/
+  RewriteRule ^(.*)$ - [L]
+  
+  # Gzip compression
+  <IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+  </IfModule>
+  
+  # Cache headers para assets
+  <IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+  </IfModule>
+</IfModule>
