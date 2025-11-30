@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npm run build",
+  "startCommand": "npm start",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "server/index-prod.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
+}
