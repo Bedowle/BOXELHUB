@@ -3019,3 +3019,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(500).json({ message: "Failed to check access" });
   }
 });
+// Crear servidor HTTP
+const httpServer = createServer(app);
+
+// Configurar WebSocket
+const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+wss.on("connection", (ws) => {
+  console.log("WebSocket client connected");
+
+  ws.on("message", (data) => {
+    try {
+      const message = JSON.parse(data.toString());
+      if (message.type === "register" && message.userId) {
+        wsClients.set(message.userId, ws);
+        console.log(`User ${message.userId} registered for WebSocket notifications`);
+      }
+    } catch (error) {
+      console.error("Error processing WebSocket message:", error);
+    }
+  });
+
+  ws.on("close", () => {
+    for (const [userId, client] of wsClients.entries()) {
+      if (client === ws) {
+        wsClients.delete(userId);
+        console.log(`User ${userId} disconnected from WebSocket`);
+        break;
+      }
+    }
+  });
+});
+
+return httpServer;
+}
