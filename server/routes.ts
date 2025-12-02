@@ -14,7 +14,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
       if (!userId) {
