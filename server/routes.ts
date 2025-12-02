@@ -16,7 +16,6 @@ import { z } from "zod";
 
 import { getUncachableStripeClient } from "./stripeClient";
 import { getPayPalClientId } from "./paypalClient";
-import { isAuthenticated, getAuthenticatedUserId } from "./replitAuth";
 
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
