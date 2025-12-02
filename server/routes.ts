@@ -20,14 +20,23 @@ import { getPayPalClientId } from "./paypalClient";
 // WebSocket clients map
 const wsClients = new Map<string, WebSocket>();
 
+// Auth middleware and helpers (replacement for isAuthenticated/getAuthenticatedUserId)
+function requireAuth(req: any, res: any, next: any) {
+  if (!req.session?.userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  next();
+}
+function getAuthenticatedUserId(req: any) {
+  return req.session?.userId;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  app.get("/api/auth/user", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -36,13 +45,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/user/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user/:id", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const user = await storage.getUser(id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (!user) return res.status(404).json({ message: "User not found" });
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -51,12 +58,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Maker balance endpoints (MUST be before /api/maker/:id to avoid param matching)
-  app.get("/api/maker/balance", isAuthenticated, async (req: any, res) => {
+  app.get("/api/maker/balance", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const totalBalance = await storage.getMakerBalance(userId);
       const availableBalance = await storage.getMakerAvailableBalance(userId);
@@ -75,12 +80,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update payout method
-  app.post("/api/maker/payout-method", isAuthenticated, async (req: any, res) => {
+  app.post("/api/maker/payout-method", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const {
         method,
@@ -118,12 +121,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get maker payouts
-  app.get("/api/maker/payouts", isAuthenticated, async (req: any, res) => {
+  app.get("/api/maker/payouts", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const payouts = await storage.getMakerPayouts(userId);
       res.json(payouts);
@@ -136,12 +137,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify payout status against Stripe (real verification)
-  app.get("/api/maker/verify-payouts", isAuthenticated, async (req: any, res) => {
+  app.get("/api/maker/verify-payouts", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const stripe = await getUncachableStripeClient();
       const payouts = await storage.getMakerPayouts(userId);
@@ -154,25 +153,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const stripeStatus = await stripe.payouts.retrieve(
                 payout.stripePayoutId
               );
-
               console.log(
                 `[Payout Verification] ${payout.id}: Stripe status = ${stripeStatus.status}`
               );
 
               let newStatus = payout.status;
-              if (stripeStatus.status === "paid") {
-                newStatus = "completed";
-              } else if (
+              if (stripeStatus.status === "paid") newStatus = "completed";
+              else if (
                 stripeStatus.status === "in_transit" ||
                 stripeStatus.status === "pending"
-              ) {
+              )
                 newStatus = "processing";
-              } else if (
+              else if (
                 stripeStatus.status === "failed" ||
                 stripeStatus.status === "canceled"
-              ) {
+              )
                 newStatus = "failed";
-              }
 
               if (newStatus !== payout.status) {
                 await storage.updatePayoutStatus(
@@ -223,12 +219,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Request payout
-  app.post("/api/maker/request-payout", isAuthenticated, async (req: any, res) => {
+  app.post("/api/maker/request-payout", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const { amount } = req.body;
       if (!amount || parseFloat(amount) <= 0) {
@@ -237,7 +231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const profile = await storage.getMakerProfile(userId);
       if (!profile || !profile.payoutMethod) {
-        return res.status(400).json({ message: "Please configure a payout method first" });
+        return res
+          .status(400)
+          .json({ message: "Please configure a payout method first" });
       }
 
       // Verify connected account for Stripe/PayPal
@@ -663,7 +659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Endpoint to check Stripe bank account status
-  app.get("/api/maker/stripe-status", isAuthenticated, async (req: any, res) => {
+  app.get("/api/maker/stripe-status", requireAuth, async (req: any, res) => {
     try {
       const stripe = await getUncachableStripeClient();
       const accounts = await (stripe.accounts as any).listExternalAccounts("self");
@@ -694,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/maker/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/maker/:id", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const makerProfile = await storage.getMakerProfile(id);
@@ -714,12 +710,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/user/type", isAuthenticated, async (req: any, res) => {
+  app.put("/api/user/type", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const { userType } = req.body;
       if (!userType || !["client", "maker"].includes(userType)) {
@@ -729,9 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (!user) return res.status(404).json({ message: "User not found" });
 
       await storage.upsertUser({
         id: userId,
@@ -751,12 +743,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update profile data (firstName, lastName, username, location)
-  app.post("/api/user/:userId/profile", isAuthenticated, async (req: any, res) => {
+  app.post("/api/user/:userId/profile", requireAuth, async (req: any, res) => {
     try {
       const authenticatedUserId = getAuthenticatedUserId(req);
-      if (!authenticatedUserId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!authenticatedUserId) return res.status(401).json({ message: "Unauthorized" });
 
       const { userId } = req.params;
 
@@ -769,9 +759,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { firstName, lastName, location, showFullName } = req.body;
       const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (!user) return res.status(404).json({ message: "User not found" });
 
       await storage.upsertUser({
         id: userId,
@@ -794,54 +782,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload profile image
-  app.post(
-    "/api/user/:userId/profile-image",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const authenticatedUserId = getAuthenticatedUserId(req);
-        if (!authenticatedUserId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.post("/api/user/:userId/profile-image", requireAuth, async (req: any, res) => {
+    try {
+      const authenticatedUserId = getAuthenticatedUserId(req);
+      if (!authenticatedUserId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { userId } = req.params;
+      const { userId } = req.params;
 
-        // Only allow editing your own profile
-        if (authenticatedUserId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "Cannot edit another user's profile" });
-        }
-
-        const { profileImageUrl } = req.body;
-        if (!profileImageUrl) {
-          return res
-            .status(400)
-            .json({ message: "profileImageUrl is required" });
-        }
-
-        const user = await storage.getUser(userId);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
-
-        await storage.upsertUser({
-          id: userId,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl,
-          userType: user.userType,
-        });
-
-        const updated = await storage.getUser(userId);
-        res.json(updated);
-      } catch (error) {
-        console.error("Error uploading profile image:", error);
-        res.status(500).json({ message: "Failed to upload profile image" });
+      // Only allow editing your own profile
+      if (authenticatedUserId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "Cannot edit another user's profile" });
       }
+
+      const { profileImageUrl } = req.body;
+      if (!profileImageUrl) {
+        return res
+          .status(400)
+          .json({ message: "profileImageUrl is required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      await storage.upsertUser({
+        id: userId,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl,
+        userType: user.userType,
+      });
+
+      const updated = await storage.getUser(userId);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      res.status(500).json({ message: "Failed to upload profile image" });
     }
-  );
+  });
 
   // Registration endpoint
   app.post("/api/auth/register", async (req: any, res) => {
@@ -903,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         message: "Registration successful. Check your email for verification link.",
         user,
-        verificationToken, // Send token in response for testing
+        verificationToken,
       });
     } catch (error: any) {
       console.error("Error with registration:", error);
@@ -917,9 +897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/verify-email", async (req: any, res) => {
     try {
       const { token } = req.body;
-      if (!token) {
-        return res.status(400).json({ message: "Token is required" });
-      }
+      if (!token) return res.status(400).json({ message: "Token is required" });
 
       const email = await storage.verifyEmailToken(token, "verification");
       if (!email) {
@@ -955,9 +933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.loginUser(email, password);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
+      if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
       // Create session
       req.session.userId = user.id;
@@ -971,12 +947,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project routes
-  app.get("/api/projects/my-projects", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/my-projects", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "client") {
@@ -986,9 +960,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const projects = await storage.getProjects({ userId });
-      const limitedProjects = projects.slice(0, 50); // Hard limit
+      const limitedProjects = projects.slice(0, 50);
 
-      // Chunked loading - max 5 concurrent
       const projectsWithBids: any[] = [];
       for (let i = 0; i < limitedProjects.length; i += 5) {
         const chunk = limitedProjects.slice(i, i + 5);
@@ -1008,12 +981,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/projects/available", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/available", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -1028,7 +999,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projects = await storage.getProjects({ status: "active" });
       const paginatedProjects = projects.slice(offset, offset + limit);
 
-      // Chunked loading - max 3 concurrent for faster response
       const projectsWithBids: any[] = [];
       for (let i = 0; i < paginatedProjects.length; i += 3) {
         const chunk = paginatedProjects.slice(i, i + 3);
@@ -1048,12 +1018,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/projects/my-bids", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/my-bids", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -1065,16 +1033,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = Math.min(parseInt(req.query.limit || "15"), 50);
       const offset = parseInt(req.query.offset || "0");
 
-      // Get all bids from this maker
       const bids = await storage.getBidsByMaker(userId);
-
-      // Get unique project IDs with pagination
       const projectIds = [...new Set(bids.map((b) => b.projectId))].slice(
         offset,
         offset + limit
       );
 
-      // Get projects for those IDs with chunking
       const projects: any[] = [];
       for (let i = 0; i < projectIds.length; i += 5) {
         const chunk = projectIds.slice(i, i + 5);
@@ -1084,10 +1048,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         projects.push(...chunkResults);
       }
 
-      // Filter out any null projects
       const validProjects = projects.filter((p) => p !== undefined) as any[];
 
-      // Add bid count for each project with chunking
       const projectsWithBids: any[] = [];
       for (let i = 0; i < validProjects.length; i += 5) {
         const chunk = validProjects.slice(i, i + 5);
@@ -1107,12 +1069,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/projects/stats", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/stats", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "client") {
@@ -1130,40 +1090,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get(
-    "/api/projects/total-unread-bids",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/total-unread-bids", requireAuth, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const user = await storage.getUser(userId);
-        if (user?.userType !== "client") {
-          return res
-            .status(403)
-            .json({ message: "Only clients can check unread bids" });
-        }
-
-        const totalUnread = await storage.getTotalUnreadBidsForClient(userId);
-        res.json({ totalUnread });
-      } catch (error) {
-        console.error("Error fetching total unread bids:", error);
-        res.status(500).json({ message: "Failed to fetch total unread bids" });
+      const user = await storage.getUser(userId);
+      if (user?.userType !== "client") {
+        return res
+          .status(403)
+          .json({ message: "Only clients can check unread bids" });
       }
-    }
-  );
 
-  app.get("/api/projects/:id", isAuthenticated, async (req: any, res) => {
+      const totalUnread = await storage.getTotalUnreadBidsForClient(userId);
+      res.json({ totalUnread });
+    } catch (error) {
+      console.error("Error fetching total unread bids:", error);
+      res.status(500).json({ message: "Failed to fetch total unread bids" });
+    }
+  });
+
+  app.get("/api/projects/:id", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
 
-      // First try to get active project
       let project = await storage.getProject(id);
 
-      // If not found, try to get deleted project (anyone can view deleted projects for chat context)
       if (!project) {
         const deletedProject = await storage.getProjectIncludeDeleted(id);
         if (deletedProject && deletedProject.deletedAt) {
@@ -1171,9 +1123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
       res.json(project);
     } catch (error) {
@@ -1182,12 +1132,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", isAuthenticated, async (req: any, res) => {
+  app.post("/api/projects", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "client") {
@@ -1196,7 +1144,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Only clients can create projects" });
       }
 
-      // Check project limit (10 active projects max)
       const activeCount = await storage.getActiveProjectCount(userId);
       if (activeCount >= 10) {
         return res
@@ -1206,15 +1153,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validated = insertProjectSchema.parse(req.body);
 
-      // Ensure arrays exist for multi-STL support
-      if (!validated.stlFileNames) {
-        validated.stlFileNames = [];
-      }
-      if (!validated.stlFileContents) {
-        validated.stlFileContents = [];
-      }
+      if (!validated.stlFileNames) validated.stlFileNames = [];
+      if (!validated.stlFileContents) validated.stlFileContents = [];
 
-      // If legacy fields are set but arrays are empty, populate arrays
       if (validated.stlFileName && validated.stlFileNames.length === 0) {
         validated.stlFileNames = [validated.stlFileName];
       }
@@ -1232,27 +1173,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projects/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/projects/:id", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const { id } = req.params;
       const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-      // Only project owner can delete
       if (project.userId !== userId) {
         return res
           .status(403)
           .json({ message: "You can only delete your own projects" });
       }
 
-      // Completed projects cannot be deleted - they serve as proof of completion
       if (project.status === "completed") {
         return res.status(400).json({
           message:
@@ -1260,13 +1195,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Reject all pending bids associated with the project
       const projectBids = await storage.getBidsByProject(id);
       for (const bid of projectBids) {
         if (bid.status === "pending") {
           await storage.updateBidStatus(bid.id, "rejected");
 
-          // Notify maker via WebSocket about bid rejection
           const makerWs = wsClients.get(bid.makerId);
           if (makerWs && makerWs.readyState === WebSocket.OPEN) {
             makerWs.send(
@@ -1291,36 +1224,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bid routes
-  app.get("/api/projects/:id/bids", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/:id/bids", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-      // Only project owner or makers can see bids
       if (user?.userType === "client" && project.userId !== userId) {
         return res
           .status(403)
           .json({ message: "You can only see bids for your own projects" });
       }
 
-      // Mark bids as read if client is viewing their project
       if (user?.userType === "client" && project.userId === userId) {
         await storage.markBidsAsRead(id);
       }
 
       const bids = await storage.getBidsByProject(id);
-      const limitedBids = bids.slice(0, 20); // Limit to first 20 to avoid slowness
+      const limitedBids = bids.slice(0, 20);
 
-      // Populate maker information with reduced concurrency
       const bidsWithMakers = await Promise.all(
         limitedBids.map(async (bid) => {
           const maker = await storage.getUser(bid.makerId);
@@ -1339,46 +1265,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get(
-    "/api/projects/:id/unread-bid-count",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { id } = req.params;
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const user = await storage.getUser(userId);
-        const project = await storage.getProject(id);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
-
-        // Only project owner can check unread bids count
-        if (user?.userType !== "client" || project.userId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "You can only check bids for your own projects" });
-        }
-
-        const unreadCount = await storage.getUnreadBidCount(id);
-        res.json({ unreadCount });
-      } catch (error) {
-        console.error("Error fetching unread bid count:", error);
-        res.status(500).json({ message: "Failed to fetch unread bid count" });
-      }
-    }
-  );
-
-  app.get("/api/projects/:id/my-bid", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/:id/unread-bid-count", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+      const user = await storage.getUser(userId);
+      const project = await storage.getProject(id);
+      if (!project) return res.status(404).json({ message: "Project not found" });
+
+      if (user?.userType !== "client" || project.userId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "You can only check bids for your own projects" });
       }
+
+      const unreadCount = await storage.getUnreadBidCount(id);
+      res.json({ unreadCount });
+    } catch (error) {
+      console.error("Error fetching unread bid count:", error);
+      res.status(500).json({ message: "Failed to fetch unread bid count" });
+    }
+  });
+
+  app.get("/api/projects/:id/my-bid", requireAuth, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -1395,100 +1310,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get(
-    "/api/projects/:id/accepted-bid",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { id } = req.params;
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/:id/accepted-bid", requireAuth, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const user = await storage.getUser(userId);
-        const project = await storage.getProject(id);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
+      const user = await storage.getUser(userId);
+      const project = await storage.getProject(id);
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-        // Only project owner can see accepted bid
-        if (user?.userType === "client" && project.userId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "You can only see bids for your own projects" });
-        }
-
-        const bids = await storage.getBidsByProject(id);
-        const acceptedBid = bids.find((b) => b.status === "accepted");
-        if (!acceptedBid) {
-          return res.json(null);
-        }
-
-        // Populate maker information
-        const maker = await storage.getUser(acceptedBid.makerId);
-        const makerProfile = maker ? await storage.getMakerProfile(maker.id) : null;
-
-        res.json({
-          ...acceptedBid,
-          maker: maker ? { ...maker, makerProfile } : undefined,
-        });
-      } catch (error) {
-        console.error("Error fetching accepted bid:", error);
-        res.status(500).json({ message: "Failed to fetch accepted bid" });
+      if (user?.userType === "client" && project.userId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "You can only see bids for your own projects" });
       }
+
+      const bids = await storage.getBidsByProject(id);
+      const acceptedBid = bids.find((b) => b.status === "accepted");
+      if (!acceptedBid) return res.json(null);
+
+      const maker = await storage.getUser(acceptedBid.makerId);
+      const makerProfile = maker ? await storage.getMakerProfile(maker.id) : null;
+
+      res.json({
+        ...acceptedBid,
+        maker: maker ? { ...maker, makerProfile } : undefined,
+      });
+    } catch (error) {
+      console.error("Error fetching accepted bid:", error);
+      res.status(500).json({ message: "Failed to fetch accepted bid" });
     }
-  );
+  });
 
-  app.get(
-    "/api/projects/:id/download-stl",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { id } = req.params;
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/:id/download-stl", requireAuth, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const project = await storage.getProject(id);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
+      const project = await storage.getProject(id);
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-        // Deleted projects cannot have STL downloaded
-        if (project.deletedAt) {
-          return res
-            .status(403)
-            .json({ message: "Cannot download STL from deleted projects" });
-        }
-
-        // Makers can download STL files without any restrictions
-        res.json({ fileName: project.stlFileName });
-      } catch (error) {
-        console.error("Error downloading STL:", error);
-        res.status(500).json({ message: "Failed to download STL" });
+      if (project.deletedAt) {
+        return res
+          .status(403)
+          .json({ message: "Cannot download STL from deleted projects" });
       }
+
+      res.json({ fileName: project.stlFileName });
+    } catch (error) {
+      console.error("Error downloading STL:", error);
+      res.status(500).json({ message: "Failed to download STL" });
     }
-  );
+  });
 
   app.get("/api/projects/:id/stl-content", async (req: any, res) => {
     try {
       const { id } = req.params;
       const index = parseInt(req.query.index || "0");
       const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-      // Deleted projects cannot have STL served
       if (project.deletedAt) {
         return res
           .status(403)
           .json({ message: "Cannot access STL from deleted projects" });
       }
 
-      // Try to use new multi-STL format first, fall back to legacy format
       let stlContent: string | undefined;
       const stlFileContents = (project as any).stlFileContents;
 
@@ -1499,15 +1388,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           stlContent = stlFileContents[0];
         }
       } else {
-        // Fallback to legacy single file
         stlContent = (project as any).stlFileContent;
       }
 
-      if (!stlContent) {
-        return res.status(404).json({ message: "STL file not found" });
-      }
+      if (!stlContent) return res.status(404).json({ message: "STL file not found" });
 
-      // Convert base64 to binary
       const binaryData = Buffer.from(stlContent, "base64");
       res.type("application/octet-stream").send(binaryData);
     } catch (error) {
@@ -1516,40 +1401,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put(
-    "/api/projects/:id/mark-bids-read",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { id: projectId } = req.params;
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const project = await storage.getProject(projectId);
-        if (!project || project.userId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "You can only mark bids as read for your own projects" });
-        }
-
-        await storage.markBidsAsRead(projectId);
-        res.json({ message: "Bids marked as read" });
-      } catch (error) {
-        console.error("Error marking bids as read:", error);
-        res.status(500).json({ message: "Failed to mark bids as read" });
-      }
-    }
-  );
-
-  app.post("/api/projects/:id/bids", isAuthenticated, async (req: any, res) => {
+  app.put("/api/projects/:id/mark-bids-read", requireAuth, async (req: any, res) => {
     try {
       const { id: projectId } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+      const project = await storage.getProject(projectId);
+      if (!project || project.userId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "You can only mark bids as read for your own projects" });
       }
+
+      await storage.markBidsAsRead(projectId);
+      res.json({ message: "Bids marked as read" });
+    } catch (error) {
+      console.error("Error marking bids as read:", error);
+      res.status(500).json({ message: "Failed to mark bids as read" });
+    }
+  });
+
+  app.post("/api/projects/:id/bids", requireAuth, async (req: any, res) => {
+    try {
+      const { id: projectId } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -1558,7 +1435,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Only makers can submit bids" });
       }
 
-      // Check if maker has completed profile
       const profile = await storage.getMakerProfile(userId);
       if (!profile) {
         return res
@@ -1566,18 +1442,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Please complete your maker profile first" });
       }
 
-      // Check project exists and is active
       const project = await storage.getProject(projectId);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
+      if (!project) return res.status(404).json({ message: "Project not found" });
       if (project.status !== "active") {
         return res
           .status(400)
           .json({ message: "This project is no longer accepting bids" });
       }
 
-      // Check if maker already has an active bid for this project
       const existingBid = await storage.getMakerBidForProject(userId, projectId);
       if (existingBid && existingBid.status !== "rejected") {
         return res
@@ -1592,7 +1464,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         makerId: userId,
       });
 
-      // Notify project owner via WebSocket
       const ownerWs = wsClients.get(project.userId);
       if (ownerWs && ownerWs.readyState === WebSocket.OPEN) {
         ownerWs.send(
@@ -1611,13 +1482,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/bids/:id/accept", isAuthenticated, async (req: any, res) => {
+  app.put("/api/bids/:id/accept", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "client") {
@@ -1627,9 +1496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const bid = await storage.getBid(id);
-      if (!bid) {
-        return res.status(404).json({ message: "Bid not found" });
-      }
+      if (!bid) return res.status(404).json({ message: "Bid not found" });
 
       const project = await storage.getProject(bid.projectId);
       if (!project || project.userId !== userId) {
@@ -1638,19 +1505,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "You can only accept bids for your own projects" });
       }
 
-      // Update bid status
       await storage.updateBidStatus(id, "accepted");
-
-      // Update project status to completed
       await storage.updateProjectStatus(bid.projectId, "completed");
 
-      // Reject all other pending bids for this project
       const allBids = await storage.getBidsByProject(bid.projectId);
       for (const otherBid of allBids) {
         if (otherBid.id !== id && otherBid.status === "pending") {
           await storage.updateBidStatus(otherBid.id, "rejected");
 
-          // Notify other makers via WebSocket
           const makerWs = wsClients.get(otherBid.makerId);
           if (makerWs && makerWs.readyState === WebSocket.OPEN) {
             makerWs.send(
@@ -1664,7 +1526,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Notify accepted maker via WebSocket
       const acceptedMakerWs = wsClients.get(bid.makerId);
       if (acceptedMakerWs && acceptedMakerWs.readyState === WebSocket.OPEN) {
         acceptedMakerWs.send(
@@ -1683,13 +1544,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/bids/:id/reject", isAuthenticated, async (req: any, res) => {
+  app.put("/api/bids/:id/reject", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "client") {
@@ -1699,9 +1558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const bid = await storage.getBid(id);
-      if (!bid) {
-        return res.status(404).json({ message: "Bid not found" });
-      }
+      if (!bid) return res.status(404).json({ message: "Bid not found" });
 
       const project = await storage.getProject(bid.projectId);
       if (!project || project.userId !== userId) {
@@ -1712,7 +1569,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.updateBidStatus(id, "rejected");
 
-      // Notify maker via WebSocket
       const makerWs = wsClients.get(bid.makerId);
       if (makerWs && makerWs.readyState === WebSocket.OPEN) {
         makerWs.send(
@@ -1731,32 +1587,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/bids/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/bids/:id", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const bid = await storage.getBid(id);
-      if (!bid) {
-        return res.status(404).json({ message: "Bid not found" });
-      }
+      if (!bid) return res.status(404).json({ message: "Bid not found" });
 
-      // Only the maker who created the bid can edit it
       if (bid.makerId !== userId) {
         return res
           .status(403)
           .json({ message: "Only the bid creator can edit it" });
       }
 
-      // Can only edit if bid is pending
       if (bid.status !== "pending") {
         return res.status(400).json({ message: "Can only edit pending bids" });
       }
 
-      // Cannot edit bids for deleted projects
       const project = await storage.getProject(bid.projectId);
       if (!project || project.deletedAt) {
         return res
@@ -1780,32 +1629,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/bids/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/bids/:id", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const bid = await storage.getBid(id);
-      if (!bid) {
-        return res.status(404).json({ message: "Bid not found" });
-      }
+      if (!bid) return res.status(404).json({ message: "Bid not found" });
 
-      // Only the maker who created the bid can delete it
       if (bid.makerId !== userId) {
         return res
           .status(403)
           .json({ message: "Only the bid creator can delete it" });
       }
 
-      // Can only delete if bid is pending
       if (bid.status !== "pending") {
         return res.status(400).json({ message: "Can only delete pending bids" });
       }
 
-      // Cannot delete bids for deleted projects
       const project = await storage.getProject(bid.projectId);
       if (!project || project.deletedAt) {
         return res
@@ -1815,7 +1657,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.deleteBid(id);
 
-      // Notify client via WebSocket
       if (project) {
         const clientWs = wsClients.get(project.userId);
         if (clientWs && clientWs.readyState === WebSocket.OPEN) {
@@ -1836,109 +1677,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put(
-    "/api/bids/:id/confirm-delivery",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { id } = req.params;
-        const { rating, comment } = req.body;
+  app.put("/api/bids/:id/confirm-delivery", requireAuth, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { rating, comment } = req.body;
 
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const user = await storage.getUser(userId);
-        if (user?.userType !== "client") {
-          return res
-            .status(403)
-            .json({ message: "Only clients can confirm delivery" });
-        }
+      const user = await storage.getUser(userId);
+      if (user?.userType !== "client") {
+        return res
+          .status(403)
+          .json({ message: "Only clients can confirm delivery" });
+      }
 
-        if (!rating || rating < 0.5 || rating > 5) {
-          return res.status(400).json({ message: "Valid rating is required" });
-        }
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
+      }
 
-        const bid = await storage.getBid(id);
-        if (!bid) {
-          return res.status(404).json({ message: "Bid not found" });
-        }
+      const bid = await storage.getBid(id);
+      if (!bid) return res.status(404).json({ message: "Bid not found" });
 
-        if (bid.status !== "accepted") {
-          return res
-            .status(400)
-            .json({ message: "Can only confirm delivery for accepted bids" });
-        }
+      if (bid.status !== "accepted") {
+        return res
+          .status(400)
+          .json({ message: "Can only confirm delivery for accepted bids" });
+      }
 
-        const project = await storage.getProject(bid.projectId);
-        if (!project || project.userId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "You can only confirm delivery for your own projects" });
-        }
+      const project = await storage.getProject(bid.projectId);
+      if (!project || project.userId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "You can only confirm delivery for your own projects" });
+      }
 
-        // Create review for maker by client
-        await storage.createReview({
-          projectId: bid.projectId,
-          fromUserId: userId,
-          toUserId: bid.makerId,
-          rating: Number(rating),
-          comment: comment || "",
-        });
+      await storage.createReview({
+        projectId: bid.projectId,
+        fromUserId: userId,
+        toUserId: bid.makerId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
 
-        await storage.confirmBidDelivery(id);
-        await storage.updateProjectStatus(bid.projectId, "completed");
+      await storage.confirmBidDelivery(id);
+      await storage.updateProjectStatus(bid.projectId, "completed");
 
-        // Reject all other pending bids for this project
-        const allBids = await storage.getBidsByProject(bid.projectId);
-        for (const otherBid of allBids) {
-          if (otherBid.id !== id && otherBid.status === "pending") {
-            await storage.updateBidStatus(otherBid.id, "rejected");
+      const allBids = await storage.getBidsByProject(bid.projectId);
+      for (const otherBid of allBids) {
+        if (otherBid.id !== id && otherBid.status === "pending") {
+          await storage.updateBidStatus(otherBid.id, "rejected");
 
-            // Notify other makers via WebSocket
-            const makerWs = wsClients.get(otherBid.makerId);
-            if (makerWs && makerWs.readyState === WebSocket.OPEN) {
-              makerWs.send(
-                JSON.stringify({
-                  type: "bid_rejected",
-                  projectId: bid.projectId,
-                  bidId: otherBid.id,
-                })
-              );
-            }
+          const makerWs = wsClients.get(otherBid.makerId);
+          if (makerWs && makerWs.readyState === WebSocket.OPEN) {
+            makerWs.send(
+              JSON.stringify({
+                type: "bid_rejected",
+                projectId: bid.projectId,
+                bidId: otherBid.id,
+              })
+            );
           }
         }
-
-        // Notify maker via WebSocket
-        const makerWs = wsClients.get(bid.makerId);
-        if (makerWs && makerWs.readyState === WebSocket.OPEN) {
-          makerWs.send(
-            JSON.stringify({
-              type: "delivery_confirmed",
-              projectId: bid.projectId,
-              bidId: id,
-              clientName: user?.firstName || user?.email || "Cliente",
-              projectName: project?.name || "Proyecto",
-              clientId: userId,
-            })
-          );
-        }
-
-        res.json({ message: "Delivery confirmed successfully" });
-      } catch (error) {
-        console.error("Error confirming delivery:", error);
-        res.status(500).json({ message: "Failed to confirm delivery" });
       }
-    }
-  );
 
-  app.get("/api/bids/my-bids", isAuthenticated, async (req: any, res) => {
+      const makerWs = wsClients.get(bid.makerId);
+      if (makerWs && makerWs.readyState === WebSocket.OPEN) {
+        makerWs.send(
+          JSON.stringify({
+            type: "delivery_confirmed",
+            projectId: bid.projectId,
+            bidId: id,
+            clientName: user?.firstName || user?.email || "Cliente",
+            projectName: project?.name || "Proyecto",
+            clientId: userId,
+          })
+        );
+      }
+
+      res.json({ message: "Delivery confirmed successfully" });
+    } catch (error) {
+      console.error("Error confirming delivery:", error);
+      res.status(500).json({ message: "Failed to confirm delivery" });
+    }
+  });
+
+  app.get("/api/bids/my-bids", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -1947,13 +1774,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Only makers can access this endpoint" });
       }
 
-      const limit = Math.min(parseInt(req.query.limit || "15"), 50); // Reduced limit
+      const limit = Math.min(parseInt(req.query.limit || "15"), 50);
       const offset = parseInt(req.query.offset || "0");
 
       const bids = await storage.getBidsByMaker(userId);
       const paginatedBids = bids.slice(offset, offset + limit);
 
-      // Enrich bids with project data (including deleted projects) - limit concurrency to 3
       const enrichedBids: any[] = [];
       for (let i = 0; i < paginatedBids.length; i += 3) {
         const chunk = paginatedBids.slice(i, i + 3);
@@ -1982,12 +1808,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/bids/stats", isAuthenticated, async (req: any, res) => {
+  app.get("/api/bids/stats", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -2004,15 +1828,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/bids/:id/rate-client", isAuthenticated, async (req: any, res) => {
+  app.put("/api/bids/:id/rate-client", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { rating, comment } = req.body;
 
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -2026,9 +1848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const bid = await storage.getBid(id);
-      if (!bid) {
-        return res.status(404).json({ message: "Bid not found" });
-      }
+      if (!bid) return res.status(404).json({ message: "Bid not found" });
 
       if (bid.makerId !== userId) {
         return res
@@ -2042,11 +1862,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Can only rate after delivery is confirmed" });
       }
 
-      // Create review for client by maker
       const project = await storage.getProject(bid.projectId);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
       await storage.createReview({
         projectId: bid.projectId,
@@ -2063,137 +1880,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get(
-    "/api/projects/:projectId/check-rating-by-maker",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { projectId } = req.params;
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/:projectId/check-rating-by-maker", requireAuth, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        // Disable caching for this endpoint to ensure fresh data
-        res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-        res.set("Pragma", "no-cache");
-        res.set("Expires", "0");
+      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
 
-        const project = await storage.getProject(projectId);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-        const bid = await storage.getMakerBidForProject(userId, projectId);
-        if (!bid) {
-          return res.status(404).json({ message: "No bid found for this project" });
-        }
+      const bid = await storage.getMakerBidForProject(userId, projectId);
+      if (!bid) return res.status(404).json({ message: "No bid found for this project" });
 
-        console.log("Checking bid delivery status:", {
-          bidId: bid.id,
-          deliveryConfirmedAt: bid.deliveryConfirmedAt,
-          status: bid.status,
-        });
+      console.log("Checking bid delivery status:", {
+        bidId: bid.id,
+        deliveryConfirmedAt: bid.deliveryConfirmedAt,
+        status: bid.status,
+      });
 
-        const deliveryConfirmed = !!bid.deliveryConfirmedAt;
-        if (!deliveryConfirmed) {
-          return res.json({ hasRated: false, deliveryConfirmed: false });
-        }
-
-        const review = await storage.getReviewForProject(
-          projectId,
-          userId,
-          project.userId
-        );
-        res.json({ hasRated: !!review, deliveryConfirmed: true });
-      } catch (error) {
-        console.error("Error checking rating:", error);
-        res.status(500).json({ message: "Failed to check rating" });
+      const deliveryConfirmed = !!bid.deliveryConfirmedAt;
+      if (!deliveryConfirmed) {
+        return res.json({ hasRated: false, deliveryConfirmed: false });
       }
+
+      const review = await storage.getReviewForProject(
+        projectId,
+        userId,
+        project.userId
+      );
+      res.json({ hasRated: !!review, deliveryConfirmed: true });
+    } catch (error) {
+      console.error("Error checking rating:", error);
+      res.status(500).json({ message: "Failed to check rating" });
     }
-  );
+  });
 
-  app.put(
-    "/api/projects/:projectId/rate-client-from-won-project",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { projectId } = req.params;
-        const { rating, comment } = req.body;
+  app.put("/api/projects/:projectId/rate-client-from-won-project", requireAuth, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const { rating, comment } = req.body;
 
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const user = await storage.getUser(userId);
-        if (user?.userType !== "maker") {
-          return res
-            .status(403)
-            .json({ message: "Only makers can rate clients" });
-        }
-
-        if (!rating || rating < 0.5 || rating > 5) {
-          return res.status(400).json({ message: "Valid rating is required" });
-        }
-
-        const project = await storage.getProject(projectId);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
-
-        const bid = await storage.getMakerBidForProject(userId, projectId);
-        if (!bid) {
-          return res.status(404).json({ message: "No bid found for this project" });
-        }
-
-        if (bid.status !== "accepted" || !bid.deliveryConfirmedAt) {
-          return res
-            .status(400)
-            .json({ message: "Can only rate after delivery is confirmed" });
-        }
-
-        const existingReview = await storage.getReviewForProject(
-          projectId,
-          userId,
-          project.userId
-        );
-        if (existingReview) {
-          return res
-            .status(400)
-            .json({ message: "You have already rated this client" });
-        }
-
-        await storage.createReview({
-          projectId: projectId,
-          fromUserId: userId,
-          toUserId: project.userId,
-          rating: Number(rating),
-          comment: comment || "",
-        });
-
-        res.json({ message: "Client rated successfully" });
-      } catch (error) {
-        console.error("Error rating client:", error);
-        res.status(500).json({ message: "Failed to rate client" });
+      const user = await storage.getUser(userId);
+      if (user?.userType !== "maker") {
+        return res
+          .status(403)
+          .json({ message: "Only makers can rate clients" });
       }
+
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ message: "Project not found" });
+
+      const bid = await storage.getMakerBidForProject(userId, projectId);
+      if (!bid) return res.status(404).json({ message: "No bid found for this project" });
+
+      if (bid.status !== "accepted" || !bid.deliveryConfirmedAt) {
+        return res
+          .status(400)
+          .json({ message: "Can only rate after delivery is confirmed" });
+      }
+
+      const existingReview = await storage.getReviewForProject(
+        projectId,
+        userId,
+        project.userId
+      );
+      if (existingReview) {
+        return res
+          .status(400)
+          .json({ message: "You have already rated this client" });
+      }
+
+      await storage.createReview({
+        projectId: projectId,
+        fromUserId: userId,
+        toUserId: project.userId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
+
+      res.json({ message: "Client rated successfully" });
+    } catch (error) {
+      console.error("Error rating client:", error);
+      res.status(500).json({ message: "Failed to rate client" });
     }
-  );
+  });
 
   // Maker profile routes
-  app.get("/api/maker-profile", isAuthenticated, async (req: any, res) => {
+  app.get("/api/maker-profile", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const profile = await storage.getMakerProfile(userId);
-      if (!profile) {
-        return res.json(null);
-      }
+      if (!profile) return res.json(null);
 
-      // Normalize rating to number
       const normalizedProfile = {
         ...profile,
         rating: profile.rating ? parseFloat(String(profile.rating)) : 0,
@@ -2206,12 +1997,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/maker-profile", isAuthenticated, async (req: any, res) => {
+  app.post("/api/maker-profile", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -2231,12 +2020,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/maker-profile", isAuthenticated, async (req: any, res) => {
+  app.put("/api/maker-profile", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -2247,7 +2034,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { showFullName, ...makerData } = req.body;
 
-      // Update showFullName in user table if provided
       if (showFullName !== undefined) {
         await storage.upsertUser({
           id: userId,
@@ -2273,12 +2059,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Message routes
-  app.get("/api/messages", isAuthenticated, async (req: any, res) => {
+  app.get("/api/messages", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const { projectId, marketplaceDesignId, otherUserId } = req.query;
       console.log(
@@ -2289,7 +2073,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "otherUserId is required" });
       }
 
-      // If projectId is provided, use project-based messages
       if (projectId) {
         const messages = await storage.getMessagesByContext(
           userId,
@@ -2303,7 +2086,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(messages);
       }
 
-      // If marketplaceDesignId is provided, use design-based messages
       if (marketplaceDesignId) {
         const messages = await storage.getMessagesByContext(
           userId,
@@ -2317,7 +2099,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(messages);
       }
 
-      // Either projectId or marketplaceDesignId is required
       console.log(
         `[GET /api/messages] ERROR: Missing context (projectId and marketplaceDesignId both empty)`
       );
@@ -2330,20 +2111,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/messages", isAuthenticated, async (req: any, res) => {
+  app.post("/api/messages", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const validated = insertMessageSchema.parse(req.body);
 
-      // Set senderId from authenticated user
       const messageData = { ...validated, senderId: userId };
       const message = await storage.createMessage(messageData);
 
-      // Notify receiver via WebSocket
       const receiverWs = wsClients.get(validated.receiverId);
       if (receiverWs && receiverWs.readyState === WebSocket.OPEN) {
         receiverWs.send(
@@ -2367,64 +2144,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put(
-    "/api/messages/mark-read/:otherUserId",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const { otherUserId } = req.params;
-        const { projectId, marketplaceDesignId } = req.query;
-
-        if (!otherUserId) {
-          return res.status(400).json({ message: "otherUserId is required" });
-        }
-
-        // If projectId is provided, mark messages as read by project context
-        if (projectId) {
-          await storage.markMessagesAsReadByContext(
-            userId,
-            otherUserId,
-            "project",
-            projectId as string
-          );
-          return res.json({ success: true });
-        }
-
-        // If marketplaceDesignId is provided, mark messages as read by design context
-        if (marketplaceDesignId) {
-          await storage.markMessagesAsReadByContext(
-            userId,
-            otherUserId,
-            "marketplace_design",
-            marketplaceDesignId as string
-          );
-          return res.json({ success: true });
-        }
-
-        // Either projectId or marketplaceDesignId is required
-        return res
-          .status(400)
-          .json({ message: "Either projectId or marketplaceDesignId is required" });
-      } catch (error: any) {
-        console.error("Error marking messages as read:", error);
-        res
-          .status(400)
-          .json({ message: error.message || "Failed to mark messages as read" });
-      }
-    }
-  );
-
-  app.get("/api/my-conversations", isAuthenticated, async (req: any, res) => {
+  app.put("/api/messages/mark-read/:otherUserId", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+      const { otherUserId } = req.params;
+      const { projectId, marketplaceDesignId } = req.query;
+
+      if (!otherUserId) {
+        return res.status(400).json({ message: "otherUserId is required" });
       }
+
+      if (projectId) {
+        await storage.markMessagesAsReadByContext(
+          userId,
+          otherUserId,
+          "project",
+          projectId as string
+        );
+        return res.json({ success: true });
+      }
+
+      if (marketplaceDesignId) {
+        await storage.markMessagesAsReadByContext(
+          userId,
+          otherUserId,
+          "marketplace_design",
+          marketplaceDesignId as string
+        );
+        return res.json({ success: true });
+      }
+
+      return res
+        .status(400)
+        .json({ message: "Either projectId or marketplaceDesignId is required" });
+    } catch (error: any) {
+      console.error("Error marking messages as read:", error);
+      res
+        .status(400)
+        .json({ message: error.message || "Failed to mark messages as read" });
+    }
+  });
+
+  app.get("/api/my-conversations", requireAuth, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const conversations = await storage.getConversationsWithUnread(userId);
       res.json(conversations);
@@ -2434,56 +2200,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get(
-    "/api/my-conversations-full",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/my-conversations-full", requireAuth, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const conversations = await storage.getConversationsWithUnread(userId);
+      const conversations = await storage.getConversationsWithUnread(userId);
 
-        // Enrich with user data and project/design data (including deleted ones for chat context)
-        const enriched = await Promise.all(
-          conversations.map(async (conv) => {
-            const user = await storage.getUser(conv.userId);
+      const enriched = await Promise.all(
+        conversations.map(async (conv) => {
+          const user = await storage.getUser(conv.userId);
 
-            // Use IncludeDeleted versions to show deleted projects/designs in chat list
-            const project = conv.projectId
-              ? await storage.getProjectIncludeDeleted(conv.projectId)
-              : null;
-            const design = conv.marketplaceDesignId
-              ? await storage.getMarketplaceDesignIncludeDeleted(conv.marketplaceDesignId)
-              : null;
+          const project = conv.projectId
+            ? await storage.getProjectIncludeDeleted(conv.projectId)
+            : null;
+          const design = conv.marketplaceDesignId
+            ? await storage.getMarketplaceDesignIncludeDeleted(conv.marketplaceDesignId)
+            : null;
 
-            return {
-              userId: conv.userId,
-              projectId: conv.projectId,
-              marketplaceDesignId: conv.marketplaceDesignId,
-              user,
-              project,
-              design,
-              lastMessage: conv.lastMessage,
-              unreadCount: conv.unreadCount,
-            };
-          })
-        );
+          return {
+            userId: conv.userId,
+            projectId: conv.projectId,
+            marketplaceDesignId: conv.marketplaceDesignId,
+            user,
+            project,
+            design,
+            lastMessage: conv.lastMessage,
+            unreadCount: conv.unreadCount,
+          };
+        })
+      );
 
-        res.json(enriched);
-      } catch (error) {
-        console.error("Error fetching conversations with user data:", error);
-        res.status(500).json({ message: "Failed to fetch conversations" });
-      }
+      res.json(enriched);
+    } catch (error) {
+      console.error("Error fetching conversations with user data:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
     }
-  );
+  });
 
   // Review routes
-
-  // Get review count for any user
-  app.get("/api/users/:id/review-count", isAuthenticated, async (req: any, res) => {
+  app.get("/api/users/:id/review-count", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const reviews = await storage.getReviewsForMaker(id);
@@ -2494,12 +2250,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/makers/:id/reviews", isAuthenticated, async (req: any, res) => {
+  app.get("/api/makers/:id/reviews", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const reviews = await storage.getReviewsForMaker(id);
 
-      // Enrich reviews with author user data
       const enriched = await Promise.all(
         reviews.map(async (review) => {
           const fromUser = await storage.getUser(review.fromUserId);
@@ -2517,16 +2272,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reviews/my-reviews", isAuthenticated, async (req: any, res) => {
+  app.get("/api/reviews/my-reviews", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const reviews = await storage.getReviewsForMaker(userId);
 
-      // Enrich reviews with author user data
       const enriched = await Promise.all(
         reviews.map(async (review) => {
           const fromUser = await storage.getUser(review.fromUserId);
@@ -2544,225 +2296,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get a specific review for a project (from client to maker)
-  app.get(
-    "/api/projects/:projectId/review-from-client",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const makerId = getAuthenticatedUserId(req);
-        if (!makerId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/:projectId/review-from-client", requireAuth, async (req: any, res) => {
+    try {
+      const makerId = getAuthenticatedUserId(req);
+      if (!makerId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { projectId } = req.params;
+      const { projectId } = req.params;
 
-        // Get the project to find the client (project creator)
-        const project = await storage.getProject(projectId);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-        // Get the review that the client (project.userId) made to this maker
-        const review = await storage.getReviewForProject(
-          projectId,
-          project.userId,
-          makerId
-        );
-        if (!review) {
-          return res.status(404).json({ message: "Review not found" });
-        }
+      const review = await storage.getReviewForProject(
+        projectId,
+        project.userId,
+        makerId
+      );
+      if (!review) return res.status(404).json({ message: "Review not found" });
 
-        // Enrich with fromUser data
-        const fromUser = await storage.getUser(review.fromUserId);
-        res.json({
-          ...review,
-          fromUser,
-        });
-      } catch (error) {
-        console.error("Error fetching review from client:", error);
-        res.status(500).json({ message: "Failed to fetch review" });
-      }
+      const fromUser = await storage.getUser(review.fromUserId);
+      res.json({
+        ...review,
+        fromUser,
+      });
+    } catch (error) {
+      console.error("Error fetching review from client:", error);
+      res.status(500).json({ message: "Failed to fetch review" });
     }
-  );
+  });
 
-  // Get a specific review for a project (from maker to client)
-  app.get(
-    "/api/projects/:projectId/review-from-maker",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const clientId = getAuthenticatedUserId(req);
-        if (!clientId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/:projectId/review-from-maker", requireAuth, async (req: any, res) => {
+    try {
+      const clientId = getAuthenticatedUserId(req);
+      if (!clientId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { projectId } = req.params;
+      const { projectId } = req.params;
 
-        // Get the project to find the client (project creator - should be current user)
-        const project = await storage.getProject(projectId);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-        // Get the bids to find the accepted one
-        const bids = await storage.getBidsByProject(projectId);
-        const acceptedBid = bids.find((b) => b.status === "accepted");
-        if (!acceptedBid) {
-          return res.status(404).json({ message: "No accepted bid found" });
-        }
-
-        // Get the review that the maker made to this client
-        const review = await storage.getReviewForProject(
-          projectId,
-          acceptedBid.makerId,
-          clientId
-        );
-        if (!review) {
-          return res.status(404).json({ message: "Review not found" });
-        }
-
-        // Enrich with fromUser data
-        const fromUser = await storage.getUser(review.fromUserId);
-        res.json({
-          ...review,
-          fromUser,
-        });
-      } catch (error) {
-        console.error("Error fetching review from maker:", error);
-        res.status(500).json({ message: "Failed to fetch review" });
+      const bids = await storage.getBidsByProject(projectId);
+      const acceptedBid = bids.find((b) => b.status === "accepted");
+      if (!acceptedBid) {
+        return res.status(404).json({ message: "No accepted bid found" });
       }
+
+      const review = await storage.getReviewForProject(
+        projectId,
+        acceptedBid.makerId,
+        clientId
+      );
+      if (!review) return res.status(404).json({ message: "Review not found" });
+
+      const fromUser = await storage.getUser(review.fromUserId);
+      res.json({
+        ...review,
+        fromUser,
+      });
+    } catch (error) {
+      console.error("Error fetching review from maker:", error);
+      res.status(500).json({ message: "Failed to fetch review" });
     }
-  );
+  });
 
-  // Check if client has rated a maker for a project
-  app.get(
-    "/api/projects/:projectId/check-rating-by-client",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { projectId } = req.params;
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/projects/:projectId/check-rating-by-client", requireAuth, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-        res.set("Pragma", "no-cache");
-        res.set("Expires", "0");
+      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
 
-        const project = await storage.getProject(projectId);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ message: "Project not found" });
 
-        // Check if project is completed
-        if (project.status !== "completed") {
-          return res.json({ hasRated: false, deliveryConfirmed: false });
-        }
-
-        // Get accepted bid to find maker
-        const bids = await storage.getBidsByProject(projectId);
-        const acceptedBid = bids.find((b) => b.status === "accepted");
-        if (!acceptedBid) {
-          return res.json({ hasRated: false, deliveryConfirmed: false });
-        }
-
-        // Check if client has rated this maker
-        const review = await storage.getReviewForProject(
-          projectId,
-          userId,
-          acceptedBid.makerId
-        );
-        res.json({ hasRated: !!review, deliveryConfirmed: true });
-      } catch (error) {
-        console.error("Error checking rating:", error);
-        res.status(500).json({ message: "Failed to check rating" });
+      if (project.status !== "completed") {
+        return res.json({ hasRated: false, deliveryConfirmed: false });
       }
-    }
-  );
 
-  // Client rates maker for a project
-  app.put(
-    "/api/projects/:projectId/rate-maker-as-client",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const { projectId } = req.params;
-        const { makerId, rating, comment } = req.body;
-
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const user = await storage.getUser(userId);
-        if (user?.userType !== "client") {
-          return res
-            .status(403)
-            .json({ message: "Only clients can rate makers" });
-        }
-
-        if (!rating || rating < 0.5 || rating > 5) {
-          return res.status(400).json({ message: "Valid rating is required" });
-        }
-
-        const project = await storage.getProject(projectId);
-        if (!project) {
-          return res.status(404).json({ message: "Project not found" });
-        }
-
-        if (project.userId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "You can only rate makers for your own projects" });
-        }
-
-        const bids = await storage.getBidsByProject(projectId);
-        const acceptedBid = bids.find(
-          (b) => b.status === "accepted" && b.makerId === makerId
-        );
-        if (!acceptedBid) {
-          return res.status(400).json({ message: "Invalid bid or maker" });
-        }
-
-        const existingReview = await storage.getReviewForProject(
-          projectId,
-          userId,
-          makerId
-        );
-        if (existingReview) {
-          return res
-            .status(400)
-            .json({ message: "You have already rated this maker" });
-        }
-
-        await storage.createReview({
-          projectId: projectId,
-          fromUserId: userId,
-          toUserId: makerId,
-          rating: Number(rating),
-          comment: comment || "",
-        });
-
-        res.json({ message: "Maker rated successfully" });
-      } catch (error) {
-        console.error("Error rating maker:", error);
-        res.status(500).json({ message: "Failed to rate maker" });
+      const bids = await storage.getBidsByProject(projectId);
+      const acceptedBid = bids.find((b) => b.status === "accepted");
+      if (!acceptedBid) {
+        return res.json({ hasRated: false, deliveryConfirmed: false });
       }
-    }
-  );
 
-  app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
+      const review = await storage.getReviewForProject(
+        projectId,
+        userId,
+        acceptedBid.makerId
+      );
+      res.json({ hasRated: !!review, deliveryConfirmed: true });
+    } catch (error) {
+      console.error("Error checking rating:", error);
+      res.status(500).json({ message: "Failed to check rating" });
+    }
+  });
+
+  app.put("/api/projects/:projectId/rate-maker-as-client", requireAuth, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const { makerId, rating, comment } = req.body;
+
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+      const user = await storage.getUser(userId);
+      if (user?.userType !== "client") {
+        return res
+          .status(403)
+          .json({ message: "Only clients can rate makers" });
+      }
+
+      if (!rating || rating < 0.5 || rating > 5) {
+        return res.status(400).json({ message: "Valid rating is required" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project) return res.status(404).json({ message: "Project not found" });
+
+      if (project.userId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "You can only rate makers for your own projects" });
+      }
+
+      const bids = await storage.getBidsByProject(projectId);
+      const acceptedBid = bids.find(
+        (b) => b.status === "accepted" && b.makerId === makerId
+      );
+      if (!acceptedBid) {
+        return res.status(400).json({ message: "Invalid bid or maker" });
+      }
+
+      const existingReview = await storage.getReviewForProject(
+        projectId,
+        userId,
+        makerId
+      );
+      if (existingReview) {
+        return res
+          .status(400)
+          .json({ message: "You have already rated this maker" });
+      }
+
+      await storage.createReview({
+        projectId: projectId,
+        fromUserId: userId,
+        toUserId: makerId,
+        rating: Number(rating),
+        comment: comment || "",
+      });
+
+      res.json({ message: "Maker rated successfully" });
+    } catch (error) {
+      console.error("Error rating maker:", error);
+      res.status(500).json({ message: "Failed to rate maker" });
+    }
+  });
+
+  app.post("/api/reviews", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const validated = insertReviewSchema.parse(req.body);
 
-      // Only client can review maker
       const user = await storage.getUser(userId);
       if (user?.userType !== "client") {
         return res
@@ -2770,7 +2469,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Only clients can leave reviews" });
       }
 
-      // Verify the bid was accepted
       const bid = await storage.getBid(validated.projectId);
       if (!bid || bid.status !== "accepted" || bid.makerId !== validated.toUserId) {
         return res.status(400).json({ message: "Invalid project or bid" });
@@ -2794,7 +2492,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const designs = await storage.getMarketplaceDesigns({ status: "active" });
 
-      // Enrich with maker data
       const enriched = await Promise.all(
         designs.map(async (design) => {
           const maker = await storage.getUser(design.makerId);
@@ -2818,22 +2515,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
 
-      // First try to get active design
       let design = await storage.getMarketplaceDesign(id);
 
-      // If not found, try to get deleted design (anyone can view deleted designs for chat context)
       if (!design) {
-        const deletedDesign = await storage.getMarketplaceDesignIncludeDeleted(
-          id
-        );
+        const deletedDesign = await storage.getMarketplaceDesignIncludeDeleted(id);
         if (deletedDesign && deletedDesign.deletedAt) {
           design = deletedDesign;
         }
       }
 
-      if (!design) {
-        return res.status(404).json({ message: "Design not found" });
-      }
+      if (!design) return res.status(404).json({ message: "Design not found" });
 
       const maker = await storage.getUser(design.makerId);
       const makerProfile = await storage.getMakerProfile(design.makerId);
@@ -2849,12 +2540,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/my-designs", isAuthenticated, async (req: any, res) => {
+  app.get("/api/my-designs", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -2871,12 +2560,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/marketplace/designs", isAuthenticated, async (req: any, res) => {
+  app.post("/api/marketplace/designs", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const user = await storage.getUser(userId);
       if (user?.userType !== "maker") {
@@ -2887,10 +2574,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validated = insertMarketplaceDesignSchema.parse(req.body);
 
-      // Validate price for minimum type
       if (validated.priceType === "minimum") {
         const price = parseFloat(String(validated.price)) || 0;
-        // If minimum price > 0, it must be at least 0.5
         if (price > 0 && price < 0.5) {
           return res.status(400).json({
             message: "Minimum price must be €0.00 (free) or at least €0.50",
@@ -2912,18 +2597,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/marketplace/designs/:id", isAuthenticated, async (req: any, res) => {
+  app.put("/api/marketplace/designs/:id", requireAuth, async (req: any, res) => {
     try {
       const userId = getAuthenticatedUserId(req);
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
       const { id } = req.params;
       const design = await storage.getMarketplaceDesign(id);
-      if (!design) {
-        return res.status(404).json({ message: "Design not found" });
-      }
+      if (!design) return res.status(404).json({ message: "Design not found" });
 
       if (design.makerId !== userId) {
         return res
@@ -2933,7 +2614,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validated = insertMarketplaceDesignSchema.partial().parse(req.body);
 
-      // Validate price for minimum type
       const priceType = validated.priceType || design.priceType;
       if (priceType === "minimum") {
         const price = parseFloat(String(validated.price ?? design.price)) || 0;
@@ -2955,100 +2635,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete(
-    "/api/marketplace/designs/:id",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.delete("/api/marketplace/designs/:id", requireAuth, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { id } = req.params;
-        const design = await storage.getMarketplaceDesign(id);
-        if (!design) {
-          return res.status(404).json({ message: "Design not found" });
-        }
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      if (!design) return res.status(404).json({ message: "Design not found" });
 
-        if (design.makerId !== userId) {
-          return res
-            .status(403)
-            .json({ message: "You can only delete your own designs" });
-        }
-
-        await storage.deleteMarketplaceDesign(id);
-        res.json({ message: "Design deleted" });
-      } catch (error) {
-        console.error("Error deleting design:", error);
-        res.status(500).json({ message: "Failed to delete design" });
+      if (design.makerId !== userId) {
+        return res
+          .status(403)
+          .json({ message: "You can only delete your own designs" });
       }
+
+      await storage.deleteMarketplaceDesign(id);
+      res.json({ message: "Design deleted" });
+    } catch (error) {
+      console.error("Error deleting design:", error);
+      res.status(500).json({ message: "Failed to delete design" });
     }
-  );
+  });
 
   // Design purchase routes
-  app.get(
-    "/api/marketplace/designs/:id/access",
-    isAuthenticated,
-    async (req: any, res) => {
-      try {
-        const userId = getAuthenticatedUserId(req);
-        if (!userId) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
+  app.get("/api/marketplace/designs/:id/access", requireAuth, async (req: any, res) => {
+    try {
+      const userId = getAuthenticatedUserId(req);
+      if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { id } = req.params;
-        const design = await storage.getMarketplaceDesign(id);
-        if (!design) {
-          return res.status(404).json({ message: "Design not found" });
-        }
+      const { id } = req.params;
+      const design = await storage.getMarketplaceDesign(id);
+      if (!design) return res.status(404).json({ message: "Design not found" });
 
       // Check if maker (can always access) or buyer (must have purchased or free)
-    if (design.makerId === userId) {
-      return res.json({ canAccess: true, reason: "maker" });
-    }
-    if (design.priceType === "free") {
-      return res.json({ canAccess: true, reason: "free" });
-    }
-
-    const hasPurchased = await storage.userHasPurchasedDesign(userId, id);
-    return res.json({ canAccess: hasPurchased, reason: hasPurchased ? "purchased" : "not_purchased" });
-  } catch (error) {
-    console.error("Error checking access:", error);
-    res.status(500).json({ message: "Failed to check access" });
-  }
-});
-// Crear servidor HTTP
-const httpServer = createServer(app);
-
-// Configurar WebSocket
-const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
-
-wss.on("connection", (ws) => {
-  console.log("WebSocket client connected");
-
-  ws.on("message", (data) => {
-    try {
-      const message = JSON.parse(data.toString());
-      if (message.type === "register" && message.userId) {
-        wsClients.set(message.userId, ws);
-        console.log(`User ${message.userId} registered for WebSocket notifications`);
+      if (design.makerId === userId) {
+        return res.json({ canAccess: true, reason: "maker" });
       }
+      if (design.priceType === "free") {
+        return res.json({ canAccess: true, reason: "free" });
+      }
+
+      const hasPurchased = await storage.userHasPurchasedDesign(userId, id);
+      return res.json({ canAccess: hasPurchased, reason: hasPurchased ? "purchased" : "not_purchased" });
     } catch (error) {
-      console.error("Error processing WebSocket message:", error);
+      console.error("Error checking access:", error);
+      res.status(500).json({ message: "Failed to check access" });
     }
   });
 
-  ws.on("close", () => {
-    for (const [userId, client] of wsClients.entries()) {
-      if (client === ws) {
-        wsClients.delete(userId);
-        console.log(`User ${userId} disconnected from WebSocket`);
-        break;
+  // Create HTTP server
+  const httpServer = createServer(app);
+
+  // Setup WebSocket server
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws) => {
+    console.log("WebSocket client connected");
+
+    ws.on("message", (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+        if (message.type === "register" && message.userId) {
+          wsClients.set(message.userId, ws);
+          console.log(`User ${message.userId} registered for WebSocket notifications`);
+        }
+      } catch (error) {
+        console.error("Error processing WebSocket message:", error);
       }
-    }
-  });
-});
+    });
 
-return httpServer;
+    ws.on("close", () => {
+      for (const [userId, client] of wsClients.entries()) {
+        if (client === ws) {
+          wsClients.delete(userId);
+          console.log(`User ${userId} disconnected from WebSocket`);
+          break;
+        }
+      }
+    });
+  });
+
+  return httpServer;
 }
