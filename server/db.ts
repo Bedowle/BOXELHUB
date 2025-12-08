@@ -3,7 +3,15 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+// Solo usar WebSockets en desarrollo, no en producción
+if (process.env.NODE_ENV !== 'production') {
+  neonConfig.webSocketConstructor = ws;
+} else {
+  // En producción (Render), usar fetch normal sin WebSockets
+  neonConfig.useSecureWebSocket = false;
+  neonConfig.pipelineTLS = false;
+  neonConfig.pipelineConnect = false;
+}
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
