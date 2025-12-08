@@ -1,0 +1,21 @@
+{
+  "name": "bedowle-printbid-marketplace",
+  "version": "1.0.0",
+  "description": "--- title: PrintBid Marketplace 🖨️✨ colorFrom: red colorTo: yellow emoji: 🐳 sdk: static pinned: false tags:   - deepsite-v3 ---",
+  "main": "script.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./publish/assets/tailwind.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.84.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17"
+  }
+}

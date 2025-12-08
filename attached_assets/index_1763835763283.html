@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VoxelHub - Impresión 3D a tu medida</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="/assets/tailwind.css"><script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-50">
+<custom-navbar></custom-navbar>
+
+<main class="min-h-screen">
+  <!-- Search and Categories Section -->
+  <section class="bg-white py-8 border-b">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-center mb-6">
+        <div class="relative w-full max-w-2xl">
+          <input type="text" id="searchInput" placeholder="Busca modelos 3D, makers, categorías..." class="w-full px-6 py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <button class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition duration-300">
+            <i data-feather="search" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <div class="flex justify-center space-x-6 overflow-x-auto pb-2">
+        <a href="#" class="text-gray-600 hover:text-blue-600 whitespace-nowrap">Arte</a>
+        <a href="#" class="text-gray-600 hover:text-blue-600 whitespace-nowrap">Hogar</a>
+        <a href="#" class="text-gray-600 hover:text-blue-600 whitespace-nowrap">Videojuegos</a>
+        <a href="#" class="text-gray-600 hover:text-blue-600 whitespace-nowrap">Juguetes</a>
+        <a href="#" class="text-gray-600 hover:text-blue-600 whitespace-nowrap">Moda</a>
+        <a href="#" class="text-gray-600 hover:text-blue-600 whitespace-nowrap">Sorpréndeme</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+    <div class="container mx-auto px-4 text-center">
+      <h1 class="text-5xl font-bold mb-6">Impresión 3D a tu medida</h1>
+      <p class="text-xl mb-8 max-w-2xl mx-auto">Sube tu modelo STL y recibe ofertas competitivas de makers profesionales</p>
+      <button onclick="showUploadModal()" class="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300" id="uploadButton">Subir Modelo STL</button>
+    </div>
+  </section>
+
+  <section class="py-12 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Modelos Recomendados</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Cards estáticas de ejemplo -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="http://static.photos/technology/320x240/1" alt="Modelo 3D" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold text-lg mb-2">Robot Decorativo</h3>
+            <p class="text-gray-600 text-sm">Arte • 234 descargas</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="http://static.photos/gaming/320x240/2" alt="Modelo 3D" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold text-lg mb-2">Soporte Móvil</h3>
+            <p class="text-gray-600 text-sm">Hogar • 189 descargas</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="http://static.photos/abstract/320x240/3" alt="Modelo 3D" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold text-lg mb-2">Estatuilla Fantasía</h3>
+            <p class="text-gray-600 text-sm">Arte • 156 descargas</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="http://static.photos/minimal/320x240/4" alt="Modelo 3D" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-semibold text-lg mb-2">Portalápices</h3>
+            <p class="text-gray-600 text-sm">Hogar • 278 descargas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">¿Cómo funciona?</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i data-feather="upload-cloud" class="text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">1. Sube tu STL</h3>
+          <p class="text-gray-600">Sube tu archivo STL y especifica los detalles de tu proyecto</p>
+        </div>
+        <div class="text-center">
+          <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i data-feather="users" class="text-purple-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">2. Recibe ofertas</h3>
+          <p class="text-gray-600">Makers calificados te enviarán cotizaciones competitivas</p>
+        </div>
+        <div class="text-center">
+          <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i data-feather="check-circle" class="text-green-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">3. Elige y paga</h3>
+          <p class="text-gray-600">Selecciona la oferta que más te convenga y realiza el pago seguro</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Proyectos Activos</h2>
+      <div id="projectsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+  </section>
+</main>
+
+<custom-footer></custom-footer>
+
+<!-- Componentes y scripts -->
+<script src="components/navbar.js"></script>
+<script src="components/footer.js"></script>
+<script src="libs/supabase.min.js"></script>
+<script src="libs/supabaseClient.js"></script>
+<script src="script.js"></script>
+<script>
+feather.replace();
+// Si no hay usuario, el botón de subir fuerza login
+document.addEventListener('DOMContentLoaded', function () {
+  const savedUser = localStorage.getItem('voxelhub_currentUser');
+  const uploadButton = document.getElementById('uploadButton');
+  if (!savedUser && uploadButton) {
+    uploadButton.onclick = function () {
+      showNotification('Debes iniciar sesión para subir modelos', 'error');
+      setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+    };
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalles del Proyecto - VoxelHub</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/assets/tailwind.css">
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-50">
+  <custom-navbar></custom-navbar>
+
+  <main class="min-h-screen py-8">
+    <div class="container mx-auto px-4">
+      <!-- Project Header -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <h1 class="text-3xl font-bold mb-2" id="projectTitle">Cargando...</h1>
+            <p class="text-gray-600 mb-4" id="projectDescription"></p>
+            <div class="flex items-center space-x-4">
+              <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full" id="projectMaterial"></span>
+              <span class="text-gray-500" id="projectBids"></span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-gray-500 text-sm">Creado:</span>
+            <p class="font-semibold" id="projectCreated"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bids Section -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6">Ofertas Recibidas</h2>
+        <div id="bidsList" class="space-y-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <custom-footer></custom-footer>
+
+  <script src="components/navbar.js"></script>
+  <script src="components/footer.js"></script>
+
+  <!-- Supabase local -->
+  <script src="libs/supabase.min.js"></script>
+  <script src="libs/supabaseClient.js"></script>
+
+  <script src="script.js"></script>
+
+  <script>
+    feather.replace();
+
+    // Load project details based on URL parameter
+    document.addEventListener('DOMContentLoaded', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get('id');
+      if (projectId) {
+        loadProjectDetails(projectId);
+        loadProjectBids(projectId);
+      }
+    });
+
+    function loadProjectDetails(projectId) {
+      const project = {
+        id: projectId,
+        name: "Prototipo de engranaje",
+        description: "Engranaje mecánico para proyecto universitario con dimensiones específicas y alta precisión requerida.",
+        material: "PLA",
+        status: "active",
+        bids: 3,
+        created: "2024-01-15"
+      };
+      document.getElementById('projectTitle').textContent = project.name;
+      document.getElementById('projectDescription').textContent = project.description;
+      document.getElementById('projectMaterial').textContent = project.material;
+      document.getElementById('projectBids').textContent = `${project.bids} ofertas recibidas`;
+      document.getElementById('projectCreated').textContent = formatDate(project.created);
+    }
+
+    function loadProjectBids(projectId) {
+      const bids = [
+        { id: 1, maker: "TechPrint3D", price: "45.00€", delivery: "5 días", rating: 4.8, reviews: 127 },
+        { id: 2, maker: "MadridMakers", price: "38.50€", delivery: "3 días", rating: 4.9, reviews: 89 },
+        { id: 3, maker: "PrintPro", price: "52.00€", delivery: "7 días", rating: 4.6, reviews: 203 }
+      ];
+      const bidsList = document.getElementById('bidsList');
+      bidsList.innerHTML = bids.map(bid => `
+        <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition duration-300">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold text-lg">${bid.maker}</h3>
+              <div class="flex items-center space-x-2 mt-1">
+                <div class="flex text-yellow-400">
+                  ${'★'.repeat(Math.floor(bid.rating))}${'☆'.repeat(5 - Math.floor(bid.rating))}
+                </div>
+                <span class="text-gray-500 text-sm">(${bid.reviews} reseñas)</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-2xl font-bold text-green-600">${bid.price}</p>
+              <p class="text-gray-500">Entrega: ${bid.delivery}</p>
+            </div>
+          </div>
+          <div class="mt-4 flex space-x-2">
+            <button onclick="acceptBid(${bid.id})" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300">Aceptar Oferta</button>
+            <button onclick="contactMaker(${bid.id})" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300">Contactar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function acceptBid(bidId) {
+      showNotification('¡Oferta aceptada! Se ha iniciado el proceso de impresión.', 'success');
+    }
+    function contactMaker(bidId) {
+      showNotification('Sistema de mensajería abierto con el maker.', 'info');
+    }
+  </script>
+</body>
+</html>
