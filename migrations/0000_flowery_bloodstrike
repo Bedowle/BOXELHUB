@@ -1,0 +1,1 @@
+ALTER TABLE "maker_profiles" ALTER COLUMN "printer_type" TYPE varchar;
