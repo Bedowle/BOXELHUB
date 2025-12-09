@@ -14,7 +14,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-
 // Enums
 export const userTypeEnum = pgEnum("user_type", ["client", "maker"]);
 export const projectStatusEnum = pgEnum("project_status", ["active", "reserved", "completed"]);
@@ -23,7 +22,6 @@ export const designStatusEnum = pgEnum("design_status", ["active", "archived"]);
 export const designPriceTypeEnum = pgEnum("design_price_type", ["free", "fixed", "minimum"]);
 export const chatContextTypeEnum = pgEnum("chat_context_type", ["project", "marketplace_design"]);
 export const payoutMethodEnum = pgEnum("payout_method", ["stripe", "paypal", "bank"]);
-
 // Session storage table (mandatory for Replit Auth)
 export const sessions = pgTable(
   "sessions",
@@ -34,7 +32,6 @@ export const sessions = pgTable(
   },
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
-
 // User storage table (extended for full registration)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -61,7 +58,6 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-
 // Maker profiles table (extended with printer details + payout configuration)
 export const makerProfiles = pgTable("maker_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -100,7 +96,6 @@ export const makerProfiles = pgTable("maker_profiles", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-
 // Projects table
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -122,7 +117,6 @@ export const projects = pgTable("projects", {
   index("idx_projects_status").on(table.status),
   index("idx_projects_deleted_at").on(table.deletedAt),
 ]);
-
 // Bids table
 export const bids = pgTable("bids", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -141,7 +135,6 @@ export const bids = pgTable("bids", {
   index("idx_bids_maker_id").on(table.makerId),
   index("idx_bids_status").on(table.status),
 ]);
-
 // Messages table for chat
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -160,7 +153,6 @@ export const messages = pgTable("messages", {
   index("idx_messages_marketplace_design_id").on(table.marketplaceDesignId),
   index("idx_messages_context_type").on(table.contextType),
 ]);
-
 // Email verification tokens table
 export const emailTokens = pgTable("email_tokens", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -173,7 +165,6 @@ export const emailTokens = pgTable("email_tokens", {
   index("idx_email_tokens_email").on(table.email),
   index("idx_email_tokens_token").on(table.token),
 ]);
-
 // Reviews table
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -187,7 +178,6 @@ export const reviews = pgTable("reviews", {
   index("idx_reviews_project_id").on(table.projectId),
   index("idx_reviews_to_user_id").on(table.toUserId),
 ]);
-
 // Marketplace designs table (maker-uploaded designs for direct purchase)
 export const marketplaceDesigns = pgTable("marketplace_designs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -206,7 +196,6 @@ export const marketplaceDesigns = pgTable("marketplace_designs", {
   index("idx_marketplace_designs_maker_id").on(table.makerId),
   index("idx_marketplace_designs_status").on(table.status),
 ]);
-
 // Design purchases/downloads table (track who bought/downloaded what and how much they paid)
 export const designPurchases = pgTable("design_purchases", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -224,7 +213,6 @@ export const designPurchases = pgTable("design_purchases", {
   index("idx_design_purchases_buyer_id").on(table.buyerId),
   index("idx_design_purchases_maker_id").on(table.makerId),
 ]);
-
 // Maker earnings table (tracks earnings with retention periods)
 export const makerEarnings = pgTable("maker_earnings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -240,7 +228,6 @@ export const makerEarnings = pgTable("maker_earnings", {
   index("idx_maker_earnings_status").on(table.status),
   index("idx_maker_earnings_available_date").on(table.availableDate),
 ]);
-
 // Maker payouts table (track all payout requests/completions)
 export const makerPayouts = pgTable("maker_payouts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -257,7 +244,6 @@ export const makerPayouts = pgTable("maker_payouts", {
   index("idx_maker_payouts_maker_id").on(table.makerId),
   index("idx_maker_payouts_status").on(table.status),
 ]);
-
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   makerProfile: one(makerProfiles, {
@@ -272,14 +258,12 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   reviewsReceived: many(reviews, { relationName: "reviewsReceived" }),
   marketplaceDesigns: many(marketplaceDesigns),
 }));
-
 export const makerProfilesRelations = relations(makerProfiles, ({ one }) => ({
   user: one(users, {
     fields: [makerProfiles.userId],
     references: [users.id],
   }),
 }));
-
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   owner: one(users, {
     fields: [projects.userId],
@@ -289,7 +273,6 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   messages: many(messages),
   reviews: many(reviews),
 }));
-
 export const bidsRelations = relations(bids, ({ one }) => ({
   project: one(projects, {
     fields: [bids.projectId],
@@ -300,7 +283,6 @@ export const bidsRelations = relations(bids, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
 export const messagesRelations = relations(messages, ({ one }) => ({
   sender: one(users, {
     fields: [messages.senderId],
@@ -317,7 +299,6 @@ export const messagesRelations = relations(messages, ({ one }) => ({
     references: [projects.id],
   }),
 }));
-
 export const reviewsRelations = relations(reviews, ({ one }) => ({
   project: one(projects, {
     fields: [reviews.projectId],
@@ -334,21 +315,18 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
     relationName: "reviewsReceived",
   }),
 }));
-
 export const marketplaceDesignsRelations = relations(marketplaceDesigns, ({ one }) => ({
   maker: one(users, {
     fields: [marketplaceDesigns.makerId],
     references: [users.id],
   }),
 }));
-
 // Zod schemas for inserts
 export const upsertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-
 export const insertMakerProfileSchema = createInsertSchema(makerProfiles).omit({
   id: true,
   createdAt: true,
@@ -357,9 +335,9 @@ export const insertMakerProfileSchema = createInsertSchema(makerProfiles).omit({
   totalReviews: true,
   userId: true, // Added by server from authenticated user
 }).extend({
-  printerType: z.string().min(1, "Printer type is required"),
+  // CORRECCIÓN: Permite un array de strings (texto libre o múltiple selección)
+  printerType: z.array(z.string()).optional(), 
 });
-
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
@@ -374,7 +352,6 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
     dimensionZ: z.string().refine(val => val && !isNaN(Number(val)), "Dimensión Z es requerida y debe ser un número"),
   }).required("Las dimensiones son requeridas"),
 });
-
 export const insertBidSchema = createInsertSchema(bids).omit({
   id: true,
   createdAt: true,
@@ -386,7 +363,6 @@ export const insertBidSchema = createInsertSchema(bids).omit({
     .refine(val => parseFloat(val) >= 0.5, "Minimum price is €0.50"),
   deliveryDays: z.number().int().positive("Delivery days must be positive"),
 });
-
 export const updateBidSchema = z.object({
   price: z.string()
     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
@@ -397,7 +373,6 @@ export const updateBidSchema = z.object({
 }).refine((data) => Object.keys(data).length > 0, {
   message: "At least one field must be updated",
 });
-
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
   createdAt: true,
@@ -434,7 +409,6 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
     path: ["contextType"],
   }
 );
-
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   createdAt: true,
@@ -442,7 +416,6 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   rating: z.number().int().min(1).max(5),
   comment: z.string().optional(),
 });
-
 export const insertMarketplaceDesignSchema = createInsertSchema(marketplaceDesigns).omit({
   id: true,
   createdAt: true,
@@ -456,7 +429,6 @@ export const insertMarketplaceDesignSchema = createInsertSchema(marketplaceDesig
     .refine(val => parseFloat(val) >= 0, "Price must be >= €0.00"),
   stlFileContent: z.string().optional(), // base64 encoded STL
 });
-
 export const insertDesignPurchaseSchema = createInsertSchema(designPurchases).omit({
   id: true,
   createdAt: true,
@@ -465,31 +437,22 @@ export const insertDesignPurchaseSchema = createInsertSchema(designPurchases).om
     .regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format")
     .refine(val => parseFloat(val) >= 0, "Amount must be >= €0.00"),
 });
-
 // TypeScript types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
-
 export type InsertMakerProfile = z.infer<typeof insertMakerProfileSchema>;
 export type MakerProfile = typeof makerProfiles.$inferSelect;
-
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
-
 export type InsertBid = z.infer<typeof insertBidSchema>;
 export type Bid = typeof bids.$inferSelect;
-
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
-
 export type InsertMarketplaceDesign = z.infer<typeof insertMarketplaceDesignSchema>;
 export type MarketplaceDesign = typeof marketplaceDesigns.$inferSelect;
-
 export type InsertDesignPurchase = z.infer<typeof insertDesignPurchaseSchema>;
 export type DesignPurchase = typeof designPurchases.$inferSelect;
-
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
-
 export type InsertMarketplaceDesign = z.infer<typeof insertMarketplaceDesignSchema>;
 export type MarketplaceDesign = typeof marketplaceDesigns.$inferSelect;
