@@ -86,6 +86,11 @@ if (!sessionSecret) {
   throw new Error("SESSION_SECRET environment variable is required");
 }
 
+// AÑADIDO: Configuración de proxy para Express. Obligatorio en Render.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use(session({
   store: sessionStore,
   secret: sessionSecret,
@@ -94,8 +99,11 @@ app.use(session({
   cookie: {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     httpOnly: true,
+    // La cookie debe ser segura (secure: true) si estás en producción
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    // Usamos 'none' en producción para permitir que la cookie se envíe correctamente
+    // cuando el frontend y el backend están en subdominios diferentes (típico de Render)
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
